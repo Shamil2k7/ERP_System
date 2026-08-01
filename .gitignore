@@ -83,3 +83,7 @@ Desktop.ini
 *.tmp
 *.temp
 *.swp
+
+# Ignore all .env files anywhere
+**/.env
+**/.env.*
