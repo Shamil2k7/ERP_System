@@ -4,15 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "nodemon src/server.js",
-  "start": "node src/server.js"
-},
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+
+    "prisma:generate": "prisma generate --schema=../database/prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=../database/prisma/schema.prisma",
+    "prisma:studio": "prisma studio --schema=../database/prisma/schema.prisma"
+  
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
-    "@prisma/client": "^7.9.1",
+    "@prisma/client": "^6.19.3",
     "bcrypt": "^6.0.0",
     "bwip-js": "^4.11.2",
     "compression": "^1.8.1",
@@ -33,7 +38,7 @@
     "nodemailer": "^9.0.3",
     "pdfkit": "^0.19.1",
     "pg": "^8.22.0",
-    "prisma": "^7.9.1",
+    "prisma": "^6.19.3",
     "qrcode": "^1.5.4",
     "redis": "^6.2.0",
     "socket.io": "^4.8.3",
