@@ -1,12 +1,23 @@
 require("dotenv").config();
 
-const app = require("./app");
+import prisma from "./config/prisma.js";
+import app from "./app.js";
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log("==================================");
-    console.log("🚀 ERP Server Running Successfully");
-    console.log(`🌍 Server : http://localhost:${PORT}`);
-    console.log("==================================");
-});
+async function startServer() {
+  try {
+    await prisma.$connect();
+    console.log(" Database Connected");
+
+    app.listen(PORT, () => {
+      console.log(` ERP Server Running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error(" Database Connection Failed");
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+startServer();
