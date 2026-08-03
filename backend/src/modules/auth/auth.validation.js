@@ -2,7 +2,7 @@ const {
     signupSchema,
     sendOTPSchema,
     verifyOTPSchema
-} = require("./auth.schema");
+} = require("./auth.schema.js");
 
 // ==========================
 // Validate Send OTP

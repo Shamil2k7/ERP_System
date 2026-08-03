@@ -6,13 +6,13 @@ const {
     sendOTP,
     verifyOTP,
     signup
-} = require("./auth.controller");
+} = require("./auth.controller.js");
 
 const {
     validateSendOTP,
     validateVerifyOTP,
     validateSignup
-} = require("./auth.validation");
+} = require("./auth.validation.js");
 
 // Send OTP
 router.post("/send-otp",validateSendOTP,sendOTP);
