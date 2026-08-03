@@ -11,6 +11,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 import authRoutes from "./modules/auth/auth.routes.js";
+import customerRoutes from "./modules/customers/customers.routes.js";
+
 
 const app = express();
 
@@ -54,7 +56,7 @@ app.get("/", (req, res) => {
 // =====================
 
 app.use("/api/auth", authRoutes);
-
+app.use("/api/customers", customerRoutes);
 // =====================
 // 404 Handler
 // =====================
