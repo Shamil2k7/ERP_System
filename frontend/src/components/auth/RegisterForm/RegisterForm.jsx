@@ -62,7 +62,7 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit}>
 
           <div className={styles.formGroup}>
             <label className={styles.label}>Employee Full Name</label>
