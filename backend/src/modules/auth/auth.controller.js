@@ -1,4 +1,4 @@
-const { sendOTPService, verifyOTPService, signupService } = require("./auth.service");
+const { sendOTPService, verifyOTPService, signupService } = require("./auth.service.js");
 
 
 //Send OTP
