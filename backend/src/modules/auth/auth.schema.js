@@ -1,5 +1,9 @@
 const Joi = require("joi");
 
+// ==========================
+// Signup Validation
+// ==========================
+
 const signupSchema = Joi.object({
 
     fullName: Joi.string()
@@ -17,6 +21,7 @@ const signupSchema = Joi.object({
     email: Joi.string()
         .email()
         .lowercase()
+        .trim()
         .required()
         .messages({
             "string.email": "Invalid email address",
@@ -28,7 +33,7 @@ const signupSchema = Joi.object({
         .pattern(/^[6-9]\d{9}$/)
         .required()
         .messages({
-            "string.pattern.base": "Invalid phone number",
+            "string.pattern.base": "Phone number must contain 10 digits",
             "string.empty": "Phone number is required",
             "any.required": "Phone number is required"
         }),
@@ -53,6 +58,53 @@ const signupSchema = Joi.object({
 
 });
 
+
+// ==========================
+// Send OTP Validation
+// ==========================
+
+const sendOTPSchema = Joi.object({
+
+    email: Joi.string()
+        .email()
+        .lowercase()
+        .trim()
+        .required()
+        .messages({
+            "string.email": "Invalid email address",
+            "string.empty": "Email is required",
+            "any.required": "Email is required"
+        })
+
+});
+
+
+// ==========================
+// Verify OTP Validation
+// ==========================
+
+const verifyOTPSchema = Joi.object({
+
+    email: Joi.string()
+        .email()
+        .lowercase()
+        .trim()
+        .required(),
+
+    otp: Joi.string()
+        .length(6)
+        .required()
+        .messages({
+            "string.length": "OTP must be 6 digits",
+            "string.empty": "OTP is required",
+            "any.required": "OTP is required"
+        })
+
+});
+
+
 module.exports = {
-    signupSchema
+    signupSchema,
+    sendOTPSchema,
+    verifyOTPSchema
 };

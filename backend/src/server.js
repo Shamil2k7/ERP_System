@@ -1,11 +1,12 @@
-import dotenv from "dotenv";
-dotenv.config();
+require("dotenv").config();
 
-import app from "./app.js";
+const app = require("./app");
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log("ERP Server Running");
-  console.log(`http://localhost:${PORT}`);
+    console.log("==================================");
+    console.log("🚀 ERP Server Running Successfully");
+    console.log(`🌍 Server : http://localhost:${PORT}`);
+    console.log("==================================");
 });
