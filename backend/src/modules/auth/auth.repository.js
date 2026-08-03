@@ -1,5 +1,10 @@
 const { PrismaClient } = require("@prisma/client");
+
 const prisma = new PrismaClient();
+
+// ==========================
+// Find User By Email
+// ==========================
 const findUserByEmail = async (email) => {
     return await prisma.user.findUnique({
         where: {
@@ -7,16 +12,26 @@ const findUserByEmail = async (email) => {
         }
     });
 };
+
+// ==========================
+// Create User
+// ==========================
 const createUser = async (userData) => {
     return await prisma.user.create({
         data: userData
     });
 };
+
+// Save OTP
+
 const saveOTP = async (otpData) => {
     return await prisma.emailOTP.create({
         data: otpData
     });
 };
+
+// Find Latest Unused OTP
+
 const findOTPByEmail = async (email) => {
     return await prisma.emailOTP.findFirst({
         where: {
@@ -29,6 +44,9 @@ const findOTPByEmail = async (email) => {
     });
 };
 
+
+// Mark OTP As Used
+
 const markOTPAsUsed = async (id) => {
     return await prisma.emailOTP.update({
         where: {
@@ -39,12 +57,26 @@ const markOTPAsUsed = async (id) => {
         }
     });
 };
-module.exports = {
 
+// Find Verified OTP
+
+const findVerifiedOTP = async (email) => {
+    return await prisma.emailOTP.findFirst({
+        where: {
+            email: email,
+            isUsed: true
+        },
+        orderBy: {
+            createdAt: "desc"
+        }
+    });
+};
+
+module.exports = {
     findUserByEmail,
     createUser,
     saveOTP,
     findOTPByEmail,
-    markOTPAsUsed
-
+    markOTPAsUsed,
+    findVerifiedOTP
 };
