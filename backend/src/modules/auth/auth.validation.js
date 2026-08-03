@@ -1,8 +1,8 @@
-const {
+import {
     signupSchema,
     sendOTPSchema,
     verifyOTPSchema
-} = require("./auth.schema.js");
+} from "./auth.schema.js";
 
 // ==========================
 // Validate Send OTP
@@ -55,7 +55,7 @@ const validateSignup = (req, res, next) => {
     next();
 };
 
-module.exports = {
+export {
     validateSendOTP,
     validateVerifyOTP,
     validateSignup
