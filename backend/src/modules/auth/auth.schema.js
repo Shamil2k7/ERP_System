@@ -18,6 +18,11 @@ const signupSchema = Joi.object({
             "any.required": "Full name is required"
         }),
 
+    employeeId: Joi.string()
+        .trim()
+        .allow(null, "")
+        .optional(),
+
     email: Joi.string()
         .email()
         .lowercase()

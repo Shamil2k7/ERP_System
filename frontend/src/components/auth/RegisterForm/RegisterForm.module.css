@@ -1,19 +1,13 @@
-/* ===========================
-   Container
-=========================== */
+
 
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a, #1e3a8a);
+  background:black;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
 }
-
-/* ===========================
-   Card
-=========================== */
 
 .card {
   width: 100%;
@@ -41,7 +35,7 @@
    Form
 =========================== */
 
-form {
+.form {
   display: flex;
   flex-direction: column;
   gap: 18px;

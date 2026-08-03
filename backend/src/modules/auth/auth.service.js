@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
-const { sendOTPEmail } = require("../../config/mail");
+const { sendOTPEmail } = require("../../config/mail.js");
 const {
     findUserByEmail,
     createUser,
@@ -8,7 +8,7 @@ const {
     findOTPByEmail,
     markOTPAsUsed,
     findVerifiedOTP,
-} = require("./auth.repository");
+} = require("./auth.repository.js");
 
 // Send OTP
 const sendOTPService = async (email) => {
