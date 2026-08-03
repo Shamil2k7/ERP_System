@@ -12,6 +12,8 @@ const __dirname = path.dirname(__filename);
 
 import authRoutes from "./modules/auth/auth.routes.js";
 import customerRoutes from "./modules/customers/customers.routes.js";
+import salesRoutes from "./modules/sales/sales.routes.js";
+
 
 
 const app = express();
@@ -57,6 +59,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/sales", salesRoutes);
 // =====================
 // 404 Handler
 // =====================
