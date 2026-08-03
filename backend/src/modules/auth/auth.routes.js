@@ -1,18 +1,18 @@
-const express = require("express");
+import express from "express";
 
 const router = express.Router();
 
-const {
+import {
     sendOTP,
     verifyOTP,
     signup
-} = require("./auth.controller.js");
+} from "./auth.controller.js";
 
-const {
+import {
     validateSendOTP,
     validateVerifyOTP,
     validateSignup
-} = require("./auth.validation.js");
+} from "./auth.validation.js";
 
 // Send OTP
 router.post("/send-otp",validateSendOTP,sendOTP);
@@ -20,4 +20,4 @@ router.post("/send-otp",validateSendOTP,sendOTP);
 router.post("/verify-otp",validateVerifyOTP,verifyOTP);
 // Signup
 router.post("/signup",validateSignup,signup);
-module.exports = router;
+export default router;

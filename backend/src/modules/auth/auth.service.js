@@ -1,14 +1,14 @@
-const bcrypt = require("bcrypt");
-const crypto = require("crypto");
-const { sendOTPEmail } = require("../../config/mail.js");
-const {
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+import { sendOTPEmail } from "../../config/mail.js";
+import {
     findUserByEmail,
     createUser,
     saveOTP,
     findOTPByEmail,
     markOTPAsUsed,
     findVerifiedOTP,
-} = require("./auth.repository.js");
+} from "./auth.repository.js";
 
 // Send OTP
 const sendOTPService = async (email) => {
@@ -73,7 +73,7 @@ const signupService = async (userData) => {
     });
     return user;
 };
-module.exports = {
+export {
     sendOTPService,
     verifyOTPService,
     signupService,
