@@ -1,14 +1,16 @@
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
-
+const { sendOTPEmail } = require("../../config/mail");
 const {
     findUserByEmail,
     createUser,
     saveOTP,
     findOTPByEmail,
     markOTPAsUsed,
-    findVerifiedOTP
+    findVerifiedOTP,
 } = require("./auth.repository");
+
+// Send OTP
 const sendOTPService = async (email) => {
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
@@ -19,17 +21,17 @@ const sendOTPService = async (email) => {
     await saveOTP({
         email,
         otp,
-        expiresAt
+        expiresAt,
     });
+    // Send OTP to Email
+    await sendOTPEmail(email, otp);
     return {
         success: true,
         message: "OTP sent successfully",
-        otp
     };
-
 };
-
 // Verify OTP
+
 const verifyOTPService = async (email, otp) => {
     const savedOTP = await findOTPByEmail(email);
     if (!savedOTP) {
@@ -47,37 +49,32 @@ const verifyOTPService = async (email, otp) => {
     await markOTPAsUsed(savedOTP.id);
     return {
         success: true,
-        message: "OTP verified successfully"
+        message: "OTP verified successfully",
     };
 };
 // Signup
-
 const signupService = async (userData) => {
-    // Check email already exists
     const existingUser = await findUserByEmail(userData.email);
     if (existingUser) {
         throw new Error("Email already registered");
     }
-    // Check OTP Verification
     const verifiedOTP = await findVerifiedOTP(userData.email);
     if (!verifiedOTP) {
         throw new Error("Please verify your email first");
     }
-    // Hash Password
     const hashedPassword = await bcrypt.hash(userData.password, 10);
-    // Create User
     const user = await createUser({
         fullName: userData.fullName,
         email: userData.email,
         phone: userData.phone,
         passwordHash: hashedPassword,
         roleId: userData.roleId,
-        isVerified: true
+        isVerified: true,
     });
     return user;
 };
 module.exports = {
     sendOTPService,
     verifyOTPService,
-    signupService
+    signupService,
 };
