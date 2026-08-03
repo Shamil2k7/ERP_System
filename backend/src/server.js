@@ -1,7 +1,8 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
 
-const prisma = require("./config/prisma");
-const app = require("./app");
+import prisma from "./config/prisma.js";
+import app from "./app.js";
 
 const PORT = process.env.PORT || 5000;
 
