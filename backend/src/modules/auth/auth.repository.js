@@ -1,4 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -72,7 +72,7 @@ const findVerifiedOTP = async (email) => {
     });
 };
 
-module.exports = {
+export {
     findUserByEmail,
     createUser,
     saveOTP,
