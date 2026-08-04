@@ -6,18 +6,6 @@ import Joi from "joi";
 
 const signupSchema = Joi.object({
 
-    fullName: Joi.string()
-        .trim()
-        .min(3)
-        .max(50)
-        .required()
-        .messages({
-            "string.empty": "Full name is required",
-            "string.min": "Full name must be at least 3 characters",
-            "string.max": "Full name cannot exceed 50 characters",
-            "any.required": "Full name is required"
-        }),
-
     employeeId: Joi.string()
         .trim()
         .allow(null, "")
@@ -52,13 +40,6 @@ const signupSchema = Joi.object({
             "string.max": "Password cannot exceed 20 characters",
             "string.empty": "Password is required",
             "any.required": "Password is required"
-        }),
-
-    roleId: Joi.string()
-        .required()
-        .messages({
-            "string.empty": "Role is required",
-            "any.required": "Role is required"
         })
 
 });
