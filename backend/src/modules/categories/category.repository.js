@@ -1,17 +1,13 @@
-import prisma from "../../config/database.js";
+import prisma from "../../config/prisma.js";
 
-/**
- * Create Category
- */
+
 export const createCategory = async (data) => {
   return await prisma.category.create({
     data,
   });
 };
 
-/**
- * Get All Categories
- */
+
 export const getAllCategories = async () => {
   return await prisma.category.findMany({
     orderBy: {
@@ -20,9 +16,7 @@ export const getAllCategories = async () => {
   });
 };
 
-/**
- * Get Category By ID
- */
+
 export const getCategoryById = async (id) => {
   return await prisma.category.findUnique({
     where: {
@@ -31,9 +25,7 @@ export const getCategoryById = async (id) => {
   });
 };
 
-/**
- * Get Category By Code
- */
+
 export const getCategoryByCode = async (code) => {
   return await prisma.category.findUnique({
     where: {
@@ -42,9 +34,7 @@ export const getCategoryByCode = async (code) => {
   });
 };
 
-/**
- * Update Category
- */
+
 export const updateCategory = async (id, data) => {
   return await prisma.category.update({
     where: {
@@ -54,9 +44,7 @@ export const updateCategory = async (id, data) => {
   });
 };
 
-/**
- * Delete Category
- */
+
 export const deleteCategory = async (id) => {
   return await prisma.category.delete({
     where: {
