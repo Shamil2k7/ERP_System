@@ -281,7 +281,7 @@ export default function RegisterForm() {
         <div className={styles.footer}>
           <p>
             Already have an ERP account?{" "}
-            <Link href="/login">Sign In</Link>
+            <Link href="/auth/Login">Sign In</Link>
           </p>
         </div>
       </div>
