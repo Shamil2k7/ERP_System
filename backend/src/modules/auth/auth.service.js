@@ -64,12 +64,12 @@ const signupService = async (userData) => {
     }
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     const user = await createUser({
-        fullName: userData.fullName,
+        fullName: userData.fullName || null,
         email: userData.email,
         employeeId: userData.employeeId,
         phone: userData.phone,
         passwordHash: hashedPassword,
-        roleId: userData.roleId,
+        roleId: userData.roleId || null,
         isVerified: true,
     });
     return user;

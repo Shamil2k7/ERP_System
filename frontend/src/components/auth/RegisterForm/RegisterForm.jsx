@@ -23,11 +23,9 @@ export default function RegisterForm() {
   const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
-    fullName: "",
     employeeId: "",
     email: "",
     phone: "",
-    role: "",
     password: "",
     confirmPassword: "",
   });
@@ -87,11 +85,9 @@ export default function RegisterForm() {
 
       // 2. Signup
       const signupPayload = {
-        fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        roleId: formData.role, // Mapping role to roleId for backend
         employeeId: formData.employeeId
       };
 
