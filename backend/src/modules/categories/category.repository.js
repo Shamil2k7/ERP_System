@@ -1,5 +1,4 @@
-import prisma from "../../config/database.js";
-
+import prisma from "../../config/prisma.js";
 /**
  * Create Category
  */
