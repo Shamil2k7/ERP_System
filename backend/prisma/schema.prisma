@@ -135,6 +135,14 @@ model SalesOrder {
   @@map("sales_orders")
 }
 
+enum SalesOrderStatus {
+  DRAFT
+  CONFIRMED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
 enum InvoiceStatus {
   DRAFT
   ISSUED
