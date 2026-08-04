@@ -5,19 +5,51 @@ const router = express.Router();
 import {
     sendOTP,
     verifyOTP,
-    signup
+    signup,
+    login,
+    forgotPassword,
+    verifyResetOTP,
+    resetPassword
 } from "./auth.controller.js";
 
 import {
     validateSendOTP,
     validateVerifyOTP,
-    validateSignup
+    validateSignup,
+    validateLogin,
+    validateForgotPassword,
+    validateResetOTP,
+    validateResetPassword
 } from "./auth.validation.js";
 
-// Send OTP
-router.post("/send-otp",validateSendOTP,sendOTP);
-// Verify OTP
-router.post("/verify-otp",validateVerifyOTP,verifyOTP);
-// Signup
-router.post("/signup",validateSignup,signup);
+// Signup Routes
+router.post("/send-otp", validateSendOTP, sendOTP);
+
+router.post("/verify-otp", validateVerifyOTP, verifyOTP);
+
+router.post("/signup", validateSignup, signup);
+// Login Route
+router.post("/login", validateLogin, login);
+
+
+// Forgot Password Routes
+
+router.post(
+    "/forgot-password",
+    validateForgotPassword,
+    forgotPassword
+);
+
+router.post(
+    "/verify-reset-otp",
+    validateResetOTP,
+    verifyResetOTP
+);
+
+router.post(
+    "/reset-password",
+    validateResetPassword,
+    resetPassword
+);
+
 export default router;

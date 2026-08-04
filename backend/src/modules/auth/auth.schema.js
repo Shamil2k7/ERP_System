@@ -1,14 +1,20 @@
 import Joi from "joi";
-
-// ==========================
 // Signup Validation
-// ==========================
-
 const signupSchema = Joi.object({
+
+    fullName: Joi.string()
+        .trim()
+        .min(3)
+        .max(100)
+        .optional()
+        .messages({
+            "string.min": "Full name must be at least 3 characters",
+            "string.max": "Full name cannot exceed 100 characters"
+        }),
 
     employeeId: Joi.string()
         .trim()
-        .allow(null, "")
+        .allow("", null)
         .optional(),
 
     email: Joi.string()
@@ -43,12 +49,7 @@ const signupSchema = Joi.object({
         })
 
 });
-
-
-// ==========================
 // Send OTP Validation
-// ==========================
-
 const sendOTPSchema = Joi.object({
 
     email: Joi.string()
@@ -63,19 +64,19 @@ const sendOTPSchema = Joi.object({
         })
 
 });
-
-
-// ==========================
 // Verify OTP Validation
-// ==========================
-
 const verifyOTPSchema = Joi.object({
 
     email: Joi.string()
         .email()
         .lowercase()
         .trim()
-        .required(),
+        .required()
+        .messages({
+            "string.email": "Invalid email address",
+            "string.empty": "Email is required",
+            "any.required": "Email is required"
+        }),
 
     otp: Joi.string()
         .length(6)
@@ -87,10 +88,97 @@ const verifyOTPSchema = Joi.object({
         })
 
 });
+// Login Validation
+const loginSchema = Joi.object({
 
+    login: Joi.string()
+        .trim()
+        .required()
+        .messages({
+            "string.empty": "Email or Employee ID is required",
+            "any.required": "Email or Employee ID is required"
+        }),
+
+    password: Joi.string()
+        .required()
+        .messages({
+            "string.empty": "Password is required",
+            "any.required": "Password is required"
+        })
+
+});
+// Forgot Password Validation
+const forgotPasswordSchema = Joi.object({
+
+    email: Joi.string()
+        .email()
+        .lowercase()
+        .trim()
+        .required()
+        .messages({
+            "string.email": "Invalid email address",
+            "string.empty": "Email is required",
+            "any.required": "Email is required"
+        })
+
+});
+// Verify Reset OTP Validation
+const verifyResetOTPSchema = Joi.object({
+
+    email: Joi.string()
+        .email()
+        .lowercase()
+        .trim()
+        .required()
+        .messages({
+            "string.email": "Invalid email address",
+            "string.empty": "Email is required",
+            "any.required": "Email is required"
+        }),
+
+    otp: Joi.string()
+        .length(6)
+        .required()
+        .messages({
+            "string.length": "OTP must be 6 digits",
+            "string.empty": "OTP is required",
+            "any.required": "OTP is required"
+        })
+
+});
+// Reset Password Validation
+const resetPasswordSchema = Joi.object({
+
+    email: Joi.string()
+        .email()
+        .lowercase()
+        .trim()
+        .required()
+        .messages({
+            "string.email": "Invalid email address",
+            "string.empty": "Email is required",
+            "any.required": "Email is required"
+        }),
+
+    password: Joi.string()
+        .min(8)
+        .max(20)
+        .required()
+        .messages({
+            "string.min": "Password must be at least 8 characters",
+            "string.max": "Password cannot exceed 20 characters",
+            "string.empty": "Password is required",
+            "any.required": "Password is required"
+        })
+
+});
 
 export {
     signupSchema,
     sendOTPSchema,
-    verifyOTPSchema
+    verifyOTPSchema,
+    loginSchema,
+    forgotPasswordSchema,
+    verifyResetOTPSchema,
+    resetPasswordSchema
 };
