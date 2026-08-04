@@ -1,7 +1,6 @@
 import prisma from "../../config/prisma.js";
 
 class CustomerRepository {
-
   async create(data) {
     return prisma.customer.create({
       data,
