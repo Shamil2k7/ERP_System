@@ -66,6 +66,7 @@ const signupService = async (userData) => {
     const user = await createUser({
         fullName: userData.fullName,
         email: userData.email,
+        employeeId: userData.employeeId,
         phone: userData.phone,
         passwordHash: hashedPassword,
         roleId: userData.roleId,

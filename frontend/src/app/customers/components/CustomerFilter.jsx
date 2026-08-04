@@ -1,18 +1,18 @@
 "use client";
 
-export default function SalesFilter({
+export default function CustomerFilter({
   search,
   setSearch,
 }) {
   return (
-    <div className="flex gap-4">
+    <div className="mb-6">
 
       <input
         type="text"
-        placeholder="Search invoice or customer..."
+        placeholder="Search customer..."
+        className="border rounded-lg p-3 w-full"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="border rounded-lg p-3 w-full"
       />
 
     </div>
