@@ -16,6 +16,11 @@ import styles from "./RegisterForm.module.css";
 export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const [step, setStep] = useState(1);
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -36,18 +41,76 @@ export default function RegisterForm() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match.");
+      setError("Passwords do not match.");
       return;
     }
 
-    console.log(formData);
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email }),
+      });
+      const data = await response.json();
+      
+      if (!response.ok) throw new Error(data.message || "Failed to send OTP");
+      
+      setStep(2);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // TODO:
-    // Call your register API here
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      // 1. Verify OTP
+      const verifyRes = await fetch("http://localhost:5000/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: formData.email, otp }),
+      });
+      const verifyData = await verifyRes.json();
+      
+      if (!verifyRes.ok) throw new Error(verifyData.message || "Invalid OTP");
+
+      // 2. Signup
+      const signupPayload = {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        roleId: formData.role, // Mapping role to roleId for backend
+        employeeId: formData.employeeId
+      };
+
+      const signupRes = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(signupPayload),
+      });
+      const signupData = await signupRes.json();
+
+      if (!signupRes.ok) throw new Error(signupData.message || "Signup failed");
+
+      alert("Registration Successful!");
+      window.location.href = "/login";
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -62,161 +125,197 @@ export default function RegisterForm() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        {error && <div className={styles.errorMessage}>{error}</div>}
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Employee Full Name</label>
+        {step === 1 ? (
+          <form className={styles.form} onSubmit={handleSubmit}>
 
-            <div className={styles.inputGroup}>
-              <FiUser />
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Employee Full Name</label>
 
-              <input
-                type="text"
-                name="fullName"
-                placeholder="Enter employee full name"
-                value={formData.fullName}
-                onChange={handleChange}
-                required
-              />
+              <div className={styles.inputGroup}>
+                <FiUser />
+
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Enter employee full name"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Employee ID</label>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Employee ID</label>
 
-            <div className={styles.inputGroup}>
-              <FiBriefcase />
+              <div className={styles.inputGroup}>
+                <FiBriefcase />
 
-              <input
-                type="text"
-                name="employeeId"
-                placeholder="EMP001"
-                value={formData.employeeId}
-                onChange={handleChange}
-                required
-              />
+                <input
+                  type="text"
+                  name="employeeId"
+                  placeholder="EMP001"
+                  value={formData.employeeId}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Work Email</label>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Work Email</label>
 
-            <div className={styles.inputGroup}>
-              <FiMail />
+              <div className={styles.inputGroup}>
+                <FiMail />
 
-              <input
-                type="email"
-                name="email"
-                placeholder="employee@company.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="employee@company.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Mobile Number</label>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Mobile Number</label>
 
-            <div className={styles.inputGroup}>
-              <FiPhone />
+              <div className={styles.inputGroup}>
+                <FiPhone />
 
-              <input
-                type="tel"
-                name="phone"
-                placeholder="+91 9876543210"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-              />
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="+91 9876543210"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
-          </div>
 
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>User Role</label>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>User Role</label>
 
-            <div className={styles.inputGroup}>
-              <FiBriefcase />
+              <div className={styles.inputGroup}>
+                <FiBriefcase />
 
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select User Role</option>
-                <option value="Admin">Administrator</option>
-                <option value="Manager">Store Manager</option>
-                <option value="Cashier">Cashier</option>
-                <option value="Accountant">Accountant</option>
-                <option value="Warehouse">Warehouse Staff</option>
-              </select>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select User Role</option>
+                  <option value="Admin">Administrator</option>
+                  <option value="Manager">Store Manager</option>
+                  <option value="Cashier">Cashier</option>
+                  <option value="Accountant">Accountant</option>
+                  <option value="Warehouse">Warehouse Staff</option>
+                </select>
+              </div>
             </div>
-          </div>
 
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Create Password</label>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Create Password</label>
 
-            <div className={styles.inputGroup}>
-              <FiLock />
+              <div className={styles.inputGroup}>
+                <FiLock />
 
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Create a secure password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Create a secure password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
 
-              <button
-                type="button"
-                className={styles.eye}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FiEyeOff /> : <FiEye />}
-              </button>
+                <button
+                  type="button"
+                  className={styles.eye}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
+              </div>
             </div>
-          </div>
 
 
-          <div className={styles.formGroup}>
-            <label className={styles.label}>Confirm Password</label>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Confirm Password</label>
 
-            <div className={styles.inputGroup}>
-              <FiLock />
+              <div className={styles.inputGroup}>
+                <FiLock />
 
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                placeholder="Re-enter your password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="Re-enter your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
 
-              <button
-                type="button"
-                className={styles.eye}
-                onClick={() =>
-                  setShowConfirmPassword(!showConfirmPassword)
-                }
-              >
-                {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
-              </button>
+                <button
+                  type="button"
+                  className={styles.eye}
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                >
+                  {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
+              </div>
             </div>
-          </div>
 
-
-          <button className={styles.registerBtn} type="submit">
-            Register Employee
-          </button>
-        </form>
+            <button className={styles.registerBtn} type="submit" disabled={loading}>
+              {loading ? "Sending OTP..." : "Register Employee"}
+            </button>
+          </form>
+        ) : (
+          <form className={styles.form} onSubmit={handleVerifyOTP}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Enter OTP</label>
+              <div className={styles.inputGroup}>
+                <FiLock />
+                <input
+                  type="text"
+                  name="otp"
+                  placeholder="Enter 6-digit OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  maxLength={6}
+                  required
+                />
+              </div>
+              <p className={styles.otpMessage}>
+                OTP sent to {formData.email}
+              </p>
+            </div>
+            
+            <button className={styles.registerBtn} type="submit" disabled={loading}>
+              {loading ? "Verifying..." : "Verify & Signup"}
+            </button>
+            <button 
+              type="button" 
+              className={styles.backBtn} 
+              onClick={() => setStep(1)}
+              disabled={loading}
+            >
+              Back
+            </button>
+          </form>
+        )}
 
         <div className={styles.footer}>
           <p>

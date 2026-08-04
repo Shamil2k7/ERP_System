@@ -1,4 +1,4 @@
-const { sendOTPService, verifyOTPService, signupService } = require("./auth.service");
+import { sendOTPService, verifyOTPService, signupService } from "./auth.service.js";
 
 
 //Send OTP
@@ -44,7 +44,7 @@ const signup = async (req, res) => {
         });
     }
 };
-module.exports = {
+export {
     sendOTP,
     verifyOTP,
     signup

@@ -1,19 +1,13 @@
-/* ===========================
-   Container
-=========================== */
+
 
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a, #1e3a8a);
+  background:black;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
 }
-
-/* ===========================
-   Card
-=========================== */
 
 .card {
   width: 100%;
@@ -41,7 +35,7 @@
    Form
 =========================== */
 
-form {
+.form {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -122,6 +116,46 @@ form {
 
 .registerBtn:hover {
   background: #1d4ed8;
+}
+
+/* ===========================
+   Feedback & OTP
+=========================== */
+
+.errorMessage {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 14px;
+  border: 1px solid #fca5a5;
+}
+
+.otpMessage {
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.backBtn {
+  margin-top: 10px;
+  height: 52px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 100%;
+}
+
+.backBtn:hover {
+  background: #f3f4f6;
 }
 
 /* ===========================
