@@ -1,46 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomerTable from "./components/CustomerTable";
 import CustomerFilter from "./components/CustomerFilter";
 
 export default function CustomersPage() {
   const [search, setSearch] = useState("");
 
-  const [customers] = useState([
-    {
-      id: 1,
-      name: "Rahul Kumar",
-      email: "rahul@gmail.com",
-      phone: "9876543210",
-      city: "Kochi",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Anil Das",
-      email: "anil@gmail.com",
-      phone: "9876543211",
-      city: "Calicut",
-      status: "Active",
-    },
-    {
-      id: 3,
-      name: "Salman",
-      email: "salman@gmail.com",
-      phone: "9999999999",
-      city: "Malappuram",
-      status: "Inactive",
-    },
-    {
-      id: 4,
-      name: "Niyas",
-      email: "niyas@gmail.com",
-      phone: "8888888888",
-      city: "Thrissur",
-      status: "Active",
-    },
-  ]);
+  const [customers, setCustomers] = useState([]);
+
+useEffect(() => {
+
+    fetch("http://localhost:5000/api/customers")
+        .then((res) => res.json())
+        .then((data) => {
+
+            setCustomers(data.data);
+
+        });
+
+}, []);
 
   const filteredCustomers = useMemo(() => {
     return customers.filter((customer) =>

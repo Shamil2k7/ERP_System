@@ -217,3 +217,75 @@ model InvoiceItem {
 
   @@map("invoice_items")
 }
+
+// ==============================
+// Payment Enums
+// ==============================
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK
+  WALLET
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+// ==============================
+// Payment Model
+// ==============================
+
+model Payment {
+
+  id                String   @id @default(uuid()) @db.Uuid
+
+  branchId          String   @map("branch_id") @db.Uuid
+
+  customerId        String?  @map("customer_id") @db.Uuid
+
+  supplierId        String?  @map("supplier_id") @db.Uuid
+
+  invoiceId         String?  @map("invoice_id") @db.Uuid
+
+  purchaseOrderId   String?  @map("purchase_order_id") @db.Uuid
+
+  paymentNumber     String   @unique @map("payment_number")
+
+  paymentDate       DateTime @map("payment_date")
+
+  amount            Decimal  @db.Decimal(18,2)
+
+  method            PaymentMethod
+
+  referenceNumber   String?  @map("reference_number")
+
+  status            PaymentStatus @default(PENDING)
+
+  notes             String?
+
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // ==============================
+  // Relations
+  // ==============================
+
+  branch            Branch        @relation(fields: [branchId], references: [id])
+
+  customer          Customer?     @relation(fields: [customerId], references: [id])
+
+  supplier          Supplier?     @relation(fields: [supplierId], references: [id])
+
+  invoice           Invoice?      @relation(fields: [invoiceId], references: [id])
+
+  purchaseOrder     PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+
+  @@map("payments")
+}

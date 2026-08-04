@@ -9,10 +9,6 @@ import validateRequest from "../../middlewares/validateRequest.js";
 
 const router = Router();
 
-/**
- * Create Category
- * POST /api/categories
- */
 router.post(
   "/",
   createCategoryValidation,
@@ -20,22 +16,10 @@ router.post(
   categoryController.createCategory
 );
 
-/**
- * Get All Categories
- * GET /api/categories
- */
 router.get("/", categoryController.getAllCategories);
 
-/**
- * Get Category By ID
- * GET /api/categories/:id
- */
 router.get("/:id", categoryController.getCategoryById);
 
-/**
- * Update Category
- * PUT /api/categories/:id
- */
 router.put(
   "/:id",
   updateCategoryValidation,
@@ -43,10 +27,7 @@ router.put(
   categoryController.updateCategory
 );
 
-/**
- * Delete Category
- * DELETE /api/categories/:id
- */
+
 router.delete("/:id", categoryController.deleteCategory);
 
 export default router;
