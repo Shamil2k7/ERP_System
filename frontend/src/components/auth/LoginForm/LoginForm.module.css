@@ -10,7 +10,7 @@
 
 .card {
   width: 100%;
-  max-width: 550px;
+  max-width: 470px;
   background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -35,7 +35,6 @@
 .header p {
   color: rgba(255, 255, 255, 0.75);
   font-size: 15px;
-  line-height: 1.6;
 }
 
 .errorMessage {
@@ -51,7 +50,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
 .formGroup {
@@ -89,8 +88,7 @@
   flex-shrink: 0;
 }
 
-.inputGroup input,
-.inputGroup select {
+.inputGroup input {
   width: 100%;
   height: 55px;
   border: none;
@@ -102,16 +100,6 @@
 
 .inputGroup input::placeholder {
   color: rgba(255, 255, 255, 0.55);
-}
-
-.inputGroup select {
-  appearance: none;
-  cursor: pointer;
-}
-
-.inputGroup select option {
-  color: #111827;
-  background: #ffffff;
 }
 
 .eye {
@@ -128,49 +116,60 @@
   font-size: 21px;
 }
 
-.registerBtn,
-.backBtn {
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: #2563eb;
+}
+
+.options a {
+  color: #93c5fd;
+  text-decoration: none;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.options a:hover {
+  color: #fff;
+}
+
+.loginBtn {
   width: 100%;
   height: 55px;
   border: none;
   border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #fff;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: 0.35s;
 }
 
-.registerBtn {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  color: #fff;
-}
-
-.registerBtn:hover:not(:disabled) {
+.loginBtn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
 }
 
-.registerBtn:disabled {
+.loginBtn:disabled {
   cursor: not-allowed;
   opacity: 0.7;
-}
-
-.backBtn {
-  margin-top: 12px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,.25);
-  color: #fff;
-}
-
-.backBtn:hover {
-  background: rgba(255,255,255,.08);
-}
-
-.otpMessage {
-  color: rgba(255,255,255,.8);
-  text-align: center;
-  font-size: 14px;
-  margin-top: 10px;
 }
 
 .footer {
@@ -179,7 +178,7 @@
 }
 
 .footer p {
-  color: rgba(255,255,255,.8);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 14px;
 }
 
@@ -205,6 +204,12 @@
   .header h1 {
     font-size: 28px;
   }
+
+  .options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -217,14 +222,12 @@
     font-size: 24px;
   }
 
-  .inputGroup input,
-  .inputGroup select {
+  .inputGroup input {
     height: 50px;
     font-size: 14px;
   }
 
-  .registerBtn,
-  .backBtn {
+  .loginBtn {
     height: 50px;
     font-size: 15px;
   }
