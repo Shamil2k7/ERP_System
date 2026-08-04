@@ -1,34 +1,63 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import CustomerForm from "../components/CustomerForm";
 
 export default function AddCustomerPage() {
 
-  const handleSave = (customer) => {
+    const router = useRouter();
 
-    console.log("Customer Data:", customer);
+    const saveCustomer = async (customer) => {
 
-    // TODO:
-    // POST http://localhost:5000/api/customers
+        try {
 
-    alert("Customer Added Successfully!");
+            const res = await fetch(
+                "http://localhost:5000/api/customers",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(customer),
+                }
+            );
 
-  };
+            const data = await res.json();
 
-  return (
+            if (!res.ok) {
 
-    <div className="p-6 max-w-5xl mx-auto">
+                alert(data.message);
 
-      <h1 className="text-3xl font-bold mb-6">
-        Add Customer
-      </h1>
+                return;
 
-      <CustomerForm
-        onSubmit={handleSave}
-      />
+            }
 
-    </div>
+            alert("Customer Added");
 
-  );
+            router.push("/customers");
+
+        } catch (err) {
+
+            console.log(err);
+
+        }
+
+    };
+
+    return (
+
+        <div className="p-6">
+
+            <h1 className="text-3xl font-bold mb-6">
+
+                Add Customer
+
+            </h1>
+
+            <CustomerForm onSubmit={saveCustomer} />
+
+        </div>
+
+    );
 
 }

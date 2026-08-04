@@ -17,10 +17,12 @@ model Role {
   updatedAt DateTime @updatedAt
 }
 
+
+
 model User {
   id            String   @id @default(uuid())
 
-  fullName      String
+  fullName      String?
   email         String   @unique
   employeeId    String?  @unique
   phone         String   @unique
@@ -29,12 +31,14 @@ model User {
 
   isVerified    Boolean  @default(false)
 
-  roleId        String
-  role          Role     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  roleId        String?
+  role          Role?    @relation(fields: [roleId], references: [id], onDelete: Restrict)
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
+
 
 model EmailOTP {
   id          String   @id @default(uuid())
@@ -65,8 +69,11 @@ model Customer {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
+  payments         Payment[]
+
   @@map("customers")
 }
+
 
 model Category {
   id          String    @id @default(uuid())
@@ -135,6 +142,14 @@ model SalesOrder {
   @@map("sales_orders")
 }
 
+enum SalesOrderStatus {
+  DRAFT
+  CONFIRMED
+  PROCESSING
+  COMPLETED
+  CANCELLED
+}
+
 enum InvoiceStatus {
   DRAFT
   ISSUED
@@ -184,7 +199,9 @@ model Invoice {
 
   items             InvoiceItem[]
 
-  @@map("invoices")
+payments          Payment[]
+
+@@map("invoices")
 }
 
 model InvoiceItem {
@@ -208,4 +225,54 @@ model InvoiceItem {
   invoice           Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@map("invoice_items")
+}
+
+// ==============================
+// Payment Enums
+// ==============================
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK
+  WALLET
+  OTHER
+}
+
+
+
+// ==============================
+// Payment Model
+// ==============================
+
+model Payment {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  branchId          String   @map("branch_id") @db.Uuid
+  customerId        String?  @map("customer_id") @db.Uuid
+  supplierId        String?  @map("supplier_id") @db.Uuid
+  invoiceId         String?  @map("invoice_id") @db.Uuid
+  purchaseOrderId   String?  @map("purchase_order_id") @db.Uuid
+
+  paymentNumber     String   @unique @map("payment_number")
+  paymentDate       DateTime @map("payment_date")
+
+  amount            Decimal  @db.Decimal(18,2)
+
+  method            PaymentMethod
+
+  referenceNumber   String?  @map("reference_number")
+
+  status            PaymentStatus @default(PENDING)
+
+  notes             String?
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Existing models only
+  customer          Customer? @relation(fields: [customerId], references: [id])
+  invoice           Invoice?  @relation(fields: [invoiceId], references: [id])
+
+  @@map("payments")
 }

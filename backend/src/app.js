@@ -13,7 +13,8 @@ const __dirname = path.dirname(__filename);
 import authRoutes from "./modules/auth/auth.routes.js";
 import customerRoutes from "./modules/customers/customers.routes.js";
 import salesRoutes from "./modules/sales/sales.routes.js";
-
+import paymentRoutes from "./modules/payments/payments.routes.js";
+import invoiceRoutes from "./modules/invoices/invoices.routes.js";
 
 import categoryRoutes from "./modules/categories/category.routes.js";
 import productRoutes from "./modules/products/product.routes.js";
@@ -64,6 +65,9 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/sales", salesRoutes);
 
 
+app.use("/api/payments", paymentRoutes);
+app.use("/api/invoices", invoiceRoutes);
+//Category
  app.use("/api/categories", categoryRoutes);
  app.use("/api/products", productRoutes);
 

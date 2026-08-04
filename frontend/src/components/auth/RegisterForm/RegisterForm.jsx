@@ -23,11 +23,9 @@ export default function RegisterForm() {
   const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
-    fullName: "",
     employeeId: "",
     email: "",
     phone: "",
-    role: "",
     password: "",
     confirmPassword: "",
   });
@@ -87,11 +85,9 @@ export default function RegisterForm() {
 
       // 2. Signup
       const signupPayload = {
-        fullName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        roleId: formData.role, // Mapping role to roleId for backend
         employeeId: formData.employeeId
       };
 
@@ -105,7 +101,7 @@ export default function RegisterForm() {
       if (!signupRes.ok) throw new Error(signupData.message || "Signup failed");
 
       alert("Registration Successful!");
-      window.location.href = "/login";
+      window.location.href = "/auth/login";
     } catch (err) {
       setError(err.message);
     } finally {
@@ -130,26 +126,11 @@ export default function RegisterForm() {
         {step === 1 ? (
           <form className={styles.form} onSubmit={handleSubmit}>
 
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Employee Full Name</label>
-
-              <div className={styles.inputGroup}>
-                <FiUser />
-
-                <input
-                  type="text"
-                  name="fullName"
-                  placeholder="Enter employee full name"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
+           
 
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Employee ID</label>
+              {/* <label className={styles.label}>Employee ID</label> */}
 
               <div className={styles.inputGroup}>
                 <FiBriefcase />
@@ -157,7 +138,7 @@ export default function RegisterForm() {
                 <input
                   type="text"
                   name="employeeId"
-                  placeholder="EMP001"
+                  placeholder="Employee ID - EMP001"
                   value={formData.employeeId}
                   onChange={handleChange}
                   required
@@ -167,7 +148,7 @@ export default function RegisterForm() {
 
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Work Email</label>
+              {/* <label className={styles.label}>Work Email</label> */}
 
               <div className={styles.inputGroup}>
                 <FiMail />
@@ -175,7 +156,7 @@ export default function RegisterForm() {
                 <input
                   type="email"
                   name="email"
-                  placeholder="employee@company.com"
+                  placeholder="Work Email - employee@company.com"
                   value={formData.email}
                   onChange={handleChange}
                   required
@@ -185,7 +166,7 @@ export default function RegisterForm() {
 
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Mobile Number</label>
+              {/* <label className={styles.label}>Mobile Number</label> */}
 
               <div className={styles.inputGroup}>
                 <FiPhone />
@@ -193,7 +174,7 @@ export default function RegisterForm() {
                 <input
                   type="tel"
                   name="phone"
-                  placeholder="+91 9876543210"
+                  placeholder="Mobile Number"
                   value={formData.phone}
                   onChange={handleChange}
                   required
@@ -202,31 +183,11 @@ export default function RegisterForm() {
             </div>
 
 
-            <div className={styles.formGroup}>
-              <label className={styles.label}>User Role</label>
-
-              <div className={styles.inputGroup}>
-                <FiBriefcase />
-
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select User Role</option>
-                  <option value="Admin">Administrator</option>
-                  <option value="Manager">Store Manager</option>
-                  <option value="Cashier">Cashier</option>
-                  <option value="Accountant">Accountant</option>
-                  <option value="Warehouse">Warehouse Staff</option>
-                </select>
-              </div>
-            </div>
+            
 
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Create Password</label>
+              {/* <label className={styles.label}>Create Password</label> */}
 
               <div className={styles.inputGroup}>
                 <FiLock />
@@ -252,7 +213,7 @@ export default function RegisterForm() {
 
 
             <div className={styles.formGroup}>
-              <label className={styles.label}>Confirm Password</label>
+              {/* <label className={styles.label}>Confirm Password</label> */}
 
               <div className={styles.inputGroup}>
                 <FiLock />
