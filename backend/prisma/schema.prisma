@@ -134,3 +134,78 @@ model SalesOrder {
 
   @@map("sales_orders")
 }
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  REFUNDED
+}
+
+model Invoice {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  branchId          String   @map("branch_id") @db.Uuid
+  salesOrderId      String?  @map("sales_order_id") @db.Uuid
+  customerId        String   @map("customer_id") @db.Uuid
+
+  invoiceNumber     String   @unique @map("invoice_number")
+
+  invoiceDate       DateTime @map("invoice_date")
+  dueDate           DateTime? @map("due_date")
+
+  subtotal          Decimal  @db.Decimal(18,2)
+
+  taxAmount         Decimal  @default(0) @db.Decimal(18,2) @map("tax_amount")
+
+  discountAmount    Decimal  @default(0) @db.Decimal(18,2) @map("discount_amount")
+
+  totalAmount       Decimal  @db.Decimal(18,2) @map("total_amount")
+
+  paidAmount        Decimal  @default(0) @db.Decimal(18,2) @map("paid_amount")
+
+  balanceAmount     Decimal  @default(0) @db.Decimal(18,2) @map("balance_amount")
+
+  paymentStatus     PaymentStatus @default(PENDING)
+
+  status            InvoiceStatus @default(DRAFT)
+
+  notes             String?
+
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  items             InvoiceItem[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+
+  id                String   @id @default(uuid()) @db.Uuid
+
+  invoiceId         String   @map("invoice_id") @db.Uuid
+
+  productId         String   @map("product_id") @db.Uuid
+
+  quantity          Int
+
+  unitPrice         Decimal  @db.Decimal(18,2) @map("unit_price")
+
+  discount          Decimal  @default(0) @db.Decimal(18,2)
+
+  tax               Decimal  @default(0) @db.Decimal(18,2)
+
+  total             Decimal  @db.Decimal(18,2)
+
+  invoice           Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_items")
+}
