@@ -17,10 +17,12 @@ model Role {
   updatedAt DateTime @updatedAt
 }
 
+
+
 model User {
   id            String   @id @default(uuid())
 
-  fullName      String
+  fullName      String?
   email         String   @unique
   employeeId    String?  @unique
   phone         String   @unique
@@ -29,12 +31,14 @@ model User {
 
   isVerified    Boolean  @default(false)
 
-  roleId        String
-  role          Role     @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  roleId        String?
+  role          Role?    @relation(fields: [roleId], references: [id], onDelete: Restrict)
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
+
+
 
 model EmailOTP {
   id          String   @id @default(uuid())
@@ -65,8 +69,11 @@ model Customer {
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
+  payments         Payment[]
+
   @@map("customers")
 }
+
 
 model Category {
   id          String    @id @default(uuid())
@@ -192,7 +199,9 @@ model Invoice {
 
   items             InvoiceItem[]
 
-  @@map("invoices")
+payments          Payment[]
+
+@@map("invoices")
 }
 
 model InvoiceItem {
@@ -230,33 +239,22 @@ enum PaymentMethod {
   OTHER
 }
 
-enum PaymentStatus {
-  PENDING
-  SUCCESS
-  FAILED
-  REFUNDED
-}
+
 
 // ==============================
 // Payment Model
 // ==============================
 
 model Payment {
-
   id                String   @id @default(uuid()) @db.Uuid
 
   branchId          String   @map("branch_id") @db.Uuid
-
   customerId        String?  @map("customer_id") @db.Uuid
-
   supplierId        String?  @map("supplier_id") @db.Uuid
-
   invoiceId         String?  @map("invoice_id") @db.Uuid
-
   purchaseOrderId   String?  @map("purchase_order_id") @db.Uuid
 
   paymentNumber     String   @unique @map("payment_number")
-
   paymentDate       DateTime @map("payment_date")
 
   amount            Decimal  @db.Decimal(18,2)
@@ -270,22 +268,11 @@ model Payment {
   notes             String?
 
   createdAt         DateTime @default(now()) @map("created_at")
-
   updatedAt         DateTime @updatedAt @map("updated_at")
 
-  // ==============================
-  // Relations
-  // ==============================
-
-  branch            Branch        @relation(fields: [branchId], references: [id])
-
-  customer          Customer?     @relation(fields: [customerId], references: [id])
-
-  supplier          Supplier?     @relation(fields: [supplierId], references: [id])
-
-  invoice           Invoice?      @relation(fields: [invoiceId], references: [id])
-
-  purchaseOrder     PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+  // Existing models only
+  customer          Customer? @relation(fields: [customerId], references: [id])
+  invoice           Invoice?  @relation(fields: [invoiceId], references: [id])
 
   @@map("payments")
 }
