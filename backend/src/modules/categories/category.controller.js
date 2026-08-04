@@ -1,8 +1,6 @@
 import * as categoryService from "./category.service.js";
 
-/**
- * Create Category
- */
+
 export const createCategory = async (req, res) => {
   try {
     const category = await categoryService.createCategory(req.body);
@@ -20,9 +18,7 @@ export const createCategory = async (req, res) => {
   }
 };
 
-/**
- * Get All Categories
- */
+
 export const getAllCategories = async (req, res) => {
   try {
     const categories = await categoryService.getAllCategories();
@@ -41,9 +37,7 @@ export const getAllCategories = async (req, res) => {
   }
 };
 
-/**
- * Get Category By ID
- */
+
 export const getCategoryById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -63,9 +57,7 @@ export const getCategoryById = async (req, res) => {
   }
 };
 
-/**
- * Update Category
- */
+
 export const updateCategory = async (req, res) => {
   try {
     const { id } = req.params;
@@ -85,9 +77,7 @@ export const updateCategory = async (req, res) => {
   }
 };
 
-/**
- * Delete Category
- */
+
 export const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
