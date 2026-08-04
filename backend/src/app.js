@@ -15,6 +15,9 @@ import customerRoutes from "./modules/customers/customers.routes.js";
 import salesRoutes from "./modules/sales/sales.routes.js";
 
 
+// Category
+import categoryRoutes from "./modules/categories/category.routes.js";
+
 
 const app = express();
 
@@ -60,6 +63,10 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/sales", salesRoutes);
+
+//Category
+ app.use("/api/categories", categoryRoutes);
+
 // =====================
 // 404 Handler
 // =====================
