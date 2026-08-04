@@ -22,6 +22,7 @@ model User {
 
   fullName      String
   email         String   @unique
+  employeeId    String?  @unique
   phone         String   @unique
 
   passwordHash  String
@@ -105,4 +106,178 @@ model Product {
   updatedAt     DateTime   @updatedAt
 
   @@map("products")
+}
+
+model SalesOrder {
+  id               String   @id @default(uuid()) @db.Uuid
+
+  branchId         String   @map("branch_id") @db.Uuid
+  customerId       String?  @map("customer_id") @db.Uuid
+
+  orderNumber      String   @unique @map("order_number")
+
+  status           SalesOrderStatus @default(DRAFT)
+
+  orderDate        DateTime @map("order_date")
+
+  totalAmount      Decimal  @db.Decimal(18,2) @map("total_amount")
+
+  taxAmount        Decimal  @default(0.00) @db.Decimal(18,2) @map("tax_amount")
+
+  discountAmount   Decimal  @default(0.00) @db.Decimal(18,2) @map("discount_amount")
+
+  netAmount        Decimal  @db.Decimal(18,2) @map("net_amount")
+
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("sales_orders")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  REFUNDED
+}
+
+model Invoice {
+  id                String   @id @default(uuid()) @db.Uuid
+
+  branchId          String   @map("branch_id") @db.Uuid
+  salesOrderId      String?  @map("sales_order_id") @db.Uuid
+  customerId        String   @map("customer_id") @db.Uuid
+
+  invoiceNumber     String   @unique @map("invoice_number")
+
+  invoiceDate       DateTime @map("invoice_date")
+  dueDate           DateTime? @map("due_date")
+
+  subtotal          Decimal  @db.Decimal(18,2)
+
+  taxAmount         Decimal  @default(0) @db.Decimal(18,2) @map("tax_amount")
+
+  discountAmount    Decimal  @default(0) @db.Decimal(18,2) @map("discount_amount")
+
+  totalAmount       Decimal  @db.Decimal(18,2) @map("total_amount")
+
+  paidAmount        Decimal  @default(0) @db.Decimal(18,2) @map("paid_amount")
+
+  balanceAmount     Decimal  @default(0) @db.Decimal(18,2) @map("balance_amount")
+
+  paymentStatus     PaymentStatus @default(PENDING)
+
+  status            InvoiceStatus @default(DRAFT)
+
+  notes             String?
+
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  items             InvoiceItem[]
+
+  @@map("invoices")
+}
+
+model InvoiceItem {
+
+  id                String   @id @default(uuid()) @db.Uuid
+
+  invoiceId         String   @map("invoice_id") @db.Uuid
+
+  productId         String   @map("product_id") @db.Uuid
+
+  quantity          Int
+
+  unitPrice         Decimal  @db.Decimal(18,2) @map("unit_price")
+
+  discount          Decimal  @default(0) @db.Decimal(18,2)
+
+  tax               Decimal  @default(0) @db.Decimal(18,2)
+
+  total             Decimal  @db.Decimal(18,2)
+
+  invoice           Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@map("invoice_items")
+}
+
+// ==============================
+// Payment Enums
+// ==============================
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK
+  WALLET
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+// ==============================
+// Payment Model
+// ==============================
+
+model Payment {
+
+  id                String   @id @default(uuid()) @db.Uuid
+
+  branchId          String   @map("branch_id") @db.Uuid
+
+  customerId        String?  @map("customer_id") @db.Uuid
+
+  supplierId        String?  @map("supplier_id") @db.Uuid
+
+  invoiceId         String?  @map("invoice_id") @db.Uuid
+
+  purchaseOrderId   String?  @map("purchase_order_id") @db.Uuid
+
+  paymentNumber     String   @unique @map("payment_number")
+
+  paymentDate       DateTime @map("payment_date")
+
+  amount            Decimal  @db.Decimal(18,2)
+
+  method            PaymentMethod
+
+  referenceNumber   String?  @map("reference_number")
+
+  status            PaymentStatus @default(PENDING)
+
+  notes             String?
+
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // ==============================
+  // Relations
+  // ==============================
+
+  branch            Branch        @relation(fields: [branchId], references: [id])
+
+  customer          Customer?     @relation(fields: [customerId], references: [id])
+
+  supplier          Supplier?     @relation(fields: [supplierId], references: [id])
+
+  invoice           Invoice?      @relation(fields: [invoiceId], references: [id])
+
+  purchaseOrder     PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
+
+  @@map("payments")
 }
