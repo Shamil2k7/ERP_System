@@ -1,4 +1,4 @@
-const Joi = require("joi");
+import Joi from "joi";
 
 // ==========================
 // Signup Validation
@@ -17,6 +17,11 @@ const signupSchema = Joi.object({
             "string.max": "Full name cannot exceed 50 characters",
             "any.required": "Full name is required"
         }),
+
+    employeeId: Joi.string()
+        .trim()
+        .allow(null, "")
+        .optional(),
 
     email: Joi.string()
         .email()
@@ -103,7 +108,7 @@ const verifyOTPSchema = Joi.object({
 });
 
 
-module.exports = {
+export {
     signupSchema,
     sendOTPSchema,
     verifyOTPSchema

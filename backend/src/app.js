@@ -1,12 +1,20 @@
-const express = require("express");
-const cors = require("cors");
-const helmet = require("helmet");
-const compression = require("compression");
-const morgan = require("morgan");
-const cookieParser = require("cookie-parser");
-const path = require("path");
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
+import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const authRoutes = require("./modules/auth/auth.routes");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+import authRoutes from "./modules/auth/auth.routes.js";
+import customerRoutes from "./modules/customers/customers.routes.js";
+import salesRoutes from "./modules/sales/sales.routes.js";
+
+
 
 const app = express();
 
@@ -50,7 +58,8 @@ app.get("/", (req, res) => {
 // =====================
 
 app.use("/api/auth", authRoutes);
-
+app.use("/api/customers", customerRoutes);
+app.use("/api/sales", salesRoutes);
 // =====================
 // 404 Handler
 // =====================
@@ -75,4 +84,4 @@ app.use((err, req, res, next) => {
     });
 });
 
-module.exports = app;
+export default app;
