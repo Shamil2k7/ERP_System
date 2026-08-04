@@ -4,319 +4,195 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CustomerForm({
-
   initialData = {},
-
-  onSubmit
-
+  onSubmit,
 }) {
-
   const router = useRouter();
 
   const [form, setForm] = useState({
-
-    firstName: initialData.firstName || "",
-
-    lastName: initialData.lastName || "",
-
-    email: initialData.email || "",
-
+    name: initialData.name || "",
     phone: initialData.phone || "",
-
-    gender: initialData.gender || "Male",
-
-    dob: initialData.dob || "",
-
-    city: initialData.city || "",
-
-    state: initialData.state || "",
-
-    country: initialData.country || "India",
-
+    email: initialData.email || "",
     address: initialData.address || "",
-
-    zipCode: initialData.zipCode || "",
-
-    customerType: initialData.customerType || "Regular",
-
-    gstNumber: initialData.gstNumber || "",
-
-    status: initialData.status || "Active"
-
+    loyaltyId: initialData.loyaltyId || "",
+    creditLimit: initialData.creditLimit || 0,
+    currentBalance: initialData.currentBalance || 0,
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
 
-    setForm({
-
-      ...form,
-
-      [e.target.name]: e.target.value
-
-    });
-
+    setForm((prev) => ({
+      ...prev,
+      [name]:
+        name === "creditLimit" || name === "currentBalance"
+          ? Number(value)
+          : value,
+    }));
   };
 
-  const handleSubmit = (e) => {
-
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !form.firstName ||
-      !form.email ||
-      !form.phone
-    ) {
-
-      alert("Please fill all required fields.");
-
+    if (!form.name.trim()) {
+      alert("Customer name is required.");
       return;
-
     }
 
-    onSubmit(form);
+    if (!form.phone.trim()) {
+      alert("Phone number is required.");
+      return;
+    }
 
+    try {
+      setLoading(true);
+      await onSubmit(form);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-
     <form
       onSubmit={handleSubmit}
-      className="space-y-6"
+      className="bg-white rounded-lg shadow p-6 space-y-6"
     >
-
-      <div className="grid md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
         <div>
-
-          <label>First Name *</label>
+          <label className="block mb-2 font-medium">
+            Customer Name *
+          </label>
 
           <input
             type="text"
-            name="firstName"
-            value={form.firstName}
+            name="name"
+            value={form.name}
             onChange={handleChange}
-            className="border rounded p-3 w-full"
+            placeholder="Enter customer name"
+            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-
         </div>
 
         <div>
-
-          <label>Last Name</label>
-
-          <input
-            type="text"
-            name="lastName"
-            value={form.lastName}
-            onChange={handleChange}
-            className="border rounded p-3 w-full"
-          />
-
-        </div>
-
-        <div>
-
-          <label>Email *</label>
-
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            className="border rounded p-3 w-full"
-          />
-
-        </div>
-
-        <div>
-
-          <label>Phone *</label>
+          <label className="block mb-2 font-medium">
+            Phone *
+          </label>
 
           <input
             type="text"
             name="phone"
             value={form.phone}
             onChange={handleChange}
-            className="border rounded p-3 w-full"
+            placeholder="Enter phone number"
+            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-
         </div>
 
         <div>
-
-          <label>Gender</label>
-
-          <select
-            name="gender"
-            value={form.gender}
-            onChange={handleChange}
-            className="border rounded p-3 w-full"
-          >
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
-          </select>
-
-        </div>
-
-        <div>
-
-          <label>Date of Birth</label>
+          <label className="block mb-2 font-medium">
+            Email
+          </label>
 
           <input
-            type="date"
-            name="dob"
-            value={form.dob}
+            type="email"
+            name="email"
+            value={form.email}
             onChange={handleChange}
-            className="border rounded p-3 w-full"
+            placeholder="Enter email"
+            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-
         </div>
 
         <div>
-
-          <label>City</label>
+          <label className="block mb-2 font-medium">
+            Loyalty ID
+          </label>
 
           <input
             type="text"
-            name="city"
-            value={form.city}
+            name="loyaltyId"
+            value={form.loyaltyId}
             onChange={handleChange}
-            className="border rounded p-3 w-full"
+            placeholder="Optional loyalty ID"
+            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-
-        </div>
-
-        <div>
-
-          <label>State</label>
-
-          <input
-            type="text"
-            name="state"
-            value={form.state}
-            onChange={handleChange}
-            className="border rounded p-3 w-full"
-          />
-
-        </div>
-
-        <div>
-
-          <label>Country</label>
-
-          <input
-            type="text"
-            name="country"
-            value={form.country}
-            onChange={handleChange}
-            className="border rounded p-3 w-full"
-          />
-
-        </div>
-
-        <div>
-
-          <label>Zip Code</label>
-
-          <input
-            type="text"
-            name="zipCode"
-            value={form.zipCode}
-            onChange={handleChange}
-            className="border rounded p-3 w-full"
-          />
-
         </div>
 
       </div>
 
       <div>
-
-        <label>Address</label>
+        <label className="block mb-2 font-medium">
+          Address
+        </label>
 
         <textarea
-          rows={4}
           name="address"
+          rows={4}
           value={form.address}
           onChange={handleChange}
-          className="border rounded p-3 w-full"
+          placeholder="Enter customer address"
+          className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-
       </div>
 
-      <div className="grid md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
         <div>
-
-          <label>Customer Type</label>
-
-          <select
-            name="customerType"
-            value={form.customerType}
-            onChange={handleChange}
-            className="border rounded p-3 w-full"
-          >
-            <option>Regular</option>
-            <option>Wholesale</option>
-            <option>VIP</option>
-          </select>
-
-        </div>
-
-        <div>
-
-          <label>GST Number</label>
+          <label className="block mb-2 font-medium">
+            Credit Limit
+          </label>
 
           <input
-            type="text"
-            name="gstNumber"
-            value={form.gstNumber}
+            type="number"
+            step="0.01"
+            min="0"
+            name="creditLimit"
+            value={form.creditLimit}
             onChange={handleChange}
-            className="border rounded p-3 w-full"
+            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-
         </div>
 
         <div>
+          <label className="block mb-2 font-medium">
+            Current Balance
+          </label>
 
-          <label>Status</label>
-
-          <select
-            name="status"
-            value={form.status}
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            name="currentBalance"
+            value={form.currentBalance}
             onChange={handleChange}
-            className="border rounded p-3 w-full"
-          >
-            <option>Active</option>
-            <option>Inactive</option>
-          </select>
-
+            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
 
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-3 pt-4">
 
         <button
           type="submit"
-          className="bg-blue-600 text-white px-6 py-3 rounded"
+          disabled={loading}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg disabled:opacity-50"
         >
-          Save Customer
+          {loading ? "Saving..." : "Save Customer"}
         </button>
 
         <button
           type="button"
           onClick={() => router.push("/customers")}
-          className="bg-gray-500 text-white px-6 py-3 rounded"
+          className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg"
         >
           Cancel
         </button>
 
       </div>
-
     </form>
-
   );
-
 }
