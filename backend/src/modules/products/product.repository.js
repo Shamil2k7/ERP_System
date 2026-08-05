@@ -1,0 +1,97 @@
+import prisma from "../../config/prisma.js";
+
+export const createProduct = async (data) => {
+  return await prisma.product.create({
+    data,
+    include: {
+      category: true,
+      brand: true,
+    },
+  });
+};
+
+export const getAllProducts = async () => {
+  return await prisma.product.findMany({
+    include: {
+      category: true,
+      brand: true,
+      barcodes: true,
+      inventories: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+export const getProductById = async (id) => {
+  return await prisma.product.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      category: true,
+      brand: true,
+      barcodes: true,
+      inventories: true,
+    },
+  });
+};
+
+export const getProductBySku = async (sku) => {
+  return await prisma.product.findUnique({
+    where: {
+      sku,
+    },
+  });
+};
+
+export const updateProduct = async (id, data) => {
+  return await prisma.product.update({
+    where: {
+      id,
+    },
+    data,
+    include: {
+      category: true,
+      brand: true,
+    },
+  });
+};
+
+
+export const deleteProduct = async (id) => {
+  return await prisma.product.delete({
+    where: {
+      id,
+    },
+  });
+};
+
+export const searchProducts = async (search) => {
+  return await prisma.product.findMany({
+    where: {
+      OR: [
+        {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          sku: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+    include: {
+      category: true,
+      brand: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
