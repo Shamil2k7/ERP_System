@@ -1,13 +1,10 @@
 import prisma from "../../config/prisma.js";
-/**
- * Create Category
- */
+
 export const createCategory = async (data) => {
   return await prisma.category.create({
     data,
   });
 };
-
 
 export const getAllCategories = async () => {
   return await prisma.category.findMany({
@@ -17,7 +14,6 @@ export const getAllCategories = async () => {
   });
 };
 
-
 export const getCategoryById = async (id) => {
   return await prisma.category.findUnique({
     where: {
@@ -26,7 +22,6 @@ export const getCategoryById = async (id) => {
   });
 };
 
-
 export const getCategoryByCode = async (code) => {
   return await prisma.category.findUnique({
     where: {
@@ -34,7 +29,6 @@ export const getCategoryByCode = async (code) => {
     },
   });
 };
-
 
 export const updateCategory = async (id, data) => {
   return await prisma.category.update({
@@ -45,11 +39,34 @@ export const updateCategory = async (id, data) => {
   });
 };
 
-
 export const deleteCategory = async (id) => {
   return await prisma.category.delete({
     where: {
       id,
+    },
+  });
+};
+
+export const searchCategories = async (search) => {
+  return await prisma.category.findMany({
+    where: {
+      OR: [
+        {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          code: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      ],
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 };
