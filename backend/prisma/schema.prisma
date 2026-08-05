@@ -133,10 +133,19 @@ model Category {
 
 // BRAND
 
+enum BrandStatus {
+  ACTIVE
+  INACTIVE
+}
+
 model Brand {
   id String @id @default(uuid())
 
   name String @unique @db.VarChar(100)
+
+  description String? @db.Text
+
+  status BrandStatus @default(ACTIVE)
 
   products Product[]
 
