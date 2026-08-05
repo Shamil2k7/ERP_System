@@ -146,7 +146,7 @@ export default function LoginForm() {
               Remember Me
             </label>
 
-            <Link href="/forgot-password">
+            <Link href="/auth/forgot-password">
               Forgot Password?
             </Link>
           </div>
@@ -163,7 +163,7 @@ export default function LoginForm() {
         <div className={styles.footer}>
           <p>
             Don't have an account?{" "}
-            <Link href="/auth/Register">
+            <Link href="/auth/register">
               Register
             </Link>
           </p>
