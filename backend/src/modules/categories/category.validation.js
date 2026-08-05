@@ -13,27 +13,38 @@ export const createCategoryValidation = [
     .notEmpty()
     .withMessage("Category code is required")
     .isLength({ min: 2, max: 20 })
-    .withMessage("Category code must be between 2 and 20 characters")
-    .matches(/^[A-Z0-9_-]+$/)
-    .withMessage(
-      "Category code must contain only uppercase letters, numbers, hyphen (-), or underscore (_)"
-    ),
+    .withMessage("Category code must be between 2 and 20 characters"),
 
   body("description")
     .optional()
-    .trim()
-    .isLength({ max: 500 })
-    .withMessage("Description cannot exceed 500 characters"),
+    .trim(),
 
   body("image")
     .optional()
-    .isURL()
-    .withMessage("Image must be a valid URL"),
+    .custom((value) => {
+      if (!value) return true;
+
+      // Accept URL
+      const isUrl = /^https?:\/\/.+/i.test(value);
+
+      // Accept local upload path
+      const isUploadPath =
+        value.startsWith("/uploads/") ||
+        value.startsWith("uploads/");
+
+      if (isUrl || isUploadPath) {
+        return true;
+      }
+
+      throw new Error(
+        "Image must be a valid URL or uploaded image path"
+      );
+    }),
 
   body("status")
     .optional()
-    .isBoolean()
-    .withMessage("Status must be true or false"),
+    .isIn(["ACTIVE", "INACTIVE"])
+    .withMessage("Status must be ACTIVE or INACTIVE"),
 ];
 
 export const updateCategoryValidation = [
@@ -47,25 +58,36 @@ export const updateCategoryValidation = [
     .optional()
     .trim()
     .isLength({ min: 2, max: 20 })
-    .withMessage("Category code must be between 2 and 20 characters")
-    .matches(/^[A-Z0-9_-]+$/)
-    .withMessage(
-      "Category code must contain only uppercase letters, numbers, hyphen (-), or underscore (_)"
-    ),
+    .withMessage("Category code must be between 2 and 20 characters"),
 
   body("description")
     .optional()
-    .trim()
-    .isLength({ max: 500 })
-    .withMessage("Description cannot exceed 500 characters"),
+    .trim(),
 
   body("image")
     .optional()
-    .isURL()
-    .withMessage("Image must be a valid URL"),
+    .custom((value) => {
+      if (!value) return true;
+
+      // Accept URL
+      const isUrl = /^https?:\/\/.+/i.test(value);
+
+      // Accept local upload path
+      const isUploadPath =
+        value.startsWith("/uploads/") ||
+        value.startsWith("uploads/");
+
+      if (isUrl || isUploadPath) {
+        return true;
+      }
+
+      throw new Error(
+        "Image must be a valid URL or uploaded image path"
+      );
+    }),
 
   body("status")
     .optional()
-    .isBoolean()
-    .withMessage("Status must be true or false"),
+    .isIn(["ACTIVE", "INACTIVE"])
+    .withMessage("Status must be ACTIVE or INACTIVE"),
 ];
