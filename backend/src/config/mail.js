@@ -1,53 +1,65 @@
 import nodemailer from "nodemailer";
 
-const transporter = nodemailer.createTransport({
+let transporter;
+
+const getTransporter = () => {
+  if (transporter) return transporter;
+
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    throw new Error(
+      "EMAIL_USER or EMAIL_PASS is missing in the .env file."
+    );
+  }
+
+  transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  return transporter;
+};
 
 const sendOTPEmail = async (email, otp) => {
+  try {
+    console.log("==================================");
+    console.log("Sending OTP...");
+    console.log("Email :", email);
+    console.log("OTP   :", otp);
+    console.log("==================================");
 
-    const mailOptions = {
-        from: `"ERP System" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: "Email Verification OTP",
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width:600px; margin:auto;">
-                <h2 style="color:#2563eb;">ERP System</h2>
+    const tx = getTransporter();
 
-                <p>Hello,</p>
+    const info = await tx.sendMail({
+      from: `"ERP System" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "ERP Email Verification OTP",
+      html: `
+        <div style="font-family:Arial;padding:20px">
+          <h2>ERP System</h2>
 
-                <p>Your Email Verification OTP is:</p>
+          <p>Your OTP is:</p>
 
-                <h1 style="letter-spacing:5px; color:#16a34a;">
-                    ${otp}
-                </h1>
+          <h1 style="color:green;letter-spacing:5px;">
+            ${otp}
+          </h1>
 
-                <p>
-                    This OTP is valid for
-                    <strong>5 minutes</strong>.
-                </p>
+          <p>This OTP is valid for 5 minutes.</p>
 
-                <p>
-                    If you didn't request this OTP,
-                    please ignore this email.
-                </p>
+          <p>If you didn't request this OTP, ignore this email.</p>
+        </div>
+      `,
+    });
 
-                <hr>
-
-                <small>
-                    ERP Management System
-                </small>
-            </div>
-        `
-    };
-
-    await transporter.sendMail(mailOptions);
+    console.log("✅ OTP Email Sent Successfully");
+    console.log(info.messageId);
+  } catch (error) {
+    console.error("❌ Failed to send OTP");
+    console.error(error);
+    throw error;
+  }
 };
 
-export {
-    sendOTPEmail
-};
+export { sendOTPEmail };
