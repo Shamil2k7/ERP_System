@@ -15,10 +15,9 @@ import customerRoutes from "./modules/customers/customers.routes.js";
 import salesRoutes from "./modules/sales/sales.routes.js";
 import paymentRoutes from "./modules/payments/payments.routes.js";
 import invoiceRoutes from "./modules/invoices/invoices.routes.js";
-
 import categoryRoutes from "./modules/categories/category.routes.js";
-import productRoutes from "./modules/products/product.routes.js";
-
+// import productRoutes from "./modules/products/product.routes.js";
+import returnRoutes from "./modules/returns/returns.routes.js";
 const app = express();
 
 // =====================
@@ -63,13 +62,14 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/sales", salesRoutes);
+app.use("/api/returns", returnRoutes);
 
 
 app.use("/api/payments", paymentRoutes);
 app.use("/api/invoices", invoiceRoutes);
 //Category
  app.use("/api/categories", categoryRoutes);
- app.use("/api/products", productRoutes);
+//  app.use("/api/products", productRoutes);
 
 // =====================
 // 404 Handler
