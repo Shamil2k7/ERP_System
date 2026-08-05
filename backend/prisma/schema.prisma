@@ -8,73 +8,68 @@ datasource db {
 }
 
 model Role {
-  id        String   @id @default(uuid())
-  name      String   @unique
+  id   String @id @default(uuid())
+  name String @unique
 
-  users     User[]
+  users User[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-
-
 model User {
-  id            String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  fullName      String?
-  email         String   @unique
-  employeeId    String?  @unique
-  phone         String   @unique
+  fullName   String?
+  email      String  @unique
+  employeeId String? @unique
+  phone      String  @unique
 
-  passwordHash  String
+  passwordHash String
 
-  isVerified    Boolean  @default(false)
+  isVerified Boolean @default(false)
 
-  roleId        String?
-  role          Role?    @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  roleId String?
+  role   Role?   @relation(fields: [roleId], references: [id], onDelete: Restrict)
 
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-
-
 
 model EmailOTP {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  email       String
-  otp         String
+  email String
+  otp   String
 
-  isUsed      Boolean  @default(false)
+  isUsed Boolean @default(false)
 
-  expiresAt   DateTime
+  expiresAt DateTime
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
+
 model Customer {
-  id               String   @id @default(uuid()) @db.Uuid
-  branchId         String?  @map("branch_id") @db.Uuid
+  id       String  @id @default(uuid()) @db.Uuid
+  branchId String? @map("branch_id") @db.Uuid
 
-  name             String
-  phone            String   @unique
-  email            String?  @unique
-  address          String?
+  name    String
+  phone   String  @unique
+  email   String? @unique
+  address String?
 
-  loyaltyId        String?  @map("loyalty_id")
+  loyaltyId String? @map("loyalty_id")
 
-  creditLimit      Decimal  @default(0.00) @map("credit_limit") @db.Decimal(18,2)
-  currentBalance   Decimal  @default(0.00) @map("current_balance") @db.Decimal(18,2)
+  creditLimit    Decimal @default(0.00) @map("credit_limit") @db.Decimal(18, 2)
+  currentBalance Decimal @default(0.00) @map("current_balance") @db.Decimal(18, 2)
 
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  payments         Payment[]
+  payments Payment[]
 
   @@map("customers")
 }
-
-
 
 //Status
 
@@ -88,7 +83,6 @@ enum ProductStatus {
   INACTIVE
 }
 
-
 enum PurchaseStatus {
   PENDING
   RECEIVED
@@ -96,14 +90,12 @@ enum PurchaseStatus {
   CANCELLED
 }
 
-
 enum TransferStatus {
   PENDING
   APPROVED
   COMPLETED
   CANCELLED
 }
-
 
 enum MovementType {
   PURCHASE
@@ -113,101 +105,80 @@ enum MovementType {
   ADJUSTMENT
 }
 
-
 // CATEGORY
 
 model Category {
+  id String @id @default(uuid())
 
-  id          String   @id @default(uuid())
+  name String @db.VarChar(100)
 
-  name        String   @db.VarChar(100)
-
-  code        String   @unique @db.VarChar(20)
+  code String @unique @db.VarChar(20)
 
   description String?
 
-  image       String?
+  image String?
 
-  status      Status   @default(ACTIVE)
-
-
-  products    Product[]
-
-
-  createdAt   DateTime @default(now())
-
-  updatedAt   DateTime @updatedAt
-
-
-  @@index([name])
-  @@index([code])
-
-  @@map("categories")
-}
-
-
-// BRAND
-
-model Brand {
-
-  id        String @id @default(uuid())
-
-  name      String @unique @db.VarChar(100)
+  status Status @default(ACTIVE)
 
   products Product[]
-
 
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
 
+  @@index([name])
+  @@index([code])
+  @@map("categories")
+}
+
+// BRAND
+
+model Brand {
+  id String @id @default(uuid())
+
+  name String @unique @db.VarChar(100)
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
 
   @@map("brands")
 }
 
-
 // PRODUCT
 
 model Product {
+  id String @id @default(uuid())
 
-  id           String        @id @default(uuid())
+  name String @db.VarChar(150)
 
+  sku String @unique @db.VarChar(50)
 
-  name         String        @db.VarChar(150)
+  categoryId String
 
-  sku          String        @unique @db.VarChar(50)
+  brandId String?
 
+  costPrice Decimal @db.Decimal(18, 2)
 
-  categoryId   String
+  sellingPrice Decimal @db.Decimal(18, 2)
 
-  brandId      String?
+  baseUnit String @default("PCS")
 
+  image String?
 
-  costPrice    Decimal       @db.Decimal(18,2)
+  description String?
 
-  sellingPrice Decimal       @db.Decimal(18,2)
+  status ProductStatus @default(ACTIVE)
 
+  category Category @relation(fields: [categoryId], references: [id])
 
-  baseUnit     String        @default("PCS")
+  brand Brand? @relation(fields: [brandId], references: [id])
 
+  barcodes Barcode[]
 
-  image        String?
-
-  description  String?
-
-
-  status       ProductStatus @default(ACTIVE)
-
-
-
-  category     Category @relation(fields:[categoryId],references:[id])
-
-  brand        Brand? @relation(fields:[brandId],references:[id])
-
-
-  barcodes     Barcode[]
-
-  inventories  Inventory[]
+  inventories Inventory[]
 
   purchaseItems PurchaseItem[]
 
@@ -215,70 +186,46 @@ model Product {
 
   stockMovements StockMovement[]
 
-
-
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
 
-
-
   @@index([categoryId])
-
   @@index([brandId])
-
   @@map("products")
 }
-
-
 
 // BARCODE
 
 model Barcode {
-
   id String @id @default(uuid())
-
 
   productId String
 
-
   barcode String @unique @db.VarChar(100)
-
 
   type String @default("CODE128")
 
-
-  product Product @relation(fields:[productId],references:[id])
-
-
+  product Product @relation(fields: [productId], references: [id])
 
   createdAt DateTime @default(now())
 
-
   @@index([productId])
-
   @@map("barcodes")
 }
-
-
 
 // SUPPLIER
 
 model Supplier {
-
   id String @id @default(uuid())
-
 
   companyName String @db.VarChar(150)
 
   contactPerson String? @db.VarChar(100)
 
-
   email String? @unique @db.VarChar(150)
 
   phone String @db.VarChar(20)
-
-
 
   address String?
 
@@ -288,42 +235,29 @@ model Supplier {
 
   country String?
 
-
   taxNumber String?
-
 
   status Status @default(ACTIVE)
 
-
-
   purchases Purchase[]
-
-
 
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
 
-
-
   @@index([companyName])
-
   @@map("suppliers")
 }
-
-
 
 // WAREHOUSE
 
 model Warehouse {
-
   id String @id @default(uuid())
 
   name String @db.VarChar(150)
 
   code String @unique @db.VarChar(50)
 
-
   address String?
 
   city String?
@@ -332,12 +266,9 @@ model Warehouse {
 
   country String?
 
-
   phone String?
 
-
   status Status @default(ACTIVE)
-
 
   inventories Inventory[]
 
@@ -345,41 +276,29 @@ model Warehouse {
 
   purchases Purchase[]
 
-
   fromTransfers StockTransfer[] @relation("FromWarehouse")
 
   toTransfers StockTransfer[] @relation("ToWarehouse")
-
 
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
 
-
   @@index([name])
-
   @@index([code])
-
   @@map("warehouses")
 }
-
 
 // INVENTORY
 
 model Inventory {
-
-
   id String @id @default(uuid())
-
 
   productId String
 
   warehouseId String
 
-
-
   quantity Int @default(0)
-
 
   minimumStock Int @default(10)
 
@@ -387,198 +306,115 @@ model Inventory {
 
   reorderLevel Int @default(20)
 
+  product Product @relation(fields: [productId], references: [id])
 
-
-  product Product @relation(fields:[productId],references:[id])
-
-
-  warehouse Warehouse @relation(fields:[warehouseId],references:[id])
-
-
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
 
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
 
-
-
-  @@unique([productId,warehouseId])
-
-
+  @@unique([productId, warehouseId])
   @@index([productId])
-
   @@index([warehouseId])
-
-
   @@map("inventory")
-
 }
-
-
 
 // PURCHASE
 
 model Purchase {
-
-
   id String @id @default(uuid())
 
-
   purchaseNo String @unique @db.VarChar(50)
-
-
 
   supplierId String
 
   warehouseId String
 
-
-
   purchaseDate DateTime @default(now())
 
-
-  totalAmount Decimal @db.Decimal(18,2)
-
+  totalAmount Decimal @db.Decimal(18, 2)
 
   status PurchaseStatus @default(PENDING)
 
-
   notes String?
 
+  supplier Supplier @relation(fields: [supplierId], references: [id])
 
-
-  supplier Supplier @relation(fields:[supplierId],references:[id])
-
-
-  warehouse Warehouse @relation(fields:[warehouseId],references:[id])
-
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
 
   items PurchaseItem[]
-
-
 
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
 
-
-
   @@index([supplierId])
-
   @@index([warehouseId])
-
-
   @@map("purchases")
 }
 
-
-
-
 model PurchaseItem {
-
-
   id String @id @default(uuid())
-
 
   purchaseId String
 
   productId String
 
-
-
   quantity Int
 
+  unitPrice Decimal @db.Decimal(18, 2)
 
-  unitPrice Decimal @db.Decimal(18,2)
+  totalPrice Decimal @db.Decimal(18, 2)
 
+  purchase Purchase @relation(fields: [purchaseId], references: [id])
 
-  totalPrice Decimal @db.Decimal(18,2)
-
-
-
-  purchase Purchase @relation(fields:[purchaseId],references:[id])
-
-
-  product Product @relation(fields:[productId],references:[id])
-
-
+  product Product @relation(fields: [productId], references: [id])
 
   @@index([purchaseId])
-
   @@index([productId])
-
-
   @@map("purchase_items")
 }
-
-
-
-
 
 // STOCK MOVEMENT HISTORY
 
 model StockMovement {
-
-
   id String @id @default(uuid())
-
 
   productId String
 
   warehouseId String
 
-
-
   type MovementType
-
 
   quantity Int
 
-
-
   referenceNo String?
-
 
   remarks String?
 
-
   performedBy String?
 
+  product Product @relation(fields: [productId], references: [id])
 
-
-  product Product @relation(fields:[productId],references:[id])
-
-
-  warehouse Warehouse @relation(fields:[warehouseId],references:[id])
-
-
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
 
   createdAt DateTime @default(now())
 
-
   @@index([productId])
-
   @@index([warehouseId])
-
-
   @@map("stock_movements")
 }
 
-
-
-
-
 // STOCK TRANSFER
 
-
 model StockTransfer {
-
   id String @id @default(uuid())
 
   transferNo String @unique @db.VarChar(50)
 
   fromWarehouseId String
-  toWarehouseId String
+  toWarehouseId   String
 
   transferDate DateTime @default(now())
 
@@ -590,99 +426,62 @@ model StockTransfer {
 
   approvedBy String?
 
+  fromWarehouse Warehouse @relation("FromWarehouse", fields: [fromWarehouseId], references: [id])
 
-  fromWarehouse Warehouse @relation(
-    "FromWarehouse",
-    fields: [fromWarehouseId],
-    references: [id]
-  )
-
-
-  toWarehouse Warehouse @relation(
-    "ToWarehouse",
-    fields: [toWarehouseId],
-    references: [id]
-  )
-
+  toWarehouse Warehouse @relation("ToWarehouse", fields: [toWarehouseId], references: [id])
 
   items StockTransferItem[]
-
 
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
 
-
   @@index([fromWarehouseId])
-
   @@index([toWarehouseId])
-
-
   @@map("stock_transfers")
 }
 
-
-
-
-
 model StockTransferItem {
-
   id String @id @default(uuid())
-
 
   stockTransferId String
 
   productId String
 
-
   quantity Int
 
+  stockTransfer StockTransfer @relation(fields: [stockTransferId], references: [id])
 
-  stockTransfer StockTransfer @relation(
-    fields: [stockTransferId],
-    references: [id]
-  )
-
-
-  product Product @relation(
-    fields: [productId],
-    references: [id]
-  )
-
+  product Product @relation(fields: [productId], references: [id])
 
   @@index([stockTransferId])
-
   @@index([productId])
-
-
   @@map("stock_transfer_items")
 }
 
-
-
 model SalesOrder {
-  id               String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  branchId         String   @map("branch_id") @db.Uuid
-  customerId       String?  @map("customer_id") @db.Uuid
+  branchId   String  @map("branch_id") @db.Uuid
+  customerId String? @map("customer_id") @db.Uuid
 
-  orderNumber      String   @unique @map("order_number")
+  orderNumber String @unique @map("order_number")
 
-  status           SalesOrderStatus @default(DRAFT)
+  status SalesOrderStatus @default(DRAFT)
 
-  orderDate        DateTime @map("order_date")
+  orderDate DateTime @map("order_date")
 
-  totalAmount      Decimal  @db.Decimal(18,2) @map("total_amount")
+  totalAmount Decimal @map("total_amount") @db.Decimal(18, 2)
 
-  taxAmount        Decimal  @default(0.00) @db.Decimal(18,2) @map("tax_amount")
+  taxAmount Decimal @default(0.00) @map("tax_amount") @db.Decimal(18, 2)
 
-  discountAmount   Decimal  @default(0.00) @db.Decimal(18,2) @map("discount_amount")
+  discountAmount Decimal @default(0.00) @map("discount_amount") @db.Decimal(18, 2)
 
-  netAmount        Decimal  @db.Decimal(18,2) @map("net_amount")
+  netAmount Decimal @map("net_amount") @db.Decimal(18, 2)
 
-  createdAt        DateTime @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("sales_orders")
 }
@@ -709,65 +508,64 @@ enum PaymentStatus {
 }
 
 model Invoice {
-  id                String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  branchId          String   @map("branch_id") @db.Uuid
-  salesOrderId      String?  @map("sales_order_id") @db.Uuid
-  customerId        String   @map("customer_id") @db.Uuid
+  branchId     String  @map("branch_id") @db.Uuid
+  salesOrderId String? @map("sales_order_id") @db.Uuid
+  customerId   String  @map("customer_id") @db.Uuid
 
-  invoiceNumber     String   @unique @map("invoice_number")
+  invoiceNumber String @unique @map("invoice_number")
 
-  invoiceDate       DateTime @map("invoice_date")
-  dueDate           DateTime? @map("due_date")
+  invoiceDate DateTime  @map("invoice_date")
+  dueDate     DateTime? @map("due_date")
 
-  subtotal          Decimal  @db.Decimal(18,2)
+  subtotal Decimal @db.Decimal(18, 2)
 
-  taxAmount         Decimal  @default(0) @db.Decimal(18,2) @map("tax_amount")
+  taxAmount Decimal @default(0) @map("tax_amount") @db.Decimal(18, 2)
 
-  discountAmount    Decimal  @default(0) @db.Decimal(18,2) @map("discount_amount")
+  discountAmount Decimal @default(0) @map("discount_amount") @db.Decimal(18, 2)
 
-  totalAmount       Decimal  @db.Decimal(18,2) @map("total_amount")
+  totalAmount Decimal @map("total_amount") @db.Decimal(18, 2)
 
-  paidAmount        Decimal  @default(0) @db.Decimal(18,2) @map("paid_amount")
+  paidAmount Decimal @default(0) @map("paid_amount") @db.Decimal(18, 2)
 
-  balanceAmount     Decimal  @default(0) @db.Decimal(18,2) @map("balance_amount")
+  balanceAmount Decimal @default(0) @map("balance_amount") @db.Decimal(18, 2)
 
-  paymentStatus     PaymentStatus @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
 
-  status            InvoiceStatus @default(DRAFT)
+  status InvoiceStatus @default(DRAFT)
 
-  notes             String?
+  notes String?
 
-  createdAt         DateTime @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  items             InvoiceItem[]
+  items InvoiceItem[]
 
-payments          Payment[]
+  payments Payment[]
 
-@@map("invoices")
+  @@map("invoices")
 }
 
 model InvoiceItem {
+  id String @id @default(uuid()) @db.Uuid
 
-  id                String   @id @default(uuid()) @db.Uuid
+  invoiceId String @map("invoice_id") @db.Uuid
 
-  invoiceId         String   @map("invoice_id") @db.Uuid
+  productId String @map("product_id") @db.Uuid
 
-  productId         String   @map("product_id") @db.Uuid
+  quantity Int
 
-  quantity          Int
+  unitPrice Decimal @map("unit_price") @db.Decimal(18, 2)
 
-  unitPrice         Decimal  @db.Decimal(18,2) @map("unit_price")
+  discount Decimal @default(0) @db.Decimal(18, 2)
 
-  discount          Decimal  @default(0) @db.Decimal(18,2)
+  tax Decimal @default(0) @db.Decimal(18, 2)
 
-  tax               Decimal  @default(0) @db.Decimal(18,2)
+  total Decimal @db.Decimal(18, 2)
 
-  total             Decimal  @db.Decimal(18,2)
-
-  invoice           Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@map("invoice_items")
 }
@@ -784,40 +582,38 @@ enum PaymentMethod {
   OTHER
 }
 
-
-
 // ==============================
 // Payment Model
 // ==============================
 
 model Payment {
-  id                String   @id @default(uuid()) @db.Uuid
+  id String @id @default(uuid()) @db.Uuid
 
-  branchId          String   @map("branch_id") @db.Uuid
-  customerId        String?  @map("customer_id") @db.Uuid
-  supplierId        String?  @map("supplier_id") @db.Uuid
-  invoiceId         String?  @map("invoice_id") @db.Uuid
-  purchaseOrderId   String?  @map("purchase_order_id") @db.Uuid
+  branchId        String  @map("branch_id") @db.Uuid
+  customerId      String? @map("customer_id") @db.Uuid
+  supplierId      String? @map("supplier_id") @db.Uuid
+  invoiceId       String? @map("invoice_id") @db.Uuid
+  purchaseOrderId String? @map("purchase_order_id") @db.Uuid
 
-  paymentNumber     String   @unique @map("payment_number")
-  paymentDate       DateTime @map("payment_date")
+  paymentNumber String   @unique @map("payment_number")
+  paymentDate   DateTime @map("payment_date")
 
-  amount            Decimal  @db.Decimal(18,2)
+  amount Decimal @db.Decimal(18, 2)
 
-  method            PaymentMethod
+  method PaymentMethod
 
-  referenceNumber   String?  @map("reference_number")
+  referenceNumber String? @map("reference_number")
 
-  status            PaymentStatus @default(PENDING)
+  status PaymentStatus @default(PENDING)
 
-  notes             String?
+  notes String?
 
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Existing models only
-  customer          Customer? @relation(fields: [customerId], references: [id])
-  invoice           Invoice?  @relation(fields: [invoiceId], references: [id])
+  customer Customer? @relation(fields: [customerId], references: [id])
+  invoice  Invoice?  @relation(fields: [invoiceId], references: [id])
 
   @@map("payments")
 }
