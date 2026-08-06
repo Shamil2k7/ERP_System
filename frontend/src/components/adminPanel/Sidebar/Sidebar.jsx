@@ -102,7 +102,6 @@ export default function Sidebar() {
           Stock
         </Link>
 
-        {/* Sales */}
 
         <h4 className={styles.title}>Sales</h4>
 
