@@ -1,20 +1,19 @@
 import express from "express";
 
 import {
-  sendOTP,
-  verifyOTP,
-  signup,
+  addEmployee,
+  verifyEmail,
   login,
+  changePassword,
   forgotPassword,
   verifyResetOTP,
   resetPassword,
 } from "./auth.controller.js";
 
 import {
-  validateSendOTP,
-  validateVerifyOTP,
-  validateSignup,
+  validateAddEmployee,
   validateLogin,
+  validateChangePassword,
   validateForgotPassword,
   validateResetOTP,
   validateResetPassword,
@@ -24,45 +23,41 @@ const router = express.Router();
 
 console.log("✅ Auth Routes Loaded");
 
-// ==========================
-// Test Route
-// ==========================
 router.get("/test", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Auth Route Working",
   });
 });
-
-// ==========================
-// Signup Routes
-// ==========================
-router.post("/send-otp", validateSendOTP, sendOTP);
-
-router.post("/verify-otp", validateVerifyOTP, verifyOTP);
-
-router.post("/signup", validateSignup, signup);
-
-// ==========================
-// Login Route
-// ==========================
-router.post("/login", validateLogin, login);
-
-// ==========================
-// Forgot Password Routes
-// ==========================
+router.post(
+  "/employees",
+  validateAddEmployee,
+  addEmployee
+);
+router.get(
+  "/verify-email",
+  verifyEmail
+);
+router.post(
+  "/login",
+  validateLogin,
+  login
+);
+router.post(
+  "/change-password",
+  validateChangePassword,
+  changePassword
+);
 router.post(
   "/forgot-password",
   validateForgotPassword,
   forgotPassword
 );
-
 router.post(
   "/verify-reset-otp",
   validateResetOTP,
   verifyResetOTP
 );
-
 router.post(
   "/reset-password",
   validateResetPassword,
