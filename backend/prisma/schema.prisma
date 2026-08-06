@@ -718,3 +718,27 @@ model Discount {
 
   @@map("discounts")
 }
+
+
+//landing page database design
+
+model LandingPage {
+  id String @id @default(uuid())
+
+  heroTitle       String
+  heroDescription String
+  heroImage       String
+
+  aboutTitle       String
+  aboutDescription String
+
+  aboutImage1 String
+  aboutImage2 String
+  aboutImage3 String
+  aboutImage4 String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("landing_page")
+}
