@@ -718,3 +718,39 @@ model Discount {
 
   @@map("discounts")
 }
+// ==============================
+// Tax Enums
+// ==============================
+
+enum TaxType {
+  INCLUSIVE
+  EXCLUSIVE
+}
+
+enum TaxStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// ==============================
+// Tax Model
+// ==============================
+
+model Tax {
+
+  id          String      @id @default(uuid()) @db.Uuid
+
+  name        String      @db.VarChar(100)
+
+  rate        Decimal     @db.Decimal(5,2)
+
+  type        TaxType
+
+  status      TaxStatus   @default(ACTIVE)
+
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("taxes")
+}
