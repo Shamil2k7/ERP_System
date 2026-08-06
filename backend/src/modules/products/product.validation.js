@@ -38,11 +38,20 @@ export const createProductValidation = [
     .isFloat({ min: 0 })
     .withMessage("Selling price must be greater than or equal to 0"),
 
-  body("baseUnit")
-    .optional()
-    .trim()
-    .isLength({ max: 20 })
-    .withMessage("Base unit cannot exceed 20 characters"),
+ body("discountType")
+  .optional()
+  .isIn(["PERCENT", "FIXED"])
+  .withMessage("Discount type must be PERCENT or FIXED"),
+
+body("discountValue")
+  .optional()
+  .isFloat({ min: 0 })
+  .withMessage("Discount value must be greater than or equal to 0"),
+
+ body("baseUnit")
+  .optional()
+  .isIn(["PCS", "KG", "G", "LTR", "ML", "BOX", "PACK", "BAG", "DOZEN"])
+  .withMessage("Invalid base unit"),
 
   body("image")
     .optional()
@@ -109,12 +118,21 @@ export const updateProductValidation = [
     .isFloat({ min: 0 })
     .withMessage("Selling price must be greater than or equal to 0"),
 
-  body("baseUnit")
-    .optional()
-    .trim()
-    .isLength({ max: 20 })
-    .withMessage("Base unit cannot exceed 20 characters"),
+    body("discountType")
+  .optional()
+  .isIn(["PERCENT", "FIXED"])
+  .withMessage("Discount type must be PERCENT or FIXED"),
 
+body("discountValue")
+  .optional()
+  .isFloat({ min: 0 })
+  .withMessage("Discount value must be greater than or equal to 0"),
+
+  body("baseUnit")
+  .optional()
+  .isIn(["PCS", "KG", "G", "LTR", "ML", "BOX", "PACK", "BAG", "DOZEN"])
+  .withMessage("Invalid base unit"),
+  
   body("image")
     .optional()
     .custom((value) => {
