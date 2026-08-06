@@ -2,51 +2,31 @@
 
 export default function StockTable({ stock = [] }) {
   return (
-    <div className="bg-white rounded-xl shadow overflow-x-auto">
-
-      <table className="min-w-full">
-
-        <thead className="bg-gray-100">
-
+    <div className="warehouse-table-container">
+      <table className="warehouse-table">
+        <thead>
           <tr>
-
-            <th className="px-4 py-3 text-left">SKU</th>
-
-            <th className="px-4 py-3 text-left">Product</th>
-
-            <th className="px-4 py-3 text-left">Category</th>
-
-            <th className="px-4 py-3 text-left">Warehouse</th>
-
-            <th className="px-4 py-3 text-center">Quantity</th>
-
-            <th className="px-4 py-3 text-center">Reorder Level</th>
-
-            <th className="px-4 py-3 text-center">Status</th>
-
+            <th>SKU</th>
+            <th>PRODUCT</th>
+            <th>CATEGORY</th>
+            <th>WAREHOUSE</th>
+            <th style={{ textAlign: "center" }}>QUANTITY</th>
+            <th style={{ textAlign: "center" }}>REORDER LEVEL</th>
+            <th style={{ textAlign: "center" }}>STATUS</th>
+            <th style={{ width: "50px" }}></th>
           </tr>
-
         </thead>
 
         <tbody>
-
           {stock.length === 0 && (
-
             <tr>
-
-              <td
-                colSpan="7"
-                className="text-center py-8 text-gray-500"
-              >
-                No stock found.
+              <td colSpan="8" style={{ textAlign: "center", padding: "40px 0", color: "#71717a" }}>
+                No stock records found matching criteria.
               </td>
-
             </tr>
-
           )}
 
           {stock.map((item) => {
-
             const status =
               item.quantity === 0
                 ? "Out of Stock"
@@ -54,58 +34,50 @@ export default function StockTable({ stock = [] }) {
                 ? "Low Stock"
                 : "In Stock";
 
-            const color =
+            const statusClass =
               status === "In Stock"
-                ? "bg-green-100 text-green-700"
+                ? "instock"
                 : status === "Low Stock"
-                ? "bg-yellow-100 text-yellow-700"
-                : "bg-red-100 text-red-700";
+                ? "lowstock"
+                : "outofstock";
 
             return (
-              <tr
-                key={item.id}
-                className="border-b hover:bg-gray-50"
-              >
-                <td className="px-4 py-4 font-medium">
-                  {item.sku}
+              <tr key={item.id}>
+                <td className="sku-cell">{item.sku}</td>
+
+                <td className="product-name-cell">{item.product}</td>
+
+                <td>{item.category}</td>
+
+                <td>{item.warehouse}</td>
+
+                <td style={{ textAlign: "center" }}>
+                  <span className="quantity-badge">{item.quantity}</span>
                 </td>
 
-                <td className="px-4 py-4">
-                  {item.product}
-                </td>
-
-                <td className="px-4 py-4">
-                  {item.category}
-                </td>
-
-                <td className="px-4 py-4">
-                  {item.warehouse}
-                </td>
-
-                <td className="px-4 py-4 text-center font-semibold">
-                  {item.quantity}
-                </td>
-
-                <td className="px-4 py-4 text-center">
+                <td style={{ textAlign: "center", color: "#71717a", fontWeight: 600 }}>
                   {item.reorder}
                 </td>
 
-                <td className="px-4 py-4 text-center">
-
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${color}`}>
+                <td style={{ textAlign: "center" }}>
+                  <span className={`badge-status ${statusClass}`}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                     {status}
                   </span>
-
                 </td>
 
+                <td style={{ textAlign: "center" }}>
+                  <button className="action-dots-btn" title="Options">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                  </button>
+                </td>
               </tr>
             );
           })}
-
         </tbody>
-
       </table>
-
     </div>
   );
 }
