@@ -83,6 +83,11 @@ enum ProductStatus {
   INACTIVE
 }
 
+enum ProductDiscountType {
+  PERCENT
+  FIXED
+}
+
 enum PurchaseStatus {
   PENDING
   RECEIVED
@@ -158,6 +163,18 @@ model Brand {
 
 // PRODUCT
 
+enum Unit {
+  PCS
+  KG
+  G
+  LTR
+  ML
+  BOX
+  PACK
+  BAG
+  DOZEN
+}
+
 model Product {
   id String @id @default(uuid())
 
@@ -173,7 +190,11 @@ model Product {
 
   sellingPrice Decimal @db.Decimal(18, 2)
 
-  baseUnit String @default("PCS")
+  discountType DiscountType?
+
+  discountValue Decimal? @db.Decimal(18, 2)
+
+  baseUnit Unit @default(PCS)
 
   image String?
 
@@ -667,6 +688,7 @@ model Return {
 
   @@map("returns")
 }
+
 // ==============================
 // Discount Enums
 // ==============================
@@ -687,38 +709,36 @@ enum DiscountStatus {
 // ==============================
 
 model Discount {
+  id String @id @default(uuid()) @db.Uuid
 
-  id                    String   @id @default(uuid()) @db.Uuid
+  branchId String @map("branch_id") @db.Uuid
 
-  branchId              String   @map("branch_id") @db.Uuid
+  name String @db.VarChar(100)
 
-  name                  String   @db.VarChar(100)
+  code String @unique @db.VarChar(50)
 
-  code                  String   @unique @db.VarChar(50)
+  type DiscountType
 
-  type                  DiscountType
+  value Decimal @db.Decimal(18, 2)
 
-  value                 Decimal  @db.Decimal(18,2)
+  minimumOrderAmount Decimal @default(0) @map("minimum_order_amount") @db.Decimal(18, 2)
 
-  minimumOrderAmount    Decimal  @default(0) @db.Decimal(18,2) @map("minimum_order_amount")
+  maximumDiscount Decimal? @map("maximum_discount") @db.Decimal(18, 2)
 
-  maximumDiscount       Decimal? @db.Decimal(18,2) @map("maximum_discount")
+  startDate DateTime @map("start_date")
 
-  startDate             DateTime @map("start_date")
+  endDate DateTime @map("end_date")
 
-  endDate               DateTime @map("end_date")
+  status DiscountStatus @default(ACTIVE)
 
-  status                DiscountStatus @default(ACTIVE)
+  description String?
 
-  description           String?
+  createdAt DateTime @default(now()) @map("created_at")
 
-  createdAt             DateTime @default(now()) @map("created_at")
-
-  updatedAt             DateTime @updatedAt @map("updated_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("discounts")
 }
-
 
 //landing page database design
 
@@ -742,6 +762,7 @@ model LandingPage {
 
   @@map("landing_page")
 }
+
 // ==============================
 // Tax Enums
 // ==============================
@@ -761,20 +782,19 @@ enum TaxStatus {
 // ==============================
 
 model Tax {
+  id String @id @default(uuid()) @db.Uuid
 
-  id          String      @id @default(uuid()) @db.Uuid
+  name String @db.VarChar(100)
 
-  name        String      @db.VarChar(100)
+  rate Decimal @db.Decimal(5, 2)
 
-  rate        Decimal     @db.Decimal(5,2)
+  type TaxType
 
-  type        TaxType
+  status TaxStatus @default(ACTIVE)
 
-  status      TaxStatus   @default(ACTIVE)
+  createdAt DateTime @default(now()) @map("created_at")
 
-  createdAt   DateTime    @default(now()) @map("created_at")
-
-  updatedAt   DateTime    @updatedAt @map("updated_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("taxes")
 }
