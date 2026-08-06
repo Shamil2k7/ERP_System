@@ -1,25 +1,23 @@
+
+
+import styles from "./adminpanel.module.css";
+
 import Sidebar from "@/components/adminPanel/Sidebar/Sidebar";
 import Header from "@/components/adminPanel/Header/Header";
 import DashboardHome from "@/components/adminPanel/DashboardHome/DashboardHome";
 
-import "./adminpanel.module.css";
-
 export default function AdminPage() {
   return (
-    <div className="admin-layout">
-
+    <div className={styles.adminLayout}>
       <Sidebar />
 
-      <div className="admin-content">
-
+      <div className={styles.adminContent}>
         <Header />
 
-        <main className="dashboard-area">
+        <main className={styles.dashboardArea}>
           <DashboardHome />
         </main>
-
       </div>
-
     </div>
   );
 }
