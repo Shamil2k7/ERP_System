@@ -1,24 +1,24 @@
 "use client";
 
-import TransferForm from "../components/TransferForm";
+import PurchaseForm from "../components/PurchaseForm";
 
-export default function TransferPage() {
+export default function AddPurchasePage() {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
 
       <div className="mb-8">
 
         <h1 className="text-3xl font-bold">
-          Stock Transfer
+          Create Purchase
         </h1>
 
         <p className="text-gray-500 mt-2">
-          Transfer stock between warehouses.
+          Create a new purchase order.
         </p>
 
       </div>
 
-      <TransferForm />
+      <PurchaseForm />
 
     </div>
   );
