@@ -14,7 +14,7 @@ import {
   FiLogOut,
 } from "react-icons/fi";
 
-import styles from "@/styles/admin.module.css";
+import styles from "./Sidebar.module.css";
 
 export default function Sidebar() {
   return (
