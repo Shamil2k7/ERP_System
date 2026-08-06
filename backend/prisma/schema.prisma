@@ -667,3 +667,90 @@ model Return {
 
   @@map("returns")
 }
+// ==============================
+// Discount Enums
+// ==============================
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum DiscountStatus {
+  ACTIVE
+  INACTIVE
+  EXPIRED
+}
+
+// ==============================
+// Discount Model
+// ==============================
+
+model Discount {
+
+  id                    String   @id @default(uuid()) @db.Uuid
+
+  branchId              String   @map("branch_id") @db.Uuid
+
+  name                  String   @db.VarChar(100)
+
+  code                  String   @unique @db.VarChar(50)
+
+  type                  DiscountType
+
+  value                 Decimal  @db.Decimal(18,2)
+
+  minimumOrderAmount    Decimal  @default(0) @db.Decimal(18,2) @map("minimum_order_amount")
+
+  maximumDiscount       Decimal? @db.Decimal(18,2) @map("maximum_discount")
+
+  startDate             DateTime @map("start_date")
+
+  endDate               DateTime @map("end_date")
+
+  status                DiscountStatus @default(ACTIVE)
+
+  description           String?
+
+  createdAt             DateTime @default(now()) @map("created_at")
+
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("discounts")
+}
+// ==============================
+// Tax Enums
+// ==============================
+
+enum TaxType {
+  INCLUSIVE
+  EXCLUSIVE
+}
+
+enum TaxStatus {
+  ACTIVE
+  INACTIVE
+}
+
+// ==============================
+// Tax Model
+// ==============================
+
+model Tax {
+
+  id          String      @id @default(uuid()) @db.Uuid
+
+  name        String      @db.VarChar(100)
+
+  rate        Decimal     @db.Decimal(5,2)
+
+  type        TaxType
+
+  status      TaxStatus   @default(ACTIVE)
+
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  @@map("taxes")
+}
