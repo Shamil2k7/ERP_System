@@ -1,111 +1,96 @@
 import {
-  signupSchema,
-  sendOTPSchema,
-  verifyOTPSchema,
+  addEmployeeSchema,
   loginSchema,
+  changePasswordSchema,
   forgotPasswordSchema,
   verifyResetOTPSchema,
-  resetPasswordSchema
+  resetPasswordSchema,
 } from "./auth.schema.js";
-// Validate Send OTP
-const validateSendOTP = (req, res, next) => {
+const validateAddEmployee = (req, res, next) => {
 
-    const { error } = sendOTPSchema.validate(req.body);
+  const { error } = addEmployeeSchema.validate(req.body);
 
-    if (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.details[0].message
-        });
-    }
-    next();
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
+
+  next();
 };
-// Validate Verify OTP
-const validateVerifyOTP = (req, res, next) => {
-
-    const { error } = verifyOTPSchema.validate(req.body);
-
-    if (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.details[0].message
-        });
-    }
-    next();
-};
-// Validate Signup
-const validateSignup = (req, res, next) => {
-
-    const { error } = signupSchema.validate(req.body);
-
-    if (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.details[0].message
-        });
-    }
-    next();
-};
-// Validate Login
 const validateLogin = (req, res, next) => {
 
-    const { error } = loginSchema.validate(req.body);
+  const { error } = loginSchema.validate(req.body);
 
-    if (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.details[0].message
-        });
-    }
-    next();
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
+
+  next();
 };
-// Validate Forgot Password
+const validateChangePassword = (req, res, next) => {
+
+  const { error } = changePasswordSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
+
+  next();
+};
 const validateForgotPassword = (req, res, next) => {
 
-    const { error } = forgotPasswordSchema.validate(req.body);
+  const { error } = forgotPasswordSchema.validate(req.body);
 
-    if (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.details[0].message
-        });
-    }
-    next();
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
+
+  next();
 };
-// Validate Reset OTP
 const validateResetOTP = (req, res, next) => {
 
-    const { error } = verifyResetOTPSchema.validate(req.body);
+  const { error } = verifyResetOTPSchema.validate(req.body);
 
-    if (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.details[0].message
-        });
-    }
-    next();
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
+
+  next();
 };
-// Validate Reset Password
 const validateResetPassword = (req, res, next) => {
 
-    const { error } = resetPasswordSchema.validate(req.body);
+  const { error } = resetPasswordSchema.validate(req.body);
 
-    if (error) {
-        return res.status(400).json({
-            success: false,
-            message: error.details[0].message
-        });
-    }
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.details[0].message,
+    });
+  }
 
-    next();
+  next();
 };
 
+
 export {
-    validateSendOTP,
-    validateVerifyOTP,
-    validateSignup,
-    validateLogin,
-    validateForgotPassword,
-    validateResetOTP,
-    validateResetPassword
+  validateAddEmployee,
+  validateLogin,
+  validateChangePassword,
+  validateForgotPassword,
+  validateResetOTP,
+  validateResetPassword,
 };

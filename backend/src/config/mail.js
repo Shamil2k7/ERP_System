@@ -22,44 +22,95 @@ const getTransporter = () => {
   return transporter;
 };
 
-const sendOTPEmail = async (email, otp) => {
+// Email Verification Link
+const sendVerificationEmail = async (email, token) => {
   try {
-    console.log("==================================");
-    console.log("Sending OTP...");
-    console.log("Email :", email);
-    console.log("OTP   :", otp);
-    console.log("==================================");
-
     const tx = getTransporter();
+
+    // Change this when frontend is deployed
+    const verifyLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
     const info = await tx.sendMail({
       from: `"ERP System" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "ERP Email Verification OTP",
+      subject: "Verify Your ERP Account",
+
       html: `
-        <div style="font-family:Arial;padding:20px">
-          <h2>ERP System</h2>
+        <div style="font-family: Arial; padding:20px;">
+        
+          <h2>Welcome to ERP System</h2>
 
-          <p>Your OTP is:</p>
+          <p>Your employee account has been created by the administrator.</p>
 
-          <h1 style="color:green;letter-spacing:5px;">
-            ${otp}
-          </h1>
+          <p>Please click the button below to verify your email address.</p>
 
-          <p>This OTP is valid for 5 minutes.</p>
+          <a
+            href="${verifyLink}"
+            style="
+              background:#2563eb;
+              color:white;
+              padding:12px 20px;
+              text-decoration:none;
+              border-radius:5px;
+              display:inline-block;
+            "
+          >
+            Verify Email
+          </a>
 
-          <p>If you didn't request this OTP, ignore this email.</p>
+          <p style="margin-top:20px;">
+            This verification link will expire in 30 minutes.
+          </p>
+
+          <p>
+            If you didn't expect this email, you can safely ignore it.
+          </p>
+
         </div>
       `,
     });
 
-    console.log("✅ OTP Email Sent Successfully");
+    console.log("✅ Verification Email Sent");
     console.log(info.messageId);
   } catch (error) {
-    console.error("❌ Failed to send OTP");
+    console.error("❌ Failed to send verification email");
     console.error(error);
+
     throw error;
   }
 };
 
-export { sendOTPEmail };
+
+
+// Forgot Password OTP
+const sendOTPEmail = async (email, otp) => {
+  try {
+    const tx = getTransporter();
+
+    await tx.sendMail({
+      from: `"ERP System" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Reset Password OTP",
+
+      html: `
+        <h2>Password Reset</h2>
+
+        <p>Your OTP is</p>
+
+        <h1>${otp}</h1>
+
+        <p>This OTP is valid for 5 minutes.</p>
+      `,
+    });
+
+    console.log("✅ OTP Email Sent");
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export {
+  sendVerificationEmail,
+  sendOTPEmail,
+};
