@@ -34,8 +34,21 @@ const productSchema = {
         type: "number",
         example: 72000,
       },
+      discountType: {
+        type: "string",
+        enum: ["PERCENT", "FIXED"],
+        nullable: true,
+        example: "PERCENT",
+      },
+
+      discountValue: {
+        type: "number",
+        nullable: true,
+        example: 10,
+      },
       baseUnit: {
         type: "string",
+        enum: ["PCS", "KG", "G", "LTR", "ML", "BOX", "PACK", "BAG", "DOZEN"],
         example: "PCS",
       },
       image: {
@@ -98,8 +111,19 @@ const productSchema = {
         type: "number",
         example: 72000,
       },
+      discountType: {
+        type: "string",
+        enum: ["PERCENT", "FIXED"],
+        example: "PERCENT",
+      },
+
+      discountValue: {
+        type: "number",
+        example: 10,
+      },
       baseUnit: {
         type: "string",
+        enum: ["PCS", "KG", "G", "LTR", "ML", "BOX", "PACK", "BAG", "DOZEN"],
         example: "PCS",
       },
       image: {
@@ -145,8 +169,19 @@ const productSchema = {
         type: "number",
         example: 78000,
       },
+      discountType: {
+        type: "string",
+        enum: ["PERCENT", "FIXED"],
+        example: "PERCENT",
+      },
+
+      discountValue: {
+        type: "number",
+        example: 500,
+      },
       baseUnit: {
         type: "string",
+        enum: ["PCS", "KG", "G", "LTR", "ML", "BOX", "PACK", "BAG", "DOZEN"],
         example: "PCS",
       },
       image: {
