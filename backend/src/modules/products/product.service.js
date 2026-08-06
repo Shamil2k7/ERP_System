@@ -1,6 +1,6 @@
 import * as productRepository from "./product.repository.js";
 import * as categoryRepository from "../categories/category.repository.js";
-import * as brandRepository from "../brands/brand.repository.js";
+// import * as brandRepository from "../brands/brand.repository.js";
 
 export const createProduct = async (data) => {
   const category = await categoryRepository.getCategoryById(
