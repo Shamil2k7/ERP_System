@@ -1,14 +1,25 @@
-import DashboardCards from "@/components/admin/DashboardCards/DashboardCard";
-import RecentOrders from "@/components/admin/RecentOrders/RecentOrders";
+import Sidebar from "@/components/adminPanel/Sidebar/Sidebar";
+import Header from "@/components/adminPanel/Header/Header";
+import DashboardHome from "@/components/adminPanel/DashboardHome/DashboardHome";
 
+import "./adminpanel.module.css";
 
-export default function AdminDashboard() {
+export default function AdminPage() {
   return (
-    <>
-      <DashboardCards />
-      {/* <SalesChart /> */}
-      <RecentOrders />
-      {/* <TopProducts /> */}
-    </>
+    <div className="admin-layout">
+
+      <Sidebar />
+
+      <div className="admin-content">
+
+        <Header />
+
+        <main className="dashboard-area">
+          <DashboardHome />
+        </main>
+
+      </div>
+
+    </div>
   );
 }
