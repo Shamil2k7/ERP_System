@@ -1,15 +1,8 @@
 "use client";
 
-import KPISection from "./KPISection";
-import SalesChart from "./SalesChart";
-import RevenueExpenseChart from "./RevenueExpenseChart";
-import CategoryChart from "./CategoryChart";
-import InventoryChart from "./InventoryChart";
-import RecentOrders from "./RecentOrders";
-import LowStockTable from "./LowStockTable";
-import BestSellingProducts from "./BestSellingProducts";
-import TopSuppliers from "./TopSuppliers";
-
+import CategoryChart from "../CategoryChart/CategoryChart";
+import RecentOrders from "../RecentOrders/RecentOrders";
+import RevenueExpenseChart from "../RevenueExpenseChart/RevenueExpenseChart";
 import styles from "./DashboardHome.module.css";
 
 export default function DashboardHome() {
@@ -34,7 +27,7 @@ export default function DashboardHome() {
         <CategoryChart />
       </div>
 
-      <InventoryChart />
+      {/* <InventoryChart /> */}
 
       <div className={styles.twoColumn}>
         <RecentOrders />
@@ -49,3 +42,5 @@ export default function DashboardHome() {
     </main>
   );
 }
+
+
