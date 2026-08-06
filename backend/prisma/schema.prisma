@@ -196,7 +196,7 @@ model Product {
 
   sellingPrice Decimal @db.Decimal(18, 2)
 
-  discountType DiscountType?
+  discountType ProductDiscountType?
 
   discountValue Decimal? @db.Decimal(18, 2)
 
