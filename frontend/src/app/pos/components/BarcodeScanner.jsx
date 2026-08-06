@@ -1,79 +1,34 @@
 "use client";
+import pos from "../pos.css";
 
-
-import { useState } from "react";
-
-
-export default function BarcodeScanner({
-
-addToCart
-
-}){
-
-
-const [barcode,setBarcode]=useState("");
-
-
-
-const scanProduct=()=>{
-
-
-const product={
-
-id:Date.now(),
-
-name:`Barcode Product ${barcode}`,
-
-price:500,
-
-stock:5
-
-};
-
-
-addToCart(product);
-
-
-setBarcode("");
-
-}
-
-
-
-return(
-
-<div className="flex gap-3 mb-4">
-
-
-<input
-
-value={barcode}
-
-onChange={(e)=>setBarcode(e.target.value)}
-
-placeholder="Scan Barcode"
-
-className="border p-3 rounded flex-1"
-
-/>
-
-
-<button
-
-onClick={scanProduct}
-
-className="bg-gray-800 text-white px-5 rounded"
-
->
-
-Scan
-
-</button>
-
-
-</div>
-
-)
-
-
+export default function CategoryTabs({ categories, active, onSelect, dark }) {
+  return (
+    <div className="flex items-center gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+      {categories.map((cat) => {
+        const isActive = cat.label === active;
+        return (
+          <button
+            key={cat.label}
+            onClick={() => onSelect(cat.label)}
+            className={`shrink-0 rounded-2xl px-5 py-3 min-w-[110px] text-left transition-colors ${
+              isActive
+                ? "bg-neutral-900 text-white"
+                : dark
+                ? "bg-neutral-800 text-neutral-200"
+                : "bg-white text-neutral-800"
+            }`}
+          >
+            <div
+              className={`text-sm ${
+                isActive ? "text-neutral-300" : dark ? "text-neutral-400" : "text-neutral-400"
+              }`}
+            >
+              {cat.label}
+            </div>
+            <div className="text-lg font-bold leading-tight">{cat.count.toLocaleString()}</div>
+          </button>
+        );
+      })}
+    </div>
+  );
 }

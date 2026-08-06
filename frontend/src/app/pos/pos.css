@@ -1,0 +1,565 @@
+/* POS Custom Styling matching the Reference Design */
+
+/* Base Layout & Background */
+.pos-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #e4e1eb 0%, #e7e0dc 45%, #e6d8ce 100%);
+  padding: 24px;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #1f2024;
+  box-sizing: border-box;
+}
+
+/* Toolbar Header */
+.pos-toolbar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.pos-mode-tabs {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.pos-mode-btn {
+  font-size: 15px;
+  font-weight: 500;
+  color: #71717a;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.pos-mode-btn.active {
+  font-weight: 700;
+  color: #18181b;
+}
+
+.pos-mode-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #18181b;
+  border-radius: 2px;
+}
+
+.pos-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pos-btn-pill {
+  background: #ffffff;
+  color: #27272a;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 22px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.pos-btn-pill:hover {
+  background: #fdfdfd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.pos-icon-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #52525b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pos-icon-btn:hover {
+  background: #f9f9fb;
+  color: #18181b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Category Tabs Cards */
+.pos-categories-scroll {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 24px;
+  scrollbar-width: thin;
+}
+
+.pos-category-card {
+  min-width: 125px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.pos-category-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+}
+
+.pos-category-card.active {
+  background: #232328;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.pos-category-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #71717a;
+  margin-bottom: 6px;
+}
+
+.pos-category-card.active .pos-category-label {
+  color: #a1a1aa;
+}
+
+.pos-category-count {
+  font-size: 20px;
+  font-weight: 700;
+  color: #18181b;
+  letter-spacing: -0.02em;
+}
+
+.pos-category-card.active .pos-category-count {
+  color: #ffffff;
+}
+
+/* Main Grid Layout */
+.pos-main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .pos-main-grid {
+    grid-template-columns: 1fr 420px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .pos-main-grid {
+    grid-template-columns: 1fr 440px;
+  }
+}
+
+/* Products Section */
+.pos-products-header {
+  font-size: 18px;
+  font-weight: 700;
+  color: #27272a;
+  margin-bottom: 16px;
+}
+
+.pos-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+}
+
+.pos-product-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 12px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.pos-product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.pos-product-img-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.pos-product-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #27272a;
+  line-height: 1.35;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 35px;
+}
+
+.pos-product-meta {
+  font-size: 11px;
+  color: #8e8e93;
+  margin-bottom: 2px;
+}
+
+.pos-product-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 6px;
+}
+
+.pos-product-price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #18181b;
+}
+
+.pos-product-add-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8e8e93;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pos-product-add-btn:hover {
+  background: #232328;
+  color: #ffffff;
+}
+
+/* Order Panel (Right Side) */
+.pos-order-panel {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.pos-order-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pos-order-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #18181b;
+}
+
+.pos-order-trash {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.pos-order-trash:hover {
+  background: #fee2e2;
+}
+
+/* Cart Items Container */
+.pos-cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.pos-cart-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #f4f4f5;
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.pos-cart-item.selected {
+  background: #fdfdfd;
+  border-color: #e4e4e7;
+}
+
+.pos-cart-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pos-cart-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pos-cart-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #18181b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 16px;
+}
+
+.pos-cart-sub {
+  font-size: 11px;
+  color: #71717a;
+  margin-top: 2px;
+}
+
+.pos-cart-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: #18181b;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.pos-cart-remove-icon {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f4f4f5;
+  color: #71717a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
+  transition: all 0.2s ease;
+}
+
+.pos-cart-remove-icon:hover {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+/* Lavender Billing Box */
+.pos-billing-box {
+  background: #f3eeff;
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pos-billing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.pos-billing-row.total {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid #e4d8ff;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e1b4b;
+}
+
+.pos-billing-value {
+  font-weight: 600;
+  color: #334155;
+}
+
+.pos-billing-total-val {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* Keypad Selector Tabs */
+.pos-keypad-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.pos-tab-btn {
+  padding: 10px 4px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #f4f4f5;
+  font-size: 12px;
+  font-weight: 600;
+  color: #52525b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pos-tab-btn.active {
+  background: #27272a;
+  color: #ffffff;
+  border-color: #27272a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+/* Keypad Grid */
+.pos-keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 46px);
+  gap: 8px;
+}
+
+.pos-keypad-btn {
+  background: #f8f8fa;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #27272a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.pos-keypad-btn:hover {
+  background: #ececf0;
+}
+
+.pos-keypad-btn.clear {
+  color: #ef4444;
+}
+
+.pos-payment-btn {
+  grid-column: 4;
+  grid-row: 3 / span 2;
+  background: #8257ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(130, 87, 255, 0.35);
+  transition: all 0.2s ease;
+}
+
+.pos-payment-btn:hover {
+  background: #7342ff;
+  box-shadow: 0 6px 18px rgba(130, 87, 255, 0.45);
+  transform: translateY(-1px);
+}
+
+/* Bottom Action Buttons */
+.pos-bottom-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pos-bottom-btn {
+  padding: 10px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  color: #3f3f46;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.pos-bottom-btn:hover {
+  background: #fafafa;
+  border-color: #d4d4d8;
+  color: #18181b;
+}
+
+/* Scrollbar customization */
+.pos-cart-list::-webkit-scrollbar,
+.pos-categories-scroll::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.pos-cart-list::-webkit-scrollbar-thumb,
+.pos-categories-scroll::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 4px;
+}
