@@ -3,79 +3,50 @@
 import Link from "next/link";
 
 export default function WarehouseCard({ warehouse }) {
+  const isMaintenance = warehouse.status === "Maintenance";
+
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition duration-300 border">
+    <div className="warehouse-card">
+      <div>
+        <div className="warehouse-card-header">
+          <div>
+            <h2 className="warehouse-title">{warehouse.name}</h2>
+            <div className="warehouse-location">
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M12 21s-6-5.333-6-10a6 6 0 0 1 12 0c0 4.667-6 10-6 10z" />
+                <circle cx="12" cy="11" r="2" />
+              </svg>
+              {warehouse.location}
+            </div>
+          </div>
 
-      <div className="p-6">
-
-        <div className="flex justify-between items-center">
-
-          <h2 className="text-xl font-bold">
-            {warehouse.name}
-          </h2>
-
-          <span
-            className={`px-3 py-1 rounded-full text-sm font-semibold ${
-              warehouse.status === "Active"
-                ? "bg-green-100 text-green-700"
-                : "bg-yellow-100 text-yellow-700"
-            }`}
-          >
+          <span className={`badge-status ${isMaintenance ? "maintenance" : "active"}`}>
+            <span className={`w-2 h-2 rounded-full ${isMaintenance ? "bg-amber-500" : "bg-emerald-500"}`}></span>
             {warehouse.status}
           </span>
-
         </div>
 
-        <p className="text-gray-500 mt-2">
-          📍 {warehouse.location}
-        </p>
-
-        <div className="mt-6 grid grid-cols-2 gap-4">
-
-          <div className="bg-gray-100 rounded-lg p-4">
-
-            <p className="text-gray-500 text-sm">
-              Products
-            </p>
-
-            <h3 className="text-2xl font-bold">
-              {warehouse.products}
-            </h3>
-
+        <div className="warehouse-stats-grid">
+          <div className="stat-box">
+            <span className="stat-label">Total Products</span>
+            <div className="stat-number">{warehouse.products.toLocaleString()}</div>
           </div>
 
-          <div className="bg-gray-100 rounded-lg p-4">
-
-            <p className="text-gray-500 text-sm">
-              Total Stock
-            </p>
-
-            <h3 className="text-2xl font-bold">
-              {warehouse.stock}
-            </h3>
-
+          <div className="stat-box">
+            <span className="stat-label">Total Stock</span>
+            <div className="stat-number">{warehouse.stock.toLocaleString()}</div>
           </div>
-
         </div>
+      </div>
 
-        <div className="mt-6 flex gap-3">
+      <div className="warehouse-card-actions">
+        <Link href="/warehouse/stock" className="btn-card-action secondary">
+          View Stock
+        </Link>
 
-          <Link
-            href="/warehouse/stock"
-            className="flex-1 bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700"
-          >
-            Stock
-          </Link>
-
-          <Link
-            href="/warehouse/transfer"
-            className="flex-1 bg-green-600 text-white text-center py-2 rounded-lg hover:bg-green-700"
-          >
-            Transfer
-          </Link>
-
-        </div>
-
+        <Link href="/warehouse/transfer" className="btn-card-action primary">
+          Stock Transfer
+        </Link>
       </div>
     </div>
   );
