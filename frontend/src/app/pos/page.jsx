@@ -1,248 +1,282 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import "./pos.css";
 
-import ProductSearch from "./components/ProductSearch";
+import PosToolbar from "./components/PosToolbar";
+import CategoryTabs from "./components/CategoryTabs";
 import ProductGrid from "./components/ProductGrid";
-import Cart from "./components/Cart";
-import PaymentModal from "./components/PaymentModal";
-import BarcodeScanner from "./components/BarcodeScanner";
+import OrderPanel from "./components/OrderPanel";
+import { GlyphTee, GlyphJeans, GlyphShirt, GlyphJacket, GlyphBag } from "./components/icons";
 
+const PRODUCTS = [
+  {
+    id: 1,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "T-shirt",
+    bg: "#f4a15b",
+    icon: GlyphTee,
+    imageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 2,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "T-shirt",
+    bg: "#e4a93b",
+    icon: GlyphTee,
+    imageUrl: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 3,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "T-shirt",
+    bg: "#d9cff0",
+    icon: GlyphTee,
+    iconDark: true,
+    imageUrl: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 4,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "T-shirt",
+    bg: "#c9484f",
+    icon: GlyphTee,
+    imageUrl: "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 5,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "T-shirt",
+    bg: "#bfc3c7",
+    icon: GlyphTee,
+    iconDark: true,
+    imageUrl: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 6,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "Shirt",
+    bg: "#7fa0c4",
+    icon: GlyphShirt,
+    imageUrl: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 7,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "Shirt",
+    bg: "#3e5b4b",
+    icon: GlyphShirt,
+    imageUrl: "https://images.unsplash.com/photo-1603252109303-2751441dd157?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 8,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "Shirt",
+    bg: "#2b2b2e",
+    icon: GlyphJacket,
+    imageUrl: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 9,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "Koti",
+    bg: "#d8a468",
+    icon: GlyphBag,
+    imageUrl: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 10,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "Jeans pant",
+    bg: "#a9c0d6",
+    icon: GlyphJeans,
+    imageUrl: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 11,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "Jeans pant",
+    bg: "#6e92b8",
+    icon: GlyphJeans,
+    imageUrl: "https://images.unsplash.com/photo-1542272604-780c36856842?w=400&auto=format&fit=crop&q=80"
+  },
+  {
+    id: 12,
+    name: "Product full name goes here",
+    code: "1254654",
+    available: 200,
+    price: 120,
+    category: "Jeans pant",
+    bg: "#4e6e8f",
+    icon: GlyphJeans,
+    imageUrl: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?w=400&auto=format&fit=crop&q=80"
+  },
+];
+
+const CATEGORIES = [
+  { label: "All", count: 23145 },
+  { label: "T-shirt", count: 224 },
+  { label: "Jeans pant", count: 125 },
+  { label: "Shirt", count: 509 },
+  { label: "Trouser", count: 100 },
+  { label: "Koti", count: 225 },
+  { label: "Money bag", count: 425 },
+];
 
 export default function POSPage() {
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [query, setQuery] = useState("");
 
-  const [cart, setCart] = useState([]);
-  const [showPayment, setShowPayment] = useState(false);
+  const [cart, setCart] = useState(() =>
+    PRODUCTS.slice(0, 3).map((p) => ({ ...p, cartId: p.id, qty: 2, size: "M" }))
+  );
+  const [selectedId, setSelectedId] = useState(PRODUCTS[0]?.id ?? null);
 
+  const [discountRate, setDiscountRate] = useState(5);
+  const [taxRate, setTaxRate] = useState(2);
+  const [couponCode, setCouponCode] = useState("");
 
-  const products = [
-    {
-      id: 1,
-      name: "Nivia Football",
-      price: 1200,
-      stock: 20,
-      category: "Sports"
-    },
-    {
-      id: 2,
-      name: "Nike Shoes",
-      price: 3500,
-      stock: 15,
-      category: "Footwear"
-    },
-    {
-      id: 3,
-      name: "Adidas Jersey",
-      price: 1800,
-      stock: 10,
-      category: "Sports"
-    }
-  ];
-
+  const filteredProducts = useMemo(() => {
+    return PRODUCTS.filter((p) => {
+      const matchesCategory = activeCategory === "All" || p.category === activeCategory;
+      const matchesQuery = p.name.toLowerCase().includes(query.toLowerCase());
+      return matchesCategory && matchesQuery;
+    });
+  }, [activeCategory, query]);
 
   const addToCart = (product) => {
-
-    const exist = cart.find(
-      item => item.id === product.id
-    );
-
-
-    if(exist){
-
-      setCart(
-        cart.map(item =>
-          item.id === product.id
-          ?
-          {
-            ...item,
-            quantity:item.quantity + 1
-          }
-          :
-          item
-        )
-      );
-
-    }
-    else{
-
-      setCart([
-        ...cart,
-        {
-          ...product,
-          quantity:1
-        }
-      ]);
-
-    }
-
+    setCart((prev) => {
+      const exists = prev.find((item) => item.cartId === product.id);
+      if (exists) {
+        return prev.map((item) =>
+          item.cartId === product.id ? { ...item, qty: item.qty + 1 } : item
+        );
+      }
+      return [...prev, { ...product, cartId: product.id, qty: 1, size: "M" }];
+    });
+    setSelectedId(product.id);
   };
 
-
-  const removeItem = (id)=>{
-
-    setCart(
-      cart.filter(
-        item=>item.id !== id
-      )
-    );
-
+  const addScannedProduct = (code) => {
+    const match = PRODUCTS.find((p) => p.code === code);
+    if (match) {
+      addToCart(match);
+      return;
+    }
+    const scanned = {
+      id: `scan-${Date.now()}`,
+      name: `Scanned Item ${code}`,
+      code,
+      available: 100,
+      price: 99,
+      bg: "#9ca3af",
+      icon: GlyphBag,
+    };
+    setCart((prev) => [...prev, { ...scanned, cartId: scanned.id, qty: 1, size: "M" }]);
+    setSelectedId(scanned.id);
   };
 
+  const removeItem = (cartId) => {
+    setCart((prev) => prev.filter((item) => item.cartId !== cartId));
+  };
 
-  const updateQuantity=(id,type)=>{
-
-
-    setCart(
-
-      cart.map(item=>{
-
-        if(item.id===id){
-
-          return{
-
-            ...item,
-
-            quantity:
-            type==="increase"
-            ?
-            item.quantity+1
-            :
-            item.quantity-1
-
-          }
-
-        }
-
-        return item;
-
-      })
-      .filter(item=>item.quantity>0)
-
+  const updateQuantity = (cartId, next) => {
+    setCart((prev) =>
+      prev
+        .map((item) => (item.cartId === cartId ? { ...item, qty: Math.max(0, next) } : item))
+        .filter((item) => item.qty > 0)
     );
+  };
 
-  }
+  const clearCart = () => {
+    setCart([]);
+    setSelectedId(null);
+  };
 
-
-
-  const total = cart.reduce(
-
-    (sum,item)=>
-
-    sum + item.price * item.quantity,
-
-    0
-
-  );
-
-
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const discountAmount = subtotal * (discountRate / 100);
+  const taxAmount = subtotal * (taxRate / 100);
+  const total = Math.max(0, subtotal - discountAmount + taxAmount);
 
   return (
-
-    <div className="p-6">
-
-      <h1 className="text-3xl font-bold mb-6">
-        POS Billing System
-      </h1>
-
-
-      <div className="grid grid-cols-12 gap-5">
-
-
-        {/* Left Side */}
-
-        <div className="col-span-8">
-
-
-          <BarcodeScanner
-            addToCart={addToCart}
-          />
-
-
-          <ProductSearch/>
-
-
-          <ProductGrid
-
-            products={products}
-
-            addToCart={addToCart}
-
-          />
-
-
-        </div>
-
-
-
-
-        {/* Right Side */}
-
-        <div className="col-span-4">
-
-
-          <Cart
-
-            cart={cart}
-
-            removeItem={removeItem}
-
-            updateQuantity={updateQuantity}
-
-          />
-
-
-          <div className="mt-5 p-4 border rounded">
-
-
-            <h2 className="text-xl font-bold">
-
-              Total : ₹{total}
-
-            </h2>
-
-
-
-            <button
-
-              onClick={()=>setShowPayment(true)}
-
-              className="bg-black text-white w-full mt-4 p-3 rounded"
-
-            >
-
-              Checkout
-
-            </button>
-
-
-          </div>
-
-
-
-        </div>
-
-
-      </div>
-
-
-
-
-      {
-        showPayment &&
-
-        <PaymentModal
-
-          total={total}
-
-          close={()=>setShowPayment(false)}
-
+    <div className="pos-wrapper">
+      <div style={{ maxWidth: "1500px", margin: "0 auto" }}>
+        {/* Top Header Toolbar */}
+        <PosToolbar
+          query={query}
+          onQueryChange={setQuery}
+          onScan={addScannedProduct}
         />
 
-      }
+        {/* Category Cards Row */}
+        <CategoryTabs
+          categories={CATEGORIES}
+          active={activeCategory}
+          onSelect={setActiveCategory}
+        />
 
+        {/* Main Content: Choose Products Grid & Order Panel */}
+        <div className="pos-main-grid">
+          <div>
+            <h2 className="pos-products-header">Choose Products</h2>
+            <ProductGrid products={filteredProducts} addToCart={addToCart} />
+          </div>
 
+          <OrderPanel
+            cart={cart}
+            removeItem={removeItem}
+            clearCart={clearCart}
+            updateQuantity={updateQuantity}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            orderNo="125125"
+            subtotal={subtotal > 0 ? subtotal : 85.25}
+            discountRate={discountRate}
+            setDiscountRate={setDiscountRate}
+            taxRate={taxRate}
+            setTaxRate={setTaxRate}
+            couponCode={couponCode}
+            setCouponCode={setCouponCode}
+            discountAmount={subtotal > 0 ? discountAmount : 20}
+            taxAmount={subtotal > 0 ? taxAmount : 10.25}
+            total={subtotal > 0 ? total : 77.00}
+            onPayment={clearCart}
+          />
+        </div>
+      </div>
     </div>
-
   );
-
 }
