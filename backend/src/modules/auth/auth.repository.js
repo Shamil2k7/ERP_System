@@ -1,5 +1,6 @@
 import prisma from "../../config/prisma.js";
 
+// Find user by email
 const findUserByEmail = async (email) => {
   return await prisma.user.findUnique({
     where: {
@@ -7,6 +8,8 @@ const findUserByEmail = async (email) => {
     },
   });
 };
+
+// Find user by employee ID
 const findUserByEmployeeId = async (employeeId) => {
   return await prisma.user.findUnique({
     where: {
@@ -15,6 +18,7 @@ const findUserByEmployeeId = async (employeeId) => {
   });
 };
 
+// Login using email or employee ID
 const findUserByLogin = async (login) => {
   return await prisma.user.findFirst({
     where: {
@@ -29,6 +33,7 @@ const findUserByLogin = async (login) => {
   });
 };
 
+// Find role
 const findRoleByName = async (name) => {
   return await prisma.role.findUnique({
     where: {
@@ -36,7 +41,9 @@ const findRoleByName = async (name) => {
     },
   });
 };
-const createUser = async (userData) => {
+
+// Create Employee
+const createEmployee = async (userData) => {
   return await prisma.user.create({
     data: {
       fullName: userData.fullName || "Employee",
@@ -53,7 +60,11 @@ const createUser = async (userData) => {
         },
       }),
 
-      isVerified: true,
+      isVerified: false,
+      firstLogin: true,
+
+      verificationToken: userData.verificationToken,
+      verificationExpires: userData.verificationExpires,
     },
 
     include: {
@@ -61,12 +72,38 @@ const createUser = async (userData) => {
     },
   });
 };
+
+// Find user using verification token
+const findUserByVerificationToken = async (token) => {
+  return await prisma.user.findFirst({
+    where: {
+      verificationToken: token,
+    },
+  });
+};
+
+// Verify employee
+const verifyEmployee = async (id) => {
+  return await prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      isVerified: true,
+      verificationToken: null,
+      verificationExpires: null,
+    },
+  });
+};
+
+// Save OTP (Forgot Password)
 const saveOTP = async (otpData) => {
   return await prisma.emailOTP.create({
     data: otpData,
   });
 };
 
+// Find OTP
 const findOTPByEmail = async (email) => {
   return await prisma.emailOTP.findFirst({
     where: {
@@ -78,6 +115,8 @@ const findOTPByEmail = async (email) => {
     },
   });
 };
+
+// Mark OTP as used
 const markOTPAsUsed = async (id) => {
   return await prisma.emailOTP.update({
     where: {
@@ -88,17 +127,10 @@ const markOTPAsUsed = async (id) => {
     },
   });
 };
-const findVerifiedOTP = async (email) => {
-  return await prisma.emailOTP.findFirst({
-    where: {
-      email,
-      isUsed: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-};
+
+
+
+// Change Password
 const updatePassword = async (email, passwordHash) => {
   return await prisma.user.update({
     where: {
@@ -106,6 +138,7 @@ const updatePassword = async (email, passwordHash) => {
     },
     data: {
       passwordHash,
+      firstLogin: false,
     },
   });
 };
@@ -115,10 +148,11 @@ export {
   findUserByEmployeeId,
   findUserByLogin,
   findRoleByName,
-  createUser,
+  createEmployee,
+  findUserByVerificationToken,
+  verifyEmployee,
   saveOTP,
   findOTPByEmail,
   markOTPAsUsed,
-  findVerifiedOTP,
   updatePassword,
 };
