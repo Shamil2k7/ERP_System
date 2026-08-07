@@ -18,6 +18,7 @@ import invoiceRoutes from "./modules/invoices/invoices.routes.js";
 import returnRoutes from "./modules/returns/returns.routes.js";
 import discountRoutes from "./modules/discounts/discounts.routes.js";
 import taxRoutes from "./modules/taxes/taxes.routes.js";
+import employeeRoutes from "./modules/employees/employees.routes.js";
 
 //M3
 import categoryRoutes from "./modules/categories/category.routes.js";
@@ -82,6 +83,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/discounts", discountRoutes);
 app.use("/api/taxes", taxRoutes);
+app.use("/api/employees", employeeRoutes);
 //M3
  app.use("/api/categories", categoryRoutes);
  app.use("/api/products", productRoutes); 

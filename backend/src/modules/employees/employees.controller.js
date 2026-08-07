@@ -1,39 +1,52 @@
 import {
-  addEmployeeService,
-  verifyEmailService,
-} from "./employee.service.js";
+  fetchAllEmployees,
+  fetchEmployeeById,
+  modifyEmployee,
+  removeEmployee
+} from "./employees.service.js";
 
-// Add Employee
-const addEmployee = async (req, res) => {
+const getEmployees = async (req, res) => {
   try {
-    const result = await addEmployeeService(req.body);
-
-    return res.status(201).json(result);
+    const result = await fetchAllEmployees();
+    return res.status(200).json(result);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// Verify Email
-const verifyEmail = async (req, res) => {
+const getEmployee = async (req, res) => {
   try {
-    const { token } = req.query;
-
-    const result = await verifyEmailService(token);
-
+    const { id } = req.params;
+    const result = await fetchEmployeeById(id);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    return res.status(404).json({ success: false, message: error.message });
+  }
+};
+
+const updateEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await modifyEmployee(id, req.body);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const deleteEmployee = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await removeEmployee(id);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
 export {
-  addEmployee,
-  verifyEmail,
+  getEmployees,
+  getEmployee,
+  updateEmployee,
+  deleteEmployee
 };

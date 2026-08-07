@@ -1,99 +1,59 @@
-import bcrypt from "bcrypt";
-import crypto from "crypto";
-
-import { sendVerificationEmail } from "../../config/mail.js";
-
 import {
-  findUserByEmail,
-  findUserByEmployeeId,
-  findRoleByName,
-  createEmployee,
-  findUserByVerificationToken,
-  verifyEmployee,
-} from "./employee.repository.js";
+  getAllEmployees,
+  getEmployeeById,
+  updateEmployee,
+  deleteEmployee
+} from "./employees.repository.js";
 
-// Add Employee
-const addEmployeeService = async (userData) => {
-  const emailExists = await findUserByEmail(userData.email);
-
-  if (emailExists) {
-    throw new Error("Email already exists");
-  }
-
-  const employeeExists = await findUserByEmployeeId(
-    userData.employeeId
-  );
-
-  if (employeeExists) {
-    throw new Error("Employee ID already exists");
-  }
-
-  const role = await findRoleByName(userData.role);
-
-  if (!role) {
-    throw new Error("Role not found");
-  }
-
-  const passwordHash = await bcrypt.hash(
-    userData.password,
-    10
-  );
-
-  const verificationToken = crypto.randomUUID();
-
-  const verificationExpires = new Date(
-    Date.now() + 30 * 60 * 1000
-  );
-
-  const employee = await createEmployee({
-    fullName: userData.fullName,
-    email: userData.email,
-    employeeId: userData.employeeId,
-    phone: userData.phone,
-    passwordHash,
-    roleId: role.id,
-    verificationToken,
-    verificationExpires,
-  });
-
-  await sendVerificationEmail(
-    employee.email,
-    verificationToken
-  );
-
+const fetchAllEmployees = async () => {
+  const employees = await getAllEmployees();
   return {
     success: true,
-    message:
-      "Employee created successfully. Verification email sent.",
-    employee,
+    data: employees
   };
 };
 
-// Verify Email
-const verifyEmailService = async (token) => {
-  const employee = await findUserByVerificationToken(token);
-
+const fetchEmployeeById = async (id) => {
+  const employee = await getEmployeeById(id);
   if (!employee) {
-    throw new Error("Invalid verification link");
+    throw new Error("Employee not found");
   }
-
-  if (employee.verificationExpires < new Date()) {
-    throw new Error("Verification link expired");
-  }
-
-  if (employee.isVerified) {
-    throw new Error("Email already verified");
-  }
-
-  await verifyEmployee(employee.id);
-
   return {
     success: true,
-    message: "Email verified successfully",
+    data: employee
+  };
+};
+
+const modifyEmployee = async (id, updateData) => {
+  const existingEmployee = await getEmployeeById(id);
+  if (!existingEmployee) {
+    throw new Error("Employee not found");
+  }
+  
+  const updatedEmployee = await updateEmployee(id, updateData);
+  return {
+    success: true,
+    message: "Employee updated successfully",
+    data: updatedEmployee
+  };
+};
+
+const removeEmployee = async (id) => {
+  const existingEmployee = await getEmployeeById(id);
+  if (!existingEmployee) {
+    throw new Error("Employee not found");
+  }
+  
+  await deleteEmployee(id);
+  return {
+    success: true,
+    message: "Employee deleted successfully"
   };
 };
 
 export {
-  addEmployeeService,
-  verifyEmailService,
+  fetchAllEmployees,
+  fetchEmployeeById,
+  modifyEmployee,
+  removeEmployee
 };
