@@ -1,61 +1,88 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 
 import SalesTable from "./components/SalesTable";
 import SalesFilter from "./components/SalesFilter";
-import SalesSummary from "./components/SalesSummary";
+import useSales from "@/hooks/useSales";
 
 export default function SalesPage() {
-  const [search, setSearch] = useState("");
+  const { sales, loading } = useSales();
 
-  const sales = [
-    {
-      id: "INV1001",
-      customer: "Rahul",
-      amount: 3200,
-      payment: "Cash",
-      status: "Completed",
-      date: "2026-08-01",
-    },
-    {
-      id: "INV1002",
-      customer: "Anil",
-      amount: 5700,
-      payment: "UPI",
-      status: "Completed",
-      date: "2026-08-01",
-    },
-    {
-      id: "INV1003",
-      customer: "Niyas",
-      amount: 1400,
-      payment: "Card",
-      status: "Pending",
-      date: "2026-07-31",
-    },
-  ];
+  const [search, setSearch] = useState("");
+  const [customer, setCustomer] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState("");
 
   const filteredSales = useMemo(() => {
-    return sales.filter(
-      (sale) =>
-        sale.customer.toLowerCase().includes(search.toLowerCase()) ||
-        sale.id.toLowerCase().includes(search.toLowerCase())
+    return sales.filter((sale) => {
+      const matchesSearch =
+        (sale.invoiceNo || "")
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        (sale.customer || "")
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        (sale.cashier || "")
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+      const matchesCustomer =
+        customer === "" || sale.customer === customer;
+
+      const matchesPayment =
+        paymentStatus === "" ||
+        sale.paymentStatus === paymentStatus;
+
+      return (
+        matchesSearch &&
+        matchesCustomer &&
+        matchesPayment
+      );
+    });
+  }, [sales, search, customer, paymentStatus]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2 className="text-xl font-semibold">
+          Loading Sales...
+        </h2>
+      </div>
     );
-  }, [search]);
+  }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-gray-100 p-6">
 
-      <h1 className="text-3xl font-bold">
-        Sales Management
-      </h1>
+      <div className="flex flex-col lg:flex-row justify-between gap-4 mb-6">
 
-      <SalesSummary sales={filteredSales} />
+        <div>
+          <h1 className="text-3xl font-bold">
+            Sales Management
+          </h1>
+
+          <p className="text-gray-500 mt-2">
+            Manage invoices and customer sales.
+          </p>
+        </div>
+
+        <Link
+          href="/sales/add"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg self-start"
+        >
+          + New Sale
+        </Link>
+
+      </div>
 
       <SalesFilter
         search={search}
         setSearch={setSearch}
+        customer={customer}
+        setCustomer={setCustomer}
+        paymentStatus={paymentStatus}
+        setPaymentStatus={setPaymentStatus}
       />
 
       <SalesTable sales={filteredSales} />
