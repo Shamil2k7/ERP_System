@@ -1,53 +1,36 @@
 import prisma from "../../config/prisma.js";
 
-// Find Employee By Email
-const findUserByEmail = async (email) => {
+const getAllEmployees = async () => {
+  return await prisma.user.findMany({
+    include: { role: true },
+    orderBy: { createdAt: 'desc' }
+  });
+};
+
+const getEmployeeById = async (id) => {
   return await prisma.user.findUnique({
-    where: { email },
+    where: { id },
+    include: { role: true }
   });
 };
 
-// Find Employee By Employee ID
-const findUserByEmployeeId = async (employeeId) => {
-  return await prisma.user.findUnique({
-    where: { employeeId },
+const updateEmployee = async (id, data) => {
+  return await prisma.user.update({
+    where: { id },
+    data,
+    include: { role: true }
   });
 };
 
-// Find Role
-const findRoleByName = async (name) => {
-  return await prisma.role.findUnique({
-    where: { name },
-  });
-};
-
-// Create Employee
-const createEmployee = async (userData) => {
-  return await prisma.user.create({
-    data: {
-      fullName: userData.fullName,
-      email: userData.email,
-      employeeId: userData.employeeId,
-      phone: userData.phone,
-      passwordHash: userData.passwordHash,
-      isVerified: false,
-
-      role: {
-        connect: {
-          id: userData.roleId,
-        },
-      },
-    },
-
-    include: {
-      role: true,
-    },
+const deleteEmployee = async (id) => {
+  return await prisma.user.delete({
+    where: { id }
   });
 };
 
 export {
-  findUserByEmail,
-  findUserByEmployeeId,
-  findRoleByName,
-  createEmployee,
+  getAllEmployees,
+  getEmployeeById,
+  updateEmployee,
+  deleteEmployee
 };
