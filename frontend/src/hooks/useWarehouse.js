@@ -1,51 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  getWarehouses,
-  getWarehouseStock,
-  getTransfers,
-} from "@/services/warehouseService";
+import { useCallback, useEffect, useState } from "react";
+import { getWarehouses } from "@/services/warehouseService";
 
 export default function useWarehouse() {
   const [warehouses, setWarehouses] = useState([]);
-  const [stock, setStock] = useState([]);
-  const [transfers, setTransfers] = useState([]);
-
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const loadData = async () => {
+  const loadWarehouses = useCallback(async () => {
     try {
       setLoading(true);
+      setError("");
 
-      const [warehouseData, stockData, transferData] =
-        await Promise.all([
-          getWarehouses(),
-          getWarehouseStock(),
-          getTransfers(),
-        ]);
+      const response = await getWarehouses();
 
-      setWarehouses(warehouseData.data || warehouseData);
+      /*
+       * Supports:
+       *
+       * { data: [...] }
+       *
+       * and
+       *
+       * [...]
+       */
 
-      setStock(stockData.data || stockData);
+      const data = Array.isArray(response)
+        ? response
+        : response?.data || [];
 
-      setTransfers(transferData.data || transferData);
-    } catch (err) {
-      console.error(err);
+      setWarehouses(data);
+    } catch (error) {
+      console.error("Warehouse Error:", error);
+      setError(error.message || "Failed to load warehouses");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    loadWarehouses();
+  }, [loadWarehouses]);
 
   return {
     warehouses,
-    stock,
-    transfers,
     loading,
-    refresh: loadData,
+    error,
+    refresh: loadWarehouses,
   };
 }

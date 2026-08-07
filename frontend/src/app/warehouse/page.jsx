@@ -1,171 +1,256 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import WarehouseCard from "./components/WarehouseCard";
+import {
+  getWarehouses,
+  searchWarehouses,
+  deleteWarehouse,
+} from "@/services/warehouseService";
+
 import "./warehouse.css";
 
-const warehousesData = [
-  {
-    id: 1,
-    name: "Main Warehouse",
-    location: "Head Office, Central District",
-    products: 1450,
-    stock: 8540,
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Branch Warehouse",
-    location: "Kozhikode Regional Hub",
-    products: 980,
-    stock: 5240,
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Backup Warehouse",
-    location: "Palakkad Facility Center",
-    products: 610,
-    stock: 3180,
-    status: "Maintenance",
-  },
-];
-
 export default function WarehousePage() {
-  const [activeTab, setActiveTab] = useState("Warehouse Overview");
+  const [warehouses, setWarehouses] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  const [error, setError] = useState("");
+
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredWarehouses = useMemo(() => {
-    return warehousesData.filter((warehouse) => {
-      const matchesSearch =
-        warehouse.name.toLowerCase().includes(search.toLowerCase()) ||
-        warehouse.location.toLowerCase().includes(search.toLowerCase());
+  // Load warehouses
+  const loadWarehouses = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-      const matchesStatus =
-        statusFilter === "All" ||
-        warehouse.status.toLowerCase() === statusFilter.toLowerCase();
+      const response = await getWarehouses();
 
-      return matchesSearch && matchesStatus;
-    });
-  }, [search, statusFilter]);
+      /*
+        Supports:
 
-  const totalProductsCount = warehousesData.reduce((acc, curr) => acc + curr.products, 0);
-  const totalStockCount = warehousesData.reduce((acc, curr) => acc + curr.stock, 0);
+        {
+          data: [...]
+        }
+
+        OR
+
+        [...]
+      */
+
+      const data = response?.data || response || [];
+
+      setWarehouses(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Warehouse error:", error);
+
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to load warehouses"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWarehouses();
+  }, []);
+
+  // Dynamic search
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!search.trim()) {
+        loadWarehouses();
+        return;
+      }
+
+      try {
+        setSearchLoading(true);
+
+        const response = await searchWarehouses(search);
+
+        const data = response?.data || response || [];
+
+        setWarehouses(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Search error:", error);
+
+        setError(
+          error.response?.data?.message ||
+            "Failed to search warehouses"
+        );
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Delete
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this warehouse?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await deleteWarehouse(id);
+
+      alert("Warehouse deleted successfully");
+
+      await loadWarehouses();
+    } catch (error) {
+      console.error("Delete error:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to delete warehouse"
+      );
+    }
+  };
 
   return (
-    <div className="warehouse-page-wrapper">
-      {/* Top Module Sub-Navigation */}
-      <nav className="warehouse-nav-tabs">
-        <Link href="/warehouse" className="nav-tab-item active">
-          Warehouse Overview
-        </Link>
-        <Link href="/warehouse/stock" className="nav-tab-item">
-          Stock Inventory
-        </Link>
-        <Link href="/warehouse/transfer" className="nav-tab-item">
-          Stock Transfer
-        </Link>
-        <button
-          className={`nav-tab-item ${activeTab === "Reports" ? "active" : ""}`}
-          onClick={() => setActiveTab("Reports")}
+    <div className="warehouse-page">
+
+      {/* Header */}
+
+      <div className="warehouse-header">
+
+        <div>
+          <h1>Warehouse Management</h1>
+
+          <p>
+            Manage warehouses and storage locations
+          </p>
+        </div>
+
+        <Link
+          href="/warehouse/add"
+          className="add-warehouse-btn"
         >
-          Reports & Analytics
-        </button>
-      </nav>
+          + Add Warehouse
+        </Link>
 
-      {/* Main Content Area */}
-      <main className="warehouse-main-content">
-        {/* Action Toolbar */}
-        <div className="warehouse-toolbar">
-          <button className="btn-add-action" onClick={() => alert("Add New Warehouse Form Modal")}>
-            Add New Warehouse <span>+</span>
-          </button>
+      </div>
 
-          <div className="toolbar-controls">
-            <input
-              type="text"
-              placeholder="Search warehouses..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="search-input-pill"
-            />
-            <button className="btn-search-icon" title="Search">
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-            </button>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="status-dropdown-pill"
+      {/* Search */}
+
+      <div className="warehouse-search">
+
+        <input
+          type="text"
+          placeholder="Search warehouse..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        {searchLoading && (
+          <span>
+            Searching...
+          </span>
+        )}
+
+      </div>
+
+      {/* Error */}
+
+      {error && (
+        <div className="warehouse-error">
+          {error}
+        </div>
+      )}
+
+      {/* Loading */}
+
+      {loading ? (
+        <div className="warehouse-loading">
+          Loading warehouses...
+        </div>
+      ) : warehouses.length === 0 ? (
+        <div className="warehouse-empty">
+          <h2>No warehouses found</h2>
+
+          <p>
+            Add a warehouse or change your search.
+          </p>
+        </div>
+      ) : (
+        <div className="warehouse-grid">
+
+          {warehouses.map((warehouse) => (
+            <div
+              key={warehouse.id}
+              className="warehouse-card-wrapper"
             >
-              <option value="All">Status</option>
-              <option value="Active">Active</option>
-              <option value="Maintenance">Maintenance</option>
-            </select>
-          </div>
-        </div>
 
-        {/* Stats Quick Summary */}
-        <div className="warehouse-stats-summary">
-          <div className="stat-pill-card">
-            <span className="stat-pill-label">Total Warehouses</span>
-            <span className="stat-pill-value">{warehousesData.length}</span>
-          </div>
-          <div className="stat-pill-card">
-            <span className="stat-pill-label">Active Locations</span>
-            <span className="stat-pill-value" style={{ color: "#16a34a" }}>
-              {warehousesData.filter(w => w.status === "Active").length}
-            </span>
-          </div>
-          <div className="stat-pill-card">
-            <span className="stat-pill-label">Unique Products</span>
-            <span className="stat-pill-value">{totalProductsCount.toLocaleString()}</span>
-          </div>
-          <div className="stat-pill-card">
-            <span className="stat-pill-label">Total In-Stock Units</span>
-            <span className="stat-pill-value">{totalStockCount.toLocaleString()}</span>
-          </div>
-        </div>
-
-        {/* Warehouse Cards Grid */}
-        <div className="warehouse-cards-grid">
-          {filteredWarehouses.map((warehouse) => (
-            <WarehouseCard key={warehouse.id} warehouse={warehouse} />
-          ))}
-        </div>
-
-        {/* Bottom Floating Pagination */}
-        <div className="warehouse-pagination-wrapper">
-          <div className="warehouse-pagination-pill">
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            >
-              &lt;
-            </button>
-            {[1, 2, 3, 4, 5].map((num) => (
-              <button
-                key={num}
-                className={`page-btn ${currentPage === num ? "active" : ""}`}
-                onClick={() => setCurrentPage(num)}
+              <Link
+                href={`/warehouse/${warehouse.id}`}
               >
-                {num}
-              </button>
-            ))}
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => Math.min(5, p + 1))}
-            >
-              &gt;
-            </button>
-          </div>
+                <div className="warehouse-card">
+
+                  <h2>
+                    {warehouse.name || "Unnamed Warehouse"}
+                  </h2>
+
+                  <p>
+                    Code:{" "}
+                    {warehouse.code || "-"}
+                  </p>
+
+                  <p>
+                    Location:{" "}
+                    {warehouse.location || "-"}
+                  </p>
+
+                  <span
+                    className={
+                      warehouse.status === "INACTIVE"
+                        ? "status inactive"
+                        : "status active"
+                    }
+                  >
+                    {warehouse.status || "ACTIVE"}
+                  </span>
+
+                </div>
+              </Link>
+
+              <div className="warehouse-actions">
+
+                <Link
+                  href={`/warehouse/${warehouse.id}`}
+                >
+                  View
+                </Link>
+
+                <Link
+                  href={`/warehouse/edit/${warehouse.id}`}
+                >
+                  Edit
+                </Link>
+
+                <button
+                  onClick={() =>
+                    handleDelete(warehouse.id)
+                  }
+                >
+                  Delete
+                </button>
+
+              </div>
+
+            </div>
+          ))}
+
         </div>
-      </main>
+      )}
+
     </div>
   );
 }

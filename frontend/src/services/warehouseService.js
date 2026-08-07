@@ -1,47 +1,50 @@
+import axios from "axios";
 import API_URL from "@/config/api";
 
-export async function getWarehouses() {
-  const res = await fetch(`${API_URL}/warehouses`);
+const warehouseAPI = axios.create({
+  baseURL: `${API_URL}/warehouses`,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch warehouses");
-  }
+// GET /api/warehouses
+export const getWarehouses = async () => {
+  const response = await warehouseAPI.get("/");
+  return response.data;
+};
 
-  return res.json();
-}
+// GET /api/warehouses/:id
+export const getWarehouseById = async (id) => {
+  const response = await warehouseAPI.get(`/${id}`);
+  return response.data;
+};
 
-export async function getWarehouseStock() {
-  const res = await fetch(`${API_URL}/warehouses/stock`);
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch stock");
-  }
-
-  return res.json();
-}
-
-export async function createTransfer(data) {
-  const res = await fetch(`${API_URL}/warehouses/transfer`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+// GET /api/warehouses/search
+export const searchWarehouses = async (query) => {
+  const response = await warehouseAPI.get("/search", {
+    params: {
+      search: query,
     },
-    body: JSON.stringify(data),
   });
 
-  if (!res.ok) {
-    throw new Error("Transfer failed");
-  }
+  return response.data;
+};
 
-  return res.json();
-}
+// POST /api/warehouses
+export const createWarehouse = async (data) => {
+  const response = await warehouseAPI.post("/", data);
+  return response.data;
+};
 
-export async function getTransfers() {
-  const res = await fetch(`${API_URL}/warehouses/transfers`);
+// PUT /api/warehouses/:id
+export const updateWarehouse = async (id, data) => {
+  const response = await warehouseAPI.put(`/${id}`, data);
+  return response.data;
+};
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch transfers");
-  }
-
-  return res.json();
-}
+// DELETE /api/warehouses/:id
+export const deleteWarehouse = async (id) => {
+  const response = await warehouseAPI.delete(`/${id}`);
+  return response.data;
+};
