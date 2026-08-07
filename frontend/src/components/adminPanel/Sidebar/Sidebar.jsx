@@ -1,7 +1,7 @@
-
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   FiGrid,
   FiHome,
@@ -25,252 +25,115 @@ import {
   FiUserCheck,
   FiSettings,
   FiLogOut,
+  FiMonitor,
 } from "react-icons/fi";
 
 import styles from "./Sidebar.module.css";
 
-export default function Sidebar() {
-  return (
-    <aside className={styles.sidebar}>
+export default function Sidebar({ isOpen, onClose }) {
+  const pathname = usePathname();
 
+  const isActive = (path) => {
+    if (!pathname) return false;
+    if (path === "/dashboard" && (pathname === "/dashboard" || pathname === "/admin/adminPanel")) {
+      return true;
+    }
+    if (path === "/") return pathname === "/";
+    return pathname === path || (path !== "/" && pathname.startsWith(path));
+  };
+
+  const linkClass = (path) => {
+    return isActive(path) ? styles.active : "";
+  };
+
+  const handleLinkClick = () => {
+    if (onClose) onClose();
+  };
+
+  return (
+    <aside className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}>
       <div className={styles.logo}>
         <h2>Dreams ERP</h2>
       </div>
 
       <nav>
-
         {/* Main */}
-
         <h4 className={styles.title}>Main</h4>
 
-        <Link href="/admin">
+        <Link href="/dashboard" className={linkClass("/dashboard")} onClick={handleLinkClick}>
           <FiGrid />
           Dashboard
         </Link>
 
-        <Link href="/admin/applications">
-          <FiHome />
-          Applications
-        </Link>
-
-        <Link href="/admin/layouts">
-          <FiPackage />
-          Layouts
+        <Link href="/pos" className={linkClass("/pos")} onClick={handleLinkClick}>
+          <FiMonitor />
+          POS System
         </Link>
 
         {/* Inventory */}
-
         <h4 className={styles.title}>Inventory</h4>
 
-        <Link href="/admin/products">
-          <FiShoppingBag />
-          Products
-        </Link>
-
-        <Link href="/admin/categories">
-          <FiBox />
-          Categories
-        </Link>
-
-        <Link href="/admin/brands">
-          <FiTag />
-          Brands
-        </Link>
-
-        <Link href="/admin/units">
-          <FiArchive />
-          Units
-        </Link>
-
-        <Link href="/admin/inventory">
-          <FiPackage />
-          Inventory
-        </Link>
-
-        <Link href="/admin/suppliers">
-          <FiTruck />
-          Suppliers
-        </Link>
-
-        <Link href="/admin/warehouse">
+        <Link href="/warehouse" className={linkClass("/warehouse")} onClick={handleLinkClick}>
           <FiHome />
-          Warehouse
+          Warehouse Management
         </Link>
 
-        <Link href="/admin/stock">
+        <Link href="/warehouse/stock" className={linkClass("/warehouse/stock")} onClick={handleLinkClick}>
           <FiPackage />
-          Stock
+          Stock Inventory
         </Link>
 
+        <Link href="/warehouse/transfer" className={linkClass("/warehouse/transfer")} onClick={handleLinkClick}>
+          <FiRefreshCw />
+          Stock Transfer
+        </Link>
 
+        {/* Sales */}
         <h4 className={styles.title}>Sales</h4>
 
-        <Link href="/admin/customers">
-          <FiUsers />
-          Customers
-        </Link>
-
-        <Link href="/admin/sales-orders">
+        <Link href="/sales" className={linkClass("/sales")} onClick={handleLinkClick}>
           <FiShoppingCart />
-          Sales Orders
+          Sales Management
         </Link>
 
-        <Link href="/admin/invoices">
+        <Link href="/customers" className={linkClass("/customers")} onClick={handleLinkClick}>
+          <FiUsers />
+          Customer Directory
+        </Link>
+
+        <Link href="/invoices" className={linkClass("/invoices")} onClick={handleLinkClick}>
           <FiFileText />
-          Recurring Invoices
+          Invoices & Billing
         </Link>
 
-        <Link href="/admin/invoice-templates">
-          <FiClipboard />
-          Invoice Templates
-        </Link>
-
-        <Link href="/admin/credit-notes">
-          <FiCreditCard />
-          Credit Notes
-        </Link>
-
-        <Link href="/admin/sales-quotes">
-          <FiFileText />
-          Sales Quotes
-        </Link>
-
-        <Link href="/admin/cash-sales">
-          <FiDollarSign />
-          Cash Sales
-        </Link>
-
-        <Link href="/admin/refunds">
-          <FiRefreshCw />
-          Refunds
-        </Link>
-
-        <Link href="/admin/delivery-notes">
-          <FiClipboard />
-          Delivery Notes
-        </Link>
-
-        <Link href="/admin/sales-analytics">
-          <FiBarChart2 />
-          Sales Analytics
-        </Link>
-
-        {/* Purchase */}
-
+        {/* Purchasing */}
         <h4 className={styles.title}>Purchase</h4>
 
-        <Link href="/admin/purchases">
-          <FiShoppingCart />
-          Purchases
-        </Link>
-
-        <Link href="/admin/purchase-orders">
-          <FiClipboard />
+        <Link href="/purchases" className={linkClass("/purchases")} onClick={handleLinkClick}>
+          <FiShoppingBag />
           Purchase Orders
         </Link>
 
-        <Link href="/admin/purchase-return">
-          <FiRefreshCw />
-          Purchase Return
-        </Link>
+        {/* Reports & Analytics */}
+        <h4 className={styles.title}>Reports & Analytics</h4>
 
-        <Link href="/admin/vendors">
-          <FiUsers />
-          Vendors
-        </Link>
-
-        <Link href="/admin/procurement">
+        <Link href="/reports" className={linkClass("/reports")} onClick={handleLinkClick}>
           <FiBarChart2 />
-          Procurement Analytics
+          Reports & Analytics
         </Link>
 
-        {/* Finance */}
-
-        <h4 className={styles.title}>Finance</h4>
-
-        <Link href="/admin/expenses">
-          <FiDollarSign />
-          Expenses
-        </Link>
-
-        <Link href="/admin/expense-category">
-          <FiBox />
-          Expense Category
-        </Link>
-
-        <Link href="/admin/payments">
-          <FiCreditCard />
-          Payments
-        </Link>
-
-        <Link href="/admin/cashflow">
-          <FiTrendingUp />
-          Cashflow
-        </Link>
-
-        <Link href="/admin/budget">
-          <FiPieChart />
-          Budgeting
-        </Link>
-
-        <Link href="/admin/taxes">
-          <FiDollarSign />
-          Taxes
-        </Link>
-
-        <Link href="/admin/reports">
-          <FiBarChart2 />
-          Reports
-        </Link>
-
-        {/* HR */}
-
-        <h4 className={styles.title}>HRM</h4>
-
-        <Link href="/admin/employees">
-          <FiUserCheck />
-          Employees
-        </Link>
-
-        <Link href="/admin/departments">
-          <FiBriefcase />
-          Departments
-        </Link>
-
-        <Link href="/admin/designations">
-          <FiUsers />
-          Designations / Roles
-        </Link>
-
-        <Link href="/admin/attendance">
-          <FiClipboard />
-          Attendance
-        </Link>
-
-        <Link href="/admin/leave">
-          <FiFileText />
-          Leave Management
-        </Link>
-
-        <Link href="/admin/payroll">
-          <FiDollarSign />
-          Payroll
-        </Link>
-
-        {/* System */}
-
+        {/* System Settings */}
         <h4 className={styles.title}>System</h4>
 
-        <Link href="/admin/settings">
+        <Link href="/settings" className={linkClass("/settings")} onClick={handleLinkClick}>
           <FiSettings />
           Settings
         </Link>
 
-        <Link href="/logout">
+        <Link href="/auth/login" className={`${linkClass("/auth/login")} ${styles.logout}`} onClick={handleLinkClick}>
           <FiLogOut />
           Logout
         </Link>
-
       </nav>
     </aside>
   );
