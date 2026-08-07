@@ -2,49 +2,141 @@
 
 import Link from "next/link";
 
-export default function SalesTable({ sales }) {
+export default function SalesTable({ sales = [] }) {
   return (
-    <div className="overflow-x-auto border rounded-lg">
+    <div className="bg-white rounded-xl shadow overflow-x-auto">
 
-      <table className="w-full">
+      <table className="min-w-full">
 
         <thead className="bg-gray-100">
 
           <tr>
-            <th className="p-3 text-left">Invoice</th>
-            <th className="p-3 text-left">Customer</th>
-            <th className="p-3 text-left">Amount</th>
-            <th className="p-3 text-left">Payment</th>
-            <th className="p-3 text-left">Status</th>
-            <th className="p-3 text-left">Date</th>
-            <th className="p-3 text-left">Action</th>
+
+            <th className="px-4 py-3 text-left">
+              Invoice
+            </th>
+
+            <th className="px-4 py-3 text-left">
+              Customer
+            </th>
+
+            <th className="px-4 py-3 text-left">
+              Cashier
+            </th>
+
+            <th className="px-4 py-3 text-left">
+              Date
+            </th>
+
+            <th className="px-4 py-3 text-center">
+              Payment
+            </th>
+
+            <th className="px-4 py-3 text-center">
+              Status
+            </th>
+
+            <th className="px-4 py-3 text-right">
+              Total
+            </th>
+
+            <th className="px-4 py-3 text-center">
+              Action
+            </th>
+
           </tr>
 
         </thead>
 
         <tbody>
 
-          {sales.map((sale) => (
-            <tr
-              key={sale.id}
-              className="border-t"
-            >
-              <td className="p-3">{sale.id}</td>
-              <td className="p-3">{sale.customer}</td>
-              <td className="p-3">₹{sale.amount}</td>
-              <td className="p-3">{sale.payment}</td>
-              <td className="p-3">{sale.status}</td>
-              <td className="p-3">{sale.date}</td>
-              <td className="p-3">
-                <Link
-                  href={`/sales/${sale.id}`}
-                  className="text-blue-600"
-                >
-                  View
-                </Link>
+          {sales.length === 0 && (
+            <tr>
+
+              <td
+                colSpan={8}
+                className="text-center py-8 text-gray-500"
+              >
+                No Sales Found
               </td>
+
             </tr>
-          ))}
+          )}
+
+          {sales.map((sale) => {
+
+            const statusColor =
+              sale.paymentStatus === "Paid"
+                ? "bg-green-100 text-green-700"
+                : sale.paymentStatus === "Pending"
+                ? "bg-red-100 text-red-700"
+                : "bg-yellow-100 text-yellow-700";
+
+            return (
+
+              <tr
+                key={sale.id}
+                className="border-b hover:bg-gray-50"
+              >
+
+                <td className="px-4 py-4 font-semibold">
+                  {sale.invoiceNo}
+                </td>
+
+                <td className="px-4 py-4">
+                  {sale.customer}
+                </td>
+
+                <td className="px-4 py-4">
+                  {sale.cashier}
+                </td>
+
+                <td className="px-4 py-4">
+                  {sale.date}
+                </td>
+
+                <td className="px-4 py-4 text-center">
+                  {sale.paymentMethod}
+                </td>
+
+                <td className="px-4 py-4 text-center">
+
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusColor}`}>
+                    {sale.paymentStatus}
+                  </span>
+
+                </td>
+
+                <td className="px-4 py-4 text-right font-bold">
+                  ₹{sale.total.toLocaleString()}
+                </td>
+
+                <td className="px-4 py-4">
+
+                  <div className="flex justify-center gap-2">
+
+                    <Link
+                      href={`/sales/${sale.id}`}
+                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                    >
+                      View
+                    </Link>
+
+                    <Link
+                      href={`/sales/edit/${sale.id}`}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                    >
+                      Edit
+                    </Link>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            );
+          })}
 
         </tbody>
 
