@@ -34,7 +34,7 @@ export default function Sidebar() {
     <aside className={styles.sidebar}>
 
       <div className={styles.logo}>
-        <h2>Dreams ERP</h2>
+        <h2>ERP</h2>
       </div>
 
       <nav>
