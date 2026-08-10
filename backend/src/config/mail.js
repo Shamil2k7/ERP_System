@@ -1,81 +1,106 @@
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config();
+dotenv.config({ path: resolve(__dirname, "../../.env") });
 
 let transporter;
 
 const getTransporter = () => {
-  if (transporter) return transporter;
+  const emailUser = process.env.EMAIL_USER?.trim();
+  const emailPass = process.env.EMAIL_PASS?.trim().replace(/\s+/g, "");
 
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  if (!emailUser || !emailPass) {
     throw new Error(
       "EMAIL_USER or EMAIL_PASS is missing in the .env file."
     );
   }
 
-  transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: emailUser,
+        pass: emailPass,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 15000,
+    });
+  }
 
   return transporter;
 };
 
-// Email Verification Link
-const sendVerificationEmail = async (email, token) => {
+// Welcome Email — sent when admin creates an employee (no links)
+const sendWelcomeEmail = async (email, fullName, employeeId, password) => {
   try {
     const tx = getTransporter();
 
-    // Change this when frontend is deployed
-    const verifyLink = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
-
     const info = await tx.sendMail({
-      from: `"ERP System" <${process.env.EMAIL_USER}>`,
+      from: `"ERP System" <${process.env.EMAIL_USER?.trim()}>`,
+      replyTo: process.env.EMAIL_USER?.trim(),
       to: email,
-      subject: "Verify Your ERP Account",
+      subject: "Welcome to ERP System — Your Account is Ready",
+      text: `Hello ${fullName},
 
+Your employee account has been created successfully by the administrator.
+
+Here are your login credentials:
+
+  Employee ID : ${employeeId}
+  Email       : ${email}
+  Password    : ${password}
+
+Please log in and change your password as soon as possible.
+
+Thank you,
+ERP System`,
       html: `
-        <div style="font-family: Arial; padding:20px;">
-        
-          <h2>Welcome to ERP System</h2>
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; background-color: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <div style="text-align: center; margin-bottom: 28px;">
+            <h2 style="color: #0f172a; margin: 0; font-size: 22px; font-weight: 700;">Welcome to ERP System</h2>
+            <p style="color: #64748b; font-size: 13px; margin-top: 6px;">Your account has been created</p>
+          </div>
 
-          <p>Your employee account has been created by the administrator.</p>
+          <p style="color: #334155; font-size: 15px; line-height: 1.6; margin-bottom: 8px;">Hello <strong>${fullName}</strong>,</p>
+          <p style="color: #334155; font-size: 15px; line-height: 1.6;">Your employee account is ready. Use the credentials below to log in.</p>
 
-          <p>Please click the button below to verify your email address.</p>
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px 24px; margin: 24px 0;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="color: #64748b; font-size: 13px; padding: 6px 0; width: 120px;">Employee ID</td>
+                <td style="color: #0f172a; font-size: 14px; font-weight: 600; padding: 6px 0;">${employeeId}</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b; font-size: 13px; padding: 6px 0;">Email</td>
+                <td style="color: #0f172a; font-size: 14px; font-weight: 600; padding: 6px 0;">${email}</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b; font-size: 13px; padding: 6px 0;">Password</td>
+                <td style="color: #0f172a; font-size: 14px; font-weight: 600; padding: 6px 0;">${password}</td>
+              </tr>
+            </table>
+          </div>
 
-          <a
-            href="${verifyLink}"
-            style="
-              background:#2563eb;
-              color:white;
-              padding:12px 20px;
-              text-decoration:none;
-              border-radius:5px;
-              display:inline-block;
-            "
-          >
-            Verify Email
-          </a>
-
-          <p style="margin-top:20px;">
-            This verification link will expire in 30 minutes.
+          <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 14px;">
+            Please change your password after first login. Keep your credentials safe.
           </p>
-
-          <p>
-            If you didn't expect this email, you can safely ignore it.
-          </p>
-
         </div>
       `,
     });
 
-    console.log("✅ Verification Email Sent");
-    console.log(info.messageId);
+    console.log("✅ Welcome Email Sent:", info.messageId);
   } catch (error) {
-    console.error("❌ Failed to send verification email");
-    console.error(error);
-
+    console.error("❌ Failed to send welcome email:", error);
     throw error;
   }
 };
@@ -111,6 +136,6 @@ const sendOTPEmail = async (email, otp) => {
 };
 
 export {
-  sendVerificationEmail,
+  sendWelcomeEmail,
   sendOTPEmail,
 };

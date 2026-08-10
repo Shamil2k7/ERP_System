@@ -1,6 +1,5 @@
 import prisma from "../../config/prisma.js";
 
-// Login
 const findUserByLogin = async (login) => {
   return await prisma.user.findFirst({
     where: {
@@ -9,14 +8,11 @@ const findUserByLogin = async (login) => {
         { employeeId: login },
       ],
     },
-
     include: {
       role: true,
     },
   });
 };
-
-// Find User By Email
 const findUserByEmail = async (email) => {
   return await prisma.user.findUnique({
     where: {
@@ -24,15 +20,11 @@ const findUserByEmail = async (email) => {
     },
   });
 };
-
-// Save OTP
 const saveOTP = async (otpData) => {
   return await prisma.emailOTP.create({
     data: otpData,
   });
 };
-
-// Find OTP
 const findOTPByEmail = async (email) => {
   return await prisma.emailOTP.findFirst({
     where: {
@@ -44,8 +36,6 @@ const findOTPByEmail = async (email) => {
     },
   });
 };
-
-// Mark OTP Used
 const markOTPAsUsed = async (id) => {
   return await prisma.emailOTP.update({
     where: {
@@ -56,8 +46,6 @@ const markOTPAsUsed = async (id) => {
     },
   });
 };
-
-// Update Password
 const updatePassword = async (email, passwordHash) => {
   return await prisma.user.update({
     where: {
@@ -65,6 +53,28 @@ const updatePassword = async (email, passwordHash) => {
     },
     data: {
       passwordHash,
+      firstLogin: false,
+    },
+  });
+};
+
+const findUserByVerificationToken = async (token) => {
+  return await prisma.user.findFirst({
+    where: {
+      verificationToken: token,
+    },
+  });
+};
+
+const updateUserVerification = async (id, isVerified) => {
+  return await prisma.user.update({
+    where: {
+      id,
+    },
+    data: {
+      isVerified,
+      verificationToken: null,
+      verificationExpires: null,
     },
   });
 };
@@ -76,4 +86,6 @@ export {
   findOTPByEmail,
   markOTPAsUsed,
   updatePassword,
+  findUserByVerificationToken,
+  updateUserVerification,
 };

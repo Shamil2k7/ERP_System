@@ -11,9 +11,14 @@ import {
   findOTPByEmail,
   markOTPAsUsed,
   updatePassword,
+  findUserByVerificationToken,
+  updateUserVerification,
 } from "./auth.repository.js";
 
-// Login
+
+// =======================
+// LOGIN
+// =======================
 const loginService = async (login, password) => {
   const employee = await findUserByLogin(login);
 
@@ -51,7 +56,10 @@ const loginService = async (login, password) => {
   };
 };
 
-// Change Password
+
+// =======================
+// CHANGE PASSWORD
+// =======================
 const changePasswordService = async (
   email,
   currentPassword,
@@ -85,7 +93,10 @@ const changePasswordService = async (
   };
 };
 
-// Forgot Password
+
+// =======================
+// FORGOT PASSWORD
+// =======================
 const forgotPasswordService = async (email) => {
   const employee = await findUserByEmail(email);
 
@@ -113,8 +124,14 @@ const forgotPasswordService = async (email) => {
   };
 };
 
-// Verify Reset OTP
-const verifyResetOTPService = async (email, otp) => {
+
+// =======================
+// VERIFY OTP
+// =======================
+const verifyResetOTPService = async (
+  email,
+  otp
+) => {
   const savedOTP = await findOTPByEmail(email);
 
   if (!savedOTP) {
@@ -141,7 +158,10 @@ const verifyResetOTPService = async (email, otp) => {
   };
 };
 
-// Reset Password
+
+// =======================
+// RESET PASSWORD
+// =======================
 const resetPasswordService = async (
   email,
   password
@@ -165,10 +185,46 @@ const resetPasswordService = async (
   };
 };
 
+// =======================
+// VERIFY EMAIL (YES / NO)
+// =======================
+const verifyEmailService = async (token, action) => {
+  if (!token) {
+    throw new Error("Verification token is missing");
+  }
+
+  const user = await findUserByVerificationToken(token);
+
+  if (!user) {
+    throw new Error("Invalid or expired verification token");
+  }
+
+  if (user.verificationExpires && user.verificationExpires < new Date()) {
+    throw new Error("Verification link has expired");
+  }
+
+  const isYes = action ? action.toLowerCase() === "yes" : true;
+
+  await updateUserVerification(user.id, isYes);
+
+  return {
+    success: true,
+    action: isYes ? "yes" : "no",
+    message: isYes
+      ? "Account verified successfully! Your account is now active and ready."
+      : "Account verification declined. The account was not verified.",
+    user: {
+      email: user.email,
+      fullName: user.fullName,
+    },
+  };
+};
+
 export {
   loginService,
   changePasswordService,
   forgotPasswordService,
   verifyResetOTPService,
   resetPasswordService,
+  verifyEmailService,
 };

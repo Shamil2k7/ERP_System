@@ -29,9 +29,6 @@ model User {
 
   isVerified Boolean @default(false)
 
-  //  Add these three fields
-  firstLogin Boolean @default(true)
-
   verificationToken   String?
   verificationExpires DateTime?
 

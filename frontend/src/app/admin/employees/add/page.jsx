@@ -30,19 +30,28 @@ export default function AddEmployeePage() {
   };
 
   const handleCancel = () => {
-    router.push('/employees');
+    router.push('/admin/employees');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+
     try {
-      await axios.post('http://localhost:5000/api/auth/employees', formData);
-      toast.success('Employee added successfully');
-      router.push('/employees');
+      const res = await axios.post(
+        "http://localhost:5000/api/employees",
+        formData
+      );
+
+      toast.success(res.data?.message || "Employee added successfully! Waiting for confirmation.");
+
+      router.push("/admin/employees");
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Operation failed');
       console.error(error);
+
+      toast.error(
+        error.response?.data?.message || "Operation failed"
+      );
     } finally {
       setSubmitting(false);
     }

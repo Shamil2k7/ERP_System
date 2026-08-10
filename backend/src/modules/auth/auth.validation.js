@@ -6,6 +6,7 @@ import {
   resetPasswordSchema,
 } from "./auth.schema.js";
 
+// Login
 const validateLogin = (req, res, next) => {
   const { error } = loginSchema.validate(req.body);
 
@@ -19,6 +20,7 @@ const validateLogin = (req, res, next) => {
   next();
 };
 
+// Change Password
 const validateChangePassword = (req, res, next) => {
   const { error } = changePasswordSchema.validate(req.body);
 
@@ -32,6 +34,7 @@ const validateChangePassword = (req, res, next) => {
   next();
 };
 
+// Forgot Password
 const validateForgotPassword = (req, res, next) => {
   const { error } = forgotPasswordSchema.validate(req.body);
 
@@ -45,6 +48,7 @@ const validateForgotPassword = (req, res, next) => {
   next();
 };
 
+// Verify Reset OTP
 const validateResetOTP = (req, res, next) => {
   const { error } = verifyResetOTPSchema.validate(req.body);
 
@@ -58,6 +62,7 @@ const validateResetOTP = (req, res, next) => {
   next();
 };
 
+// Reset Password
 const validateResetPassword = (req, res, next) => {
   const { error } = resetPasswordSchema.validate(req.body);
 

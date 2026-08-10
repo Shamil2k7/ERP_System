@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Edit2, Trash2, X, Users, Loader2, Plus } from 'lucide-react';
+import { Edit2, Trash2, X, Users, Loader2, Plus, Mail } from 'lucide-react';
 import styles from './employee.module.css';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
@@ -29,19 +29,23 @@ export default function EmployeePage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchEmployees();
+    fetchEmployees(true);
+    const interval = setInterval(() => {
+      fetchEmployees(false);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchEmployees = async () => {
+  const fetchEmployees = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const res = await axios.get('http://localhost:5000/api/employees');
       setEmployees(res.data.data);
     } catch (error) {
-      toast.error('Failed to fetch employees');
+      if (showLoading) toast.error('Failed to fetch employees');
       console.error(error);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
@@ -51,8 +55,9 @@ export default function EmployeePage() {
   };
 
   const handleAddClick = () => {
-    router.push('/admin/employee/add');
+    router.push('/admin/employees/add');
   };
+
 
   const handleEditClick = (employee) => {
     setCurrentEmployee(employee);
@@ -115,7 +120,7 @@ export default function EmployeePage() {
         <div className={styles.header}>
           <div>
             <h1 className={styles.title}>Employees</h1>
-            <p className={styles.subtitle}>Manage your team members and their access.</p>
+            <p className={styles.subtitle}>Manage your team members and their verification status.</p>
           </div>
           <button className={styles.addButton} onClick={handleAddClick}>
             <Plus size={20} />
@@ -161,8 +166,8 @@ export default function EmployeePage() {
                       <div className={styles.phone}>{employee.phone}</div>
                     </td>
                     <td className={styles.td}>
-                      <span className={`${styles.badge} ${employee.isVerified ? styles.badgeActive : styles.badgeInactive}`}>
-                        {employee.isVerified ? 'Verified' : 'Pending'}
+                      <span className={`${styles.badge} ${employee.isVerified ? styles.badgeActive : styles.badgePending}`}>
+                        {employee.isVerified ? '✓ Verified' : '⏳ Waiting for Confirmation'}
                       </span>
                     </td>
                     <td className={styles.td}>

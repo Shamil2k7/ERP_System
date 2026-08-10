@@ -1,6 +1,9 @@
 import Joi from "joi";
 
+// ======================
 // Login
+// ======================
+
 const loginSchema = Joi.object({
   login: Joi.string()
     .trim()
@@ -18,7 +21,10 @@ const loginSchema = Joi.object({
     }),
 });
 
+// ======================
 // Change Password
+// ======================
+
 const changePasswordSchema = Joi.object({
   email: Joi.string()
     .email()
@@ -48,7 +54,10 @@ const changePasswordSchema = Joi.object({
     }),
 });
 
+// ======================
 // Forgot Password
+// ======================
+
 const forgotPasswordSchema = Joi.object({
   email: Joi.string()
     .email()
@@ -60,7 +69,10 @@ const forgotPasswordSchema = Joi.object({
     }),
 });
 
+// ======================
 // Verify Reset OTP
+// ======================
+
 const verifyResetOTPSchema = Joi.object({
   email: Joi.string()
     .email()
@@ -81,7 +93,10 @@ const verifyResetOTPSchema = Joi.object({
     }),
 });
 
+// ======================
 // Reset Password
+// ======================
+
 const resetPasswordSchema = Joi.object({
   email: Joi.string()
     .email()

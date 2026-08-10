@@ -1,22 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { FiMail, FiLock, FiEye, FiEyeOff, FiBriefcase, } from "react-icons/fi";
+import { FiMail, FiLock, FiEye, FiEyeOff, FiBriefcase, FiCheckCircle } from "react-icons/fi";
 import styles from "./LoginForm.module.css";
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [formData, setFormData] = useState({
     login: "",
     password: "",
     remember: false,
   });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("verified") === "true") {
+        setSuccessMessage("Your email account has been verified successfully! You can now log in.");
+      }
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -71,6 +79,24 @@ export default function LoginForm() {
 
           <p>Sign in to your Retail ERP account.</p>
         </div>
+
+        {successMessage && (
+          <div style={{
+            padding: "12px 16px",
+            backgroundColor: "#dcfce7",
+            color: "#15803d",
+            border: "1px solid #bbf7d0",
+            borderRadius: "8px",
+            fontSize: "14px",
+            marginBottom: "16px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
+          }}>
+            <FiCheckCircle style={{ flexShrink: 0, fontSize: "18px" }} />
+            <span>{successMessage}</span>
+          </div>
+        )}
 
         {error && (
           <div className={styles.errorMessage}>

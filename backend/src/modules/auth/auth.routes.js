@@ -2,11 +2,11 @@ import express from "express";
 
 import {
   login,
-  verifyEmail,
   changePassword,
   forgotPassword,
   verifyResetOTP,
   resetPassword,
+  verifyEmail,
 } from "./auth.controller.js";
 
 import {
@@ -28,9 +28,6 @@ router.get("/test", (req, res) => {
     message: "Auth Route Working",
   });
 });
-
-// Verify Email
-router.get("/verify-email", verifyEmail);
 
 // Login
 router.post(
@@ -66,5 +63,8 @@ router.post(
   validateResetPassword,
   resetPassword
 );
+
+// Verify Email Link (YES / NO Click from Email)
+router.get("/verify-email", verifyEmail);
 
 export default router;
