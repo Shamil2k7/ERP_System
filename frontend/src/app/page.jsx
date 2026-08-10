@@ -1,10 +1,33 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import styles from "./landing.module.css";
-import Image from "next/image";
+import { getLandingPage } from "@/services/landing.service";
 
 export default function Home() {
+  const [landing, setLanding] = useState(null);
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+  useEffect(() => {
+    async function loadLanding() {
+      try {
+        const data = await getLandingPage();
+        setLanding(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadLanding();
+  }, []);
+
+  if (!landing) {
+    return (
+      <div className={styles.loading}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -33,18 +56,11 @@ export default function Home() {
           </span> */}
 
           <h1 className={styles.heroTitle}>
-            Transform
-            <br />
-            Your Business
-            <br />
-            With <span>ERP</span>
+            {landing.heroTitle}
           </h1>
 
           <p className={styles.heroDescription}>
-            A powerful cloud-based ERP platform that helps businesses
-            manage inventory, billing, purchasing, accounting,
-            warehouses, employees, customers and real-time analytics
-            from one intelligent system.
+            {landing.heroDescription}
           </p>
 
           <div className={styles.heroButtons}>
@@ -84,11 +100,14 @@ export default function Home() {
             <div className={styles.chartArea}>
 
               <div className={styles.chartLine}></div>
-              <Image
-                src="/images/dashboard.png"
-                alt="ERP Dashboard"
-                width={520}
-                height={320}
+              <img
+                src={
+                  landing.heroImage
+                    ? `${API_URL}/uploads/landingpageimage/${landing.heroImage}`
+                    : "/placeholder.png"
+                }
+                alt="Hero"
+                loading="lazy"
                 className={styles.dashboardImage}
               />
 
@@ -135,23 +154,43 @@ export default function Home() {
           <div className={styles.imageGrid}>
 
             <img
-              src="https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=600"
-              alt=""
+              src={
+                landing.aboutImage1
+                  ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage1}`
+                  : "/placeholder.png"
+              }
+              alt="About 1"
+              loading="lazy"
             />
 
             <img
-              src="https://images.pexels.com/photos/3184306/pexels-photo-3184306.jpeg?auto=compress&cs=tinysrgb&w=600"
-              alt=""
+              src={
+                landing.aboutImage1
+                  ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage2}`
+                  : "/placeholder.png"
+              }
+              alt="About 2"
+              loading="lazy"
             />
 
             <img
-              src="https://images.pexels.com/photos/3182812/pexels-photo-3182812.jpeg?auto=compress&cs=tinysrgb&w=600"
-              alt=""
+              src={
+                landing.aboutImage1
+                  ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage3}`
+                  : "/placeholder.png"
+              }
+              alt="About 3"
+              loading="lazy"
             />
 
             <img
-              src="https://images.pexels.com/photos/3183197/pexels-photo-3183197.jpeg?auto=compress&cs=tinysrgb&w=600"
-              alt=""
+              src={
+                landing.aboutImage1
+                  ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage4}`
+                  : "/placeholder.png"
+              }
+              alt="About 4"
+              loading="lazy"
             />
 
           </div>
@@ -160,34 +199,9 @@ export default function Home() {
 
         <div className={styles.aboutContent}>
 
-          <span className={styles.sectionTag}>
-            ABOUT ERP CLOUD
-          </span>
+          <h2>{landing.aboutTitle}</h2>
 
-          <h2>
-            One Platform.
-            <br />
-            Complete Business Control.
-          </h2>
-
-          <p>
-            ERP Cloud helps retailers and growing businesses
-            manage inventory, sales, purchasing, accounting,
-            warehouses, HR, customers and reporting from a
-            single cloud-based platform.
-          </p>
-
-          <div className={styles.features}>
-
-            <div>Cloud Based Solution</div>
-
-            <div>Multi-Branch Management</div>
-
-            <div>Real-Time Analytics</div>
-
-            <div>Enterprise Security</div>
-
-          </div>
+          <p>{landing.aboutDescription}</p>
 
           <button className={styles.learnBtn}>
             Learn More →
@@ -195,10 +209,11 @@ export default function Home() {
 
         </div>
 
-      </section>
+
+      </section >
 
       <footer className={styles.footer}>
-        <p>© 2026 ERPCloud. All Rights Reserved.</p>
+        <p>© ERP Cloud. All Rights Reserved.</p>
       </footer>
     </>
   );
