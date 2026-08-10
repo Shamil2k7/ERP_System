@@ -32,6 +32,11 @@ import warehouseRoutes from "./modules/warehouse/warehouse.routes.js";
 // import barcodeRoutes from "./modules/barcode/barcode.routes.js";
 import brandRoutes from "./modules/brands/brand.routes.js";
 
+
+// M7
+import landingRoutes from "./modules/landing/landing.routes.js";
+
+
 const app = express();
 
 // =====================
@@ -95,6 +100,10 @@ app.use("/api/employees", employeeRoutes);
 //  app.use("/api/stock-transfers", stockTransferRoutes);
 //  app.use("/api/barcodes", barcodeRoutes);
 app.use("/api/brands", brandRoutes);
+
+
+// M7
+app.use("/api/landing", landingRoutes);
 
 // =====================
 // 404 Handler
