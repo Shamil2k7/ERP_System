@@ -1,6 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import axios from 'axios';
+import { toast, Toaster } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 import {
   FiUpload,
   FiSave,
@@ -15,27 +18,75 @@ const initialProduct = {
   code: "",
   sku: "",
   barcode: "",
-  category: "",
-  brand: "",
-  unit: "Piece",
+  categoryId: "",
+  brandId: "",
+  baseUnitId: "",
   description: "",
-  purchasePrice: "",
+  costPrice: "",
   sellingPrice: "",
   tax: "",
-  discount: "",
+  discountValue: "",
+  discountType: "PERCENT",
   stock: "",
   lowStock: "",
   warehouse: "",
-  status: "Active",
+  status: "ACTIVE",
 };
 
 export default function AddProductPage() {
+  const router = useRouter();
   const [product, setProduct] = useState(initialProduct);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [units, setUnits] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    fetchCategories();
+    fetchBrands();
+    fetchUnits();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/categories');
+      if (res.data && res.data.data) {
+        setCategories(res.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories', error);
+      toast.error('Failed to load categories');
+    }
+  };
+
+  const fetchBrands = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/brands');
+      if (res.data && res.data.data) {
+        setBrands(res.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch brands', error);
+      toast.error('Failed to load brands');
+    }
+  };
+
+  const fetchUnits = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/units');
+      if (res.data && res.data.data) {
+        setUnits(res.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch units', error);
+      toast.error('Failed to load units');
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -106,18 +157,47 @@ export default function AddProductPage() {
      SUBMIT
   ========================= */
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    
+    // We will ignore stock, lowStock, and warehouse for now 
+    // since the API expects product model fields.
+    const payload = {
+      name: product.name,
+      sku: product.sku,
+      categoryId: product.categoryId,
+      brandId: product.brandId || null,
+      costPrice: parseFloat(product.costPrice || 0),
+      sellingPrice: parseFloat(product.sellingPrice || 0),
+      baseUnitId: product.baseUnitId || null,
+      description: product.description,
+      status: product.status,
+    };
 
-    console.log("Product:", product);
-    console.log("Product Image:", image);
+    if (product.discountValue) {
+      payload.discountValue = parseFloat(product.discountValue);
+      payload.discountType = product.discountType;
+    }
 
-    // Later:
-    // Send product + image using FormData
+    try {
+      const res = await axios.post('http://localhost:5000/api/products', payload);
+      toast.success('Product added successfully!');
+      setTimeout(() => {
+        router.push('/admin/products/view');
+      }, 1500);
+    } catch (error) {
+      console.error(error);
+      const msg = error.response?.data?.message || 'Failed to create product';
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <div className={styles.layout}>
+      <Toaster position="top-right" />
       <div className={styles.main}>
         <div className={styles.container}>
 
@@ -139,9 +219,10 @@ export default function AddProductPage() {
               type="submit"
               form="add-product-form"
               className={styles.saveBtn}
+              disabled={submitting}
             >
               <FiSave />
-              Save Product
+              {submitting ? 'Saving...' : 'Save Product'}
             </button>
           </div>
 
@@ -240,89 +321,72 @@ export default function AddProductPage() {
                   {/* Category */}
 
                   <div>
-                    <label htmlFor="category">
+                    <label htmlFor="categoryId">
                       Category
                     </label>
 
                     <select
-                      id="category"
-                      name="category"
-                      value={product.category}
+                      id="categoryId"
+                      name="categoryId"
+                      value={product.categoryId}
                       onChange={handleChange}
+                      required
                     >
                       <option value="">
                         Choose Category
                       </option>
-
-                      <option value="Smartphones">
-                        Smartphones
-                      </option>
-
-                      <option value="Computers">
-                        Computers
-                      </option>
-
-                      <option value="Accessories">
-                        Accessories
-                      </option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   {/* Brand */}
 
                   <div>
-                    <label htmlFor="brand">
+                    <label htmlFor="brandId">
                       Brand
                     </label>
 
                     <select
-                      id="brand"
-                      name="brand"
-                      value={product.brand}
+                      id="brandId"
+                      name="brandId"
+                      value={product.brandId}
                       onChange={handleChange}
                     >
                       <option value="">
                         Select Brand
                       </option>
-
-                      <option value="Apple">
-                        Apple
-                      </option>
-
-                      <option value="Samsung">
-                        Samsung
-                      </option>
-
-                      <option value="Dell">
-                        Dell
-                      </option>
+                      {brands.map((brand) => (
+                        <option key={brand.id} value={brand.id}>
+                          {brand.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                   {/* Unit */}
 
                   <div>
-                    <label htmlFor="unit">
+                    <label htmlFor="baseUnitId">
                       Unit
                     </label>
 
                     <select
-                      id="unit"
-                      name="unit"
-                      value={product.unit}
+                      id="baseUnitId"
+                      name="baseUnitId"
+                      value={product.baseUnitId}
                       onChange={handleChange}
+                      required
                     >
-                      <option value="Piece">
-                        Piece
-                      </option>
-
-                      <option value="Box">
-                        Box
-                      </option>
-
-                      <option value="Pack">
-                        Pack
-                      </option>
+                      <option value="">Choose Unit</option>
+                      {units.map((unit) => (
+                        <option key={unit.id} value={unit.id}>
+                          {unit.name} ({unit.shortName})
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -339,11 +403,11 @@ export default function AddProductPage() {
                       value={product.status}
                       onChange={handleChange}
                     >
-                      <option value="Active">
+                      <option value="ACTIVE">
                         Active
                       </option>
 
-                      <option value="Inactive">
+                      <option value="INACTIVE">
                         Inactive
                       </option>
                     </select>
@@ -377,19 +441,20 @@ export default function AddProductPage() {
                 <div className={styles.grid}>
 
                   <div>
-                    <label htmlFor="purchasePrice">
-                      Purchase Price
+                    <label htmlFor="costPrice">
+                      Purchase Price (Cost)
                     </label>
 
                     <input
-                      id="purchasePrice"
-                      name="purchasePrice"
+                      id="costPrice"
+                      name="costPrice"
                       type="number"
                       min="0"
                       step="0.01"
-                      value={product.purchasePrice}
+                      value={product.costPrice}
                       onChange={handleChange}
                       placeholder="0.00"
+                      required
                     />
                   </div>
 
@@ -407,6 +472,7 @@ export default function AddProductPage() {
                       value={product.sellingPrice}
                       onChange={handleChange}
                       placeholder="0.00"
+                      required
                     />
                   </div>
 
@@ -428,20 +494,31 @@ export default function AddProductPage() {
                   </div>
 
                   <div>
-                    <label htmlFor="discount">
-                      Discount (%)
+                    <label htmlFor="discountValue">
+                      Discount
                     </label>
 
-                    <input
-                      id="discount"
-                      name="discount"
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={product.discount}
-                      onChange={handleChange}
-                      placeholder="5"
-                    />
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <input
+                        id="discountValue"
+                        name="discountValue"
+                        type="number"
+                        min="0"
+                        value={product.discountValue}
+                        onChange={handleChange}
+                        placeholder="5"
+                        style={{ flex: 1 }}
+                      />
+                      <select
+                        name="discountType"
+                        value={product.discountType}
+                        onChange={handleChange}
+                        style={{ width: '80px' }}
+                      >
+                        <option value="PERCENT">%</option>
+                        <option value="FIXED">Fixed</option>
+                      </select>
+                    </div>
                   </div>
 
                 </div>
@@ -453,12 +530,15 @@ export default function AddProductPage() {
 
               <div className={styles.card}>
                 <h2>Inventory</h2>
+                <p style={{ fontSize: '12px', color: '#666', marginBottom: '15px' }}>
+                  Note: Inventory counts are managed via Purchases and Stock Adjustments. 
+                </p>
 
                 <div className={styles.grid}>
 
                   <div>
                     <label htmlFor="stock">
-                      Opening Stock
+                      Opening Stock (Read-only)
                     </label>
 
                     <input
@@ -468,7 +548,8 @@ export default function AddProductPage() {
                       min="0"
                       value={product.stock}
                       onChange={handleChange}
-                      placeholder="50"
+                      placeholder="0"
+                      disabled
                     />
                   </div>
 
@@ -615,4 +696,3 @@ export default function AddProductPage() {
     </div>
   );
 }
-

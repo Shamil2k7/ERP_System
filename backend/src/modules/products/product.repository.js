@@ -6,6 +6,7 @@ export const createProduct = async (data) => {
     include: {
       category: true,
       brand: true,
+      baseUnit: true,
     },
   });
 };
@@ -15,6 +16,7 @@ export const getAllProducts = async () => {
     include: {
       category: true,
       brand: true,
+      baseUnit: true,
       barcodes: true,
       inventories: true,
     },
@@ -32,6 +34,7 @@ export const getProductById = async (id) => {
     include: {
       category: true,
       brand: true,
+      baseUnit: true,
       barcodes: true,
       inventories: true,
     },
@@ -55,6 +58,7 @@ export const updateProduct = async (id, data) => {
     include: {
       category: true,
       brand: true,
+      baseUnit: true,
     },
   });
 };
@@ -89,6 +93,7 @@ export const searchProducts = async (search) => {
     include: {
       category: true,
       brand: true,
+      baseUnit: true,
     },
     orderBy: {
       createdAt: "desc",
