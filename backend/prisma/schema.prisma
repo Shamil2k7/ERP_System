@@ -854,6 +854,9 @@ model AuditLog {
   @@index([entity])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ==============================
 // System Settings Model
 // ==============================
 

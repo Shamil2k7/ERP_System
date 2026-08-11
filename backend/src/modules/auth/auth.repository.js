@@ -70,6 +70,18 @@ const updatePassword = async (email, passwordHash) => {
   });
 };
 
+// Update Email
+const updateEmail = async (currentEmail, newEmail) => {
+  return await prisma.user.update({
+    where: {
+      email: currentEmail,
+    },
+    data: {
+      email: newEmail,
+    },
+  });
+};
+
 export {
   findUserByLogin,
   findUserByEmail,
@@ -77,4 +89,5 @@ export {
   findOTPByEmail,
   markOTPAsUsed,
   updatePassword,
+  updateEmail,
 };

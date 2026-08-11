@@ -3,6 +3,7 @@ import express from "express";
 import {
   login,
   changePassword,
+  changeEmail,
   forgotPassword,
   verifyResetOTP,
   resetPassword,
@@ -41,6 +42,12 @@ router.post(
   "/change-password",
   validateChangePassword,
   changePassword
+);
+
+// Change Email
+router.post(
+  "/change-email",
+  changeEmail
 );
 
 // Forgot Password

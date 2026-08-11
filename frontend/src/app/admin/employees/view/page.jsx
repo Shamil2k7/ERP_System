@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Edit2, Trash2, X, Users, Loader2, Plus } from "lucide-react";
 import styles from "./viewEmployees.module.css";
 import axios from "axios";
@@ -21,7 +22,6 @@ export default function EmployeePage() {
     phone: "",
     employeeId: "",
     role: "",
-    password: "",
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -69,7 +69,6 @@ export default function EmployeePage() {
       phone: employee.phone || "",
       employeeId: employee.employeeId || "",
       role: employee.role?.name || "Admin",
-      password: "",
     });
 
     setIsModalOpen(true);
@@ -103,10 +102,6 @@ export default function EmployeePage() {
 
     try {
       const updateData = { ...formData };
-
-      if (!updateData.password) {
-        delete updateData.password;
-      }
 
       await axios.put(
         `http://localhost:5000/api/employees/${currentEmployee.id}`,
@@ -391,18 +386,16 @@ export default function EmployeePage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  New Password
-                </label>
-
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  placeholder="Leave blank to keep current password"
-                />
+                <p style={{ fontSize: "0.85rem", color: "#64748b", margin: 0, padding: "10px 0" }}>
+                  To change the employee&apos;s password, direct them to their{" "}
+                  <Link
+                    href="/settings/profile"
+                    style={{ color: "#6366f1", fontWeight: 600, textDecoration: "underline" }}
+                  >
+                    Profile Page
+                  </Link>
+                  .
+                </p>
               </div>
 
               <div className={styles.formActions}>
