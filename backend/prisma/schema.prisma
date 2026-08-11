@@ -813,3 +813,28 @@ model Tax {
 
   @@map("taxes")
 }
+
+// ==============================
+// Audit Log Model
+// ==============================
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  userName  String?  @map("user_name")
+  userEmail String?  @map("user_email")
+  action    String   @db.VarChar(50) // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, EXPORT, etc.
+  entity    String   @db.VarChar(100) // Employee, Product, Customer, Invoice, Auth, etc.
+  entityId  String?  @map("entity_id")
+  details   Json?    // Detailed metadata, old/new values, request data
+  ipAddress String?  @map("ip_address") @db.VarChar(45)
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+

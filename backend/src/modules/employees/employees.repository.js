@@ -1,6 +1,8 @@
 import prisma from "../../config/prisma.js";
 
-
+/**
+ * Get all employees
+ */
 const getAllEmployees = async () => {
   return await prisma.user.findMany({
     include: {
@@ -12,6 +14,9 @@ const getAllEmployees = async () => {
   });
 };
 
+/**
+ * Get employee by ID
+ */
 const getEmployeeById = async (id) => {
   return await prisma.user.findUnique({
     where: {
@@ -23,55 +28,70 @@ const getEmployeeById = async (id) => {
   });
 };
 
-
+/**
+ * Find employee by email
+ */
 const findEmployeeByEmail = async (email) => {
   return await prisma.user.findUnique({
     where: {
-      email,
+      email: email.toLowerCase().trim(),
     },
   });
 };
 
-
+/**
+ * Find employee by employee ID
+ */
 const findEmployeeByEmployeeId = async (employeeId) => {
   return await prisma.user.findUnique({
     where: {
-      employeeId,
+      employeeId: employeeId.trim(),
     },
   });
 };
 
-
-
+/**
+ * Find employee by phone
+ */
 const findEmployeeByPhone = async (phone) => {
   return await prisma.user.findUnique({
     where: {
-      phone,
+      phone: phone.trim(),
     },
   });
 };
+
+/**
+ * Find role by role ID
+ */
+const findRoleById = async (roleId) => {
+  return await prisma.role.findUnique({
+    where: {
+      id: roleId,
+    },
+  });
+};
+
+/**
+ * Find role by role name
+ *
+ * Do NOT create a role automatically here.
+ * Roles should be created/managed separately by admin/system setup.
+ */
 const findRoleByName = async (roleName) => {
-  let role = await prisma.role.findFirst({
+  return await prisma.role.findFirst({
     where: {
       name: {
-        equals: roleName,
+        equals: roleName.trim(),
         mode: "insensitive",
       },
     },
   });
-
-  if (!role) {
-    role = await prisma.role.create({
-      data: {
-        name: roleName,
-      },
-    });
-  }
-
-  return role;
 };
 
-
+/**
+ * Create employee
+ */
 const createEmployee = async (data) => {
   return await prisma.user.create({
     data,
@@ -81,6 +101,9 @@ const createEmployee = async (data) => {
   });
 };
 
+/**
+ * Update employee
+ */
 const updateEmployee = async (id, data) => {
   return await prisma.user.update({
     where: {
@@ -93,6 +116,9 @@ const updateEmployee = async (id, data) => {
   });
 };
 
+/**
+ * Delete employee
+ */
 const deleteEmployee = async (id) => {
   return await prisma.user.delete({
     where: {
@@ -101,13 +127,13 @@ const deleteEmployee = async (id) => {
   });
 };
 
-
 export {
   getAllEmployees,
   getEmployeeById,
   findEmployeeByEmail,
   findEmployeeByEmployeeId,
   findEmployeeByPhone,
+  findRoleById,
   findRoleByName,
   createEmployee,
   updateEmployee,

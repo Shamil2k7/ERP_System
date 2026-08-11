@@ -36,6 +36,7 @@ import unitRoutes from "./modules/units/unit.routes.js";
 
 // M7
 import landingRoutes from "./modules/landing/landing.routes.js";
+import auditRoutes from "./modules/audit/audit.routes.js";
 
 
 const app = express();
@@ -107,6 +108,7 @@ app.use("/api/units", unitRoutes);
 
 // M7
 app.use("/api/landing", landingRoutes);
+app.use("/api/audit-logs", auditRoutes);
 
 // =====================
 // 404 Handler
