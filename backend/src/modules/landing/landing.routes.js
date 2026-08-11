@@ -8,10 +8,10 @@ import {
 
 const router = express.Router();
 
-// Get Landing Page Data
+// GET landing page
 router.get("/", getLandingPage);
 
-// Update Landing Page
+// UPDATE landing page
 router.put(
   "/",
   upload.fields([

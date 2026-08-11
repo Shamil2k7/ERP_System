@@ -28,8 +28,6 @@ router.get("/test", (req, res) => {
   });
 });
 
-// Verify Email
-// router.get("/verify-email", verifyEmail);
 
 // Login
 router.post(
