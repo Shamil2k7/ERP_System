@@ -17,6 +17,24 @@ model Role {
   updatedAt DateTime @updatedAt
 }
 
+// DEPARTMENT
+
+model Department {
+  id          String   @id @default(uuid())
+  name        String   @unique @db.VarChar(150)
+  code        String   @unique @db.VarChar(50)
+  head        String?  @db.VarChar(150)
+  employees   Int      @default(0)
+  status      Status   @default(ACTIVE)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name])
+  @@index([code])
+  @@map("departments")
+}
+
 model User {
   id String @id @default(uuid())
 
