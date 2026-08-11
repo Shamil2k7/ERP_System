@@ -2,15 +2,13 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
-// Folder where landing page images will be stored
 const uploadPath = "src/uploads/landingpageimage";
 
-// Create folder if it doesn't exist
+// Create upload directory
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath, { recursive: true });
 }
 
-// Multer Storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadPath);
@@ -24,7 +22,6 @@ const storage = multer.diskStorage({
   },
 });
 
-// Allow only image files
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);
@@ -33,12 +30,11 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Export upload middleware
 const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // file size is only = 5 MB
+    fileSize: 5 * 1024 * 1024,
   },
 });
 

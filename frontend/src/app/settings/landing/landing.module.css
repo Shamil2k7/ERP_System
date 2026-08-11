@@ -1,27 +1,27 @@
 .container {
   max-width: 1100px;
   margin: 40px auto;
-  background: #fff;
   padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
 .title {
-  font-size: 28px;
-  font-weight: 700;
   margin-bottom: 30px;
-  color: #222;
+  font-size: 30px;
+  font-weight: 700;
+  color: #111827;
 }
 
 .section {
   margin-bottom: 40px;
   padding-bottom: 30px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .section h2 {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   color: #2563eb;
   font-size: 22px;
 }
@@ -29,24 +29,26 @@
 .formGroup {
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
-.formGroup label {
+.formGroup label,
+.imageBox label {
   margin-bottom: 8px;
   font-weight: 600;
-  color: #444;
+  color: #374151;
 }
 
 .formGroup input,
-.formGroup textarea {
+.formGroup textarea,
+.imageBox input {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid #dcdcdc;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 15px;
   outline: none;
-  transition: 0.3s;
+  background: #ffffff;
 }
 
 .formGroup input:focus,
@@ -62,7 +64,7 @@
 .imageGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 25px;
 }
 
 .imageBox {
@@ -74,19 +76,18 @@
   width: 100%;
   height: 220px;
   object-fit: cover;
-  margin-top: 10px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  background: #f7f7f7;
+  margin-top: 12px;
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  background: #f8fafc;
 }
 
 .saveBtn {
-  margin-top: 30px;
-  background: #2563eb;
-  color: #fff;
+  padding: 14px 30px;
   border: none;
-  padding: 14px 26px;
-  border-radius: 8px;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #ffffff;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
@@ -103,10 +104,10 @@
 }
 
 .loading {
+  min-height: 70vh;
   display: flex;
-  justify-content: center;
   align-items: center;
-  height: 70vh;
+  justify-content: center;
   font-size: 22px;
   font-weight: 600;
 }
@@ -123,9 +124,5 @@
 
   .title {
     font-size: 24px;
-  }
-
-  .section h2 {
-    font-size: 20px;
   }
 }
