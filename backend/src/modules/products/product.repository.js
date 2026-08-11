@@ -1,5 +1,6 @@
 import prisma from "../../config/prisma.js";
 
+
 export const createProduct = async (data) => {
   return await prisma.product.create({
     data,
