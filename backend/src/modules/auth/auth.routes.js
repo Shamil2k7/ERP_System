@@ -2,7 +2,6 @@ import express from "express";
 
 import {
   login,
-  verifyEmail,
   changePassword,
   forgotPassword,
   verifyResetOTP,
@@ -30,7 +29,7 @@ router.get("/test", (req, res) => {
 });
 
 // Verify Email
-router.get("/verify-email", verifyEmail);
+// router.get("/verify-email", verifyEmail);
 
 // Login
 router.post(
