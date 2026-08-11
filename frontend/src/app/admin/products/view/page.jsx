@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import axios from 'axios';
+import { toast, Toaster } from 'react-hot-toast';
+import { Loader2 } from 'lucide-react';
 import {
   FiSearch,
   FiCalendar,
@@ -20,149 +23,47 @@ import {
 
 import styles from "./products.module.css";
 
-const productsData = [
-  {
-    id: 20,
-    code: "#PRD0020",
-    name: "Apple iPhone 15",
-    sku: "APP-PH-15",
-    category: "Smartphones",
-    brand: "Apple",
-    unit: "Piece",
-    quantity: 2,
-    status: "Low Stock",
-    sellingPrice: 250,
-    purchasePrice: 230,
-    icon: "",
-    iconType: "apple",
-  },
-  {
-    id: 19,
-    code: "#PRD0019",
-    name: "Dell XPS 13 9310",
-    sku: "DEL-LAP-9310",
-    category: "Computers",
-    brand: "Dell",
-    unit: "Piece",
-    quantity: 12,
-    status: "In Stock",
-    sellingPrice: 300,
-    purchasePrice: 280,
-    icon: "▱",
-    iconType: "laptop",
-  },
-  {
-    id: 18,
-    code: "#PRD0018",
-    name: "Bose QuietComfort 45",
-    sku: "BOS-HD-45",
-    category: "Headphones",
-    brand: "Bose",
-    unit: "Piece",
-    quantity: 15,
-    status: "In Stock",
-    sellingPrice: 100,
-    purchasePrice: 80,
-    icon: "♬",
-    iconType: "headphone",
-  },
-  {
-    id: 17,
-    code: "#PRD0017",
-    name: "Adidas Running Shoe",
-    sku: "ADI-SHO-RUN",
-    category: "Footwear",
-    brand: "Adidas",
-    unit: "Pack",
-    quantity: 20,
-    status: "In Stock",
-    sellingPrice: 400,
-    purchasePrice: 380,
-    icon: "⌁",
-    iconType: "shoe",
-  },
-  {
-    id: 16,
-    code: "#PRD0016",
-    name: "Dyson Vacuum Cleaner",
-    sku: "DYS-VC-100",
-    category: "Appliances",
-    brand: "Dyson",
-    unit: "Piece",
-    quantity: 8,
-    status: "In Stock",
-    sellingPrice: 750,
-    purchasePrice: 730,
-    icon: "♧",
-    iconType: "vacuum",
-  },
-  {
-    id: 15,
-    code: "#PRD0015",
-    name: "Apple AirPods Pro",
-    sku: "APP-EAR-PRO",
-    category: "Headphones",
-    brand: "Apple",
-    unit: "Piece",
-    quantity: 25,
-    status: "In Stock",
-    sellingPrice: 120,
-    purchasePrice: 100,
-    icon: "♧",
-    iconType: "airpods",
-  },
-  {
-    id: 14,
-    code: "#PRD0014",
-    name: "Levi's Original Fit Jeans",
-    sku: "LEV-JEA-001",
-    category: "Apparel",
-    brand: "Levi",
-    unit: "Piece",
-    quantity: 13,
-    status: "In Stock",
-    sellingPrice: 500,
-    purchasePrice: 480,
-    icon: "♧",
-    iconType: "shirt",
-  },
-  {
-    id: 13,
-    code: "#PRD0013",
-    name: "Giro Syntax Helmet",
-    sku: "GIR-HEL-01",
-    category: "Accessories",
-    brand: "Giro",
-    unit: "Piece",
-    quantity: 6,
-    status: "In Stock",
-    sellingPrice: 250,
-    purchasePrice: 220,
-    icon: "♧",
-    iconType: "helmet",
-  },
-  {
-    id: 12,
-    code: "#PRD0012",
-    name: "Samsung Galaxy S24",
-    sku: "SAM-GAL-S24",
-    category: "Smartphones",
-    brand: "Samsung",
-    unit: "Piece",
-    quantity: 0,
-    status: "No Stock",
-    sellingPrice: 800,
-    purchasePrice: 750,
-    icon: "S",
-    iconType: "samsung",
-  },
-];
-
 export default function ProductsPage() {
+  const [productsData, setProductsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sortBy, setSortBy] = useState("Latest");
   const [openMenu, setOpenMenu] = useState(null);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get('http://localhost:5000/api/products');
+      if (res.data && res.data.data) {
+        setProductsData(res.data.data);
+      }
+    } catch (error) {
+      toast.error('Failed to fetch products');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    
+    try {
+      await axios.delete(`http://localhost:5000/api/products/${id}`);
+      toast.success('Product deleted successfully');
+      setOpenMenu(null);
+      fetchProducts();
+    } catch (error) {
+      toast.error('Failed to delete product');
+      console.error(error);
+    }
+  };
 
   const filteredProducts = useMemo(() => {
     let result = [...productsData];
@@ -172,59 +73,73 @@ export default function ProductsPage() {
 
       result = result.filter(
         (product) =>
-          product.name.toLowerCase().includes(keyword) ||
-          product.code.toLowerCase().includes(keyword) ||
-          product.sku.toLowerCase().includes(keyword) ||
-          product.category.toLowerCase().includes(keyword) ||
-          product.brand.toLowerCase().includes(keyword)
+          product.name?.toLowerCase().includes(keyword) ||
+          product.code?.toLowerCase().includes(keyword) ||
+          product.sku?.toLowerCase().includes(keyword) ||
+          product.category?.name?.toLowerCase().includes(keyword) ||
+          product.brand?.name?.toLowerCase().includes(keyword)
       );
     }
 
     if (statusFilter !== "All") {
       result = result.filter(
-        (product) => product.status === statusFilter
+        (product) => {
+          if (statusFilter === 'In Stock') return (product.inventories?.[0]?.quantity || 0) > (product.inventories?.[0]?.lowStock || 0);
+          if (statusFilter === 'Low Stock') return (product.inventories?.[0]?.quantity || 0) > 0 && (product.inventories?.[0]?.quantity || 0) <= (product.inventories?.[0]?.lowStock || 10);
+          if (statusFilter === 'No Stock') return (product.inventories?.[0]?.quantity || 0) === 0;
+          return true;
+        }
       );
     }
 
     if (sortBy === "Name") {
       result.sort((a, b) =>
-        a.name.localeCompare(b.name)
+        (a.name || "").localeCompare(b.name || "")
       );
     }
 
     if (sortBy === "Price Low") {
       result.sort(
-        (a, b) => a.sellingPrice - b.sellingPrice
+        (a, b) => parseFloat(a.sellingPrice || 0) - parseFloat(b.sellingPrice || 0)
       );
     }
 
     if (sortBy === "Price High") {
       result.sort(
-        (a, b) => b.sellingPrice - a.sellingPrice
+        (a, b) => parseFloat(b.sellingPrice || 0) - parseFloat(a.sellingPrice || 0)
       );
     }
 
     if (sortBy === "Quantity") {
       result.sort(
-        (a, b) => b.quantity - a.quantity
+        (a, b) => (b.inventories?.[0]?.quantity || 0) - (a.inventories?.[0]?.quantity || 0)
       );
     }
 
     return result;
-  }, [search, statusFilter, sortBy]);
+  }, [search, statusFilter, sortBy, productsData]);
 
   const totalProducts = productsData.length;
+  
   const inStock = productsData.filter(
-    (product) => product.quantity > 0
+    (product) => (product.inventories?.[0]?.quantity || 0) > 0
   ).length;
 
   const lowStock = productsData.filter(
-    (product) => product.status === "Low Stock"
+    (product) => (product.inventories?.[0]?.quantity || 0) > 0 && (product.inventories?.[0]?.quantity || 0) <= (product.inventories?.[0]?.minimumStock || 10)
   ).length;
 
   const noStock = productsData.filter(
-    (product) => product.quantity === 0
+    (product) => (product.inventories?.[0]?.quantity || 0) === 0
   ).length;
+
+  const getProductStatus = (product) => {
+    const qty = product.inventories?.[0]?.quantity || 0;
+    const minStock = product.inventories?.[0]?.minimumStock || 10;
+    if (qty === 0) return "No Stock";
+    if (qty <= minStock) return "Low Stock";
+    return "In Stock";
+  };
 
   const getStatusClass = (status) => {
     if (status === "In Stock") {
@@ -257,16 +172,16 @@ export default function ProductsPage() {
     ];
 
     const rows = filteredProducts.map((product) => [
-      product.code,
-      product.name,
-      product.sku,
-      product.category,
-      product.brand,
-      product.unit,
-      product.quantity,
-      product.status,
-      product.sellingPrice,
-      product.purchasePrice,
+      product.code || 'N/A',
+      product.name || 'N/A',
+      product.sku || 'N/A',
+      product.category?.name || 'N/A',
+      product.brand?.name || 'N/A',
+      product.baseUnit || 'N/A',
+      product.inventories?.[0]?.quantity || 0,
+      getProductStatus(product),
+      product.sellingPrice || 0,
+      product.costPrice || 0,
     ]);
 
     const csv = [
@@ -291,7 +206,7 @@ export default function ProductsPage() {
 
   return (
     <main className={styles.page}>
-
+      <Toaster position="top-right" />
       {/* =========================
           HEADER
       ========================= */}
@@ -395,7 +310,7 @@ export default function ProductsPage() {
             <h2>{lowStock}</h2>
 
             <span className={styles.alertText}>
-              3 new alerts
+              Alerts Active
             </span>
           </div>
 
@@ -464,7 +379,7 @@ export default function ProductsPage() {
             <FiCalendar />
 
             <span>
-              01 Jan 26 to 20 Jan 26
+              Today
             </span>
           </button>
 
@@ -540,7 +455,7 @@ export default function ProductsPage() {
             <button
               className={styles.iconButton}
               title="Refresh"
-              onClick={() => window.location.reload()}
+              onClick={fetchProducts}
             >
               <FiRefreshCw />
             </button>
@@ -555,6 +470,11 @@ export default function ProductsPage() {
 
         <div className={styles.tableWrapper}>
 
+          {loading ? (
+             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px' }}>
+                <Loader2 className={styles.spinner} style={{ animation: 'spin 1s linear infinite' }} size={40} />
+             </div>
+          ) : (
           <table className={styles.table}>
 
             <thead>
@@ -576,12 +496,13 @@ export default function ProductsPage() {
             <tbody>
 
               {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
-
+                filteredProducts.map((product) => {
+                  const status = getProductStatus(product);
+                  return (
                   <tr key={product.id}>
 
                     <td className={styles.code}>
-                      {product.code}
+                      {product.code || `#${product.id?.substring(0,6)}`}
                     </td>
 
                     {/* Product */}
@@ -591,9 +512,11 @@ export default function ProductsPage() {
                       <div className={styles.productCell}>
 
                         <div
-                          className={`${styles.productIcon} ${styles[product.iconType]}`}
+                          className={`${styles.productIcon} ${styles[product.iconType || 'default']}`}
                         >
-                          {product.icon}
+                          {product.image ? (
+                             <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', borderRadius: '4px' }} />
+                          ) : product.icon || <FiBox />}
                         </div>
 
                         <strong>
@@ -607,19 +530,19 @@ export default function ProductsPage() {
                     <td>{product.sku}</td>
 
                     <td>
-                      {product.category}
+                      {product.category?.name || 'N/A'}
                     </td>
 
                     <td>
-                      {product.brand}
+                      {product.brand?.name || 'N/A'}
                     </td>
 
                     <td>
-                      {product.unit}
+                      {product.baseUnit || 'PCS'}
                     </td>
 
                     <td>
-                      {String(product.quantity).padStart(
+                      {String(product.inventories?.[0]?.quantity || 0).padStart(
                         2,
                         "0"
                       )}
@@ -630,11 +553,9 @@ export default function ProductsPage() {
                     <td>
 
                       <span
-                        className={`${styles.status} ${getStatusClass(
-                          product.status
-                        )}`}
+                        className={`${styles.status} ${getStatusClass(status)}`}
                       >
-                        {product.status}
+                        {status}
                       </span>
 
                     </td>
@@ -648,7 +569,7 @@ export default function ProductsPage() {
                     {/* Purchase Price */}
 
                     <td className={styles.price}>
-                      ${product.purchasePrice}
+                      ${product.costPrice}
                     </td>
 
                     {/* Action */}
@@ -677,15 +598,15 @@ export default function ProductsPage() {
                               styles.actionMenu
                             }
                           >
-                            <button>
+                            <button onClick={() => window.location.href = `/admin/products/view/${product.id}`}>
                               View
                             </button>
 
-                            <button>
+                            <button onClick={() => window.location.href = `/admin/products/edit/${product.id}`}>
                               Edit
                             </button>
 
-                            <button>
+                            <button onClick={() => handleDelete(product.id)} style={{ color: 'red' }}>
                               Delete
                             </button>
                           </div>
@@ -698,7 +619,7 @@ export default function ProductsPage() {
 
                   </tr>
 
-                ))
+                )})
               ) : (
 
                 <tr>
@@ -715,7 +636,7 @@ export default function ProductsPage() {
             </tbody>
 
           </table>
-
+          )}
         </div>
 
       </section>
