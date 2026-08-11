@@ -1,4 +1,5 @@
 import express from "express";
+
 import upload from "./landing.upload.js";
 
 import {
@@ -8,10 +9,10 @@ import {
 
 const router = express.Router();
 
-// Get Landing Page Data
+// GET /api/landing
 router.get("/", getLandingPage);
 
-// Update Landing Page
+// PUT /api/landing
 router.put(
   "/",
   upload.fields([

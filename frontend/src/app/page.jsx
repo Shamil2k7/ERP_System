@@ -165,7 +165,7 @@ export default function Home() {
 
             <img
               src={
-                landing.aboutImage1
+                landing.aboutImage2
                   ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage2}`
                   : "/placeholder.png"
               }
@@ -175,7 +175,7 @@ export default function Home() {
 
             <img
               src={
-                landing.aboutImage1
+                landing.aboutImage3
                   ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage3}`
                   : "/placeholder.png"
               }
@@ -185,14 +185,13 @@ export default function Home() {
 
             <img
               src={
-                landing.aboutImage1
+                landing.aboutImage4
                   ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage4}`
                   : "/placeholder.png"
               }
               alt="About 4"
               loading="lazy"
             />
-
           </div>
 
         </div>
