@@ -62,7 +62,7 @@ export default function Header({ toggleSidebar }) {
         <div className={styles.profile}>
 
           <img
-            src="https://i.pravatar.cc/100"
+            src="https://i.pravata"
             alt="profile"
           />
 
