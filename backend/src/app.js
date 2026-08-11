@@ -25,8 +25,8 @@ import categoryRoutes from "./modules/categories/category.routes.js";
 import productRoutes from "./modules/products/product.routes.js";
 import supplierRoutes from "./modules/suppliers/supplier.routes.js";
 import warehouseRoutes from "./modules/warehouse/warehouse.routes.js";
-// import inventoryRoutes from "./modules/inventory/inventory.routes.js";
-// import purchaseRoutes from "./modules/purchase/purchase.routes.js";
+import inventoryRoutes from "./modules/inventory/inventory.routes.js";
+import purchaseRoutes from "./modules/purchase/purchase.routes.js";
 // import stockRoutes from "./modules/stock/stock.routes.js";
 // import stockTransferRoutes from "./modules/stockTransfer/stockTransfer.routes.js";
 // import barcodeRoutes from "./modules/barcode/barcode.routes.js";
@@ -90,13 +90,14 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/discounts", discountRoutes);
 app.use("/api/taxes", taxRoutes);
 app.use("/api/employees", employeeRoutes);
+
 //M3
  app.use("/api/categories", categoryRoutes);
  app.use("/api/products", productRoutes); 
  app.use("/api/suppliers", supplierRoutes);
  app.use("/api/warehouses", warehouseRoutes);
-//  app.use("/api/inventory", inventoryRoutes);
-//  app.use("/api/purchases", purchaseRoutes);
+ app.use("/api/inventory", inventoryRoutes);
+ app.use("/api/purchases", purchaseRoutes);
 //  app.use("/api/stock", stockRoutes);
 //  app.use("/api/stock-transfers", stockTransferRoutes);
 //  app.use("/api/barcodes", barcodeRoutes);
