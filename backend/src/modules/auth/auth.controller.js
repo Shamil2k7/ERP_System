@@ -1,6 +1,7 @@
 import {
   loginService,
   changePasswordService,
+  changeEmailService,
   forgotPasswordService,
   verifyResetOTPService,
   resetPasswordService,
@@ -101,9 +102,30 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// Change Email
+const changeEmail = async (req, res) => {
+  try {
+    const { currentEmail, password, newEmail } = req.body;
+
+    const result = await changeEmailService(
+      currentEmail,
+      password,
+      newEmail
+    );
+
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 export {
   login,
   changePassword,
+  changeEmail,
   forgotPassword,
   verifyResetOTP,
   resetPassword,
