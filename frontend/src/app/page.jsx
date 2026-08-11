@@ -6,6 +6,7 @@ import { getLandingPage } from "@/services/landing.service";
 
 export default function Home() {
   const [landing, setLanding] = useState(null);
+
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
@@ -13,8 +14,8 @@ export default function Home() {
       try {
         const data = await getLandingPage();
         setLanding(data);
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error("Landing page error:", error);
       }
     }
 
@@ -31,6 +32,8 @@ export default function Home() {
 
   return (
     <>
+      {/* ================= NAVBAR ================= */}
+
       <nav className={styles.navbar}>
         <div className={styles.logo}>
           ERP<span>Cloud</span>
@@ -40,21 +43,16 @@ export default function Home() {
           Login →
         </button>
       </nav>
+
       {/* ================= HERO ================= */}
 
       <section className={styles.hero} id="home">
-
-        {/* Background Blur Shapes */}
         <div className={styles.blurOne}></div>
         <div className={styles.blurTwo}></div>
 
         {/* Left Content */}
+
         <div className={styles.heroContent}>
-
-          {/* <span className={styles.heroTag}>
-            CLOUD ERP PLATFORM
-          </span> */}
-
           <h1 className={styles.heroTitle}>
             {landing.heroTitle}
           </h1>
@@ -64,59 +62,40 @@ export default function Home() {
           </p>
 
           <div className={styles.heroButtons}>
-
-            {/* <button className={styles.primaryBtn}>
-              Request Demo
-            </button> */}
-
             <button className={styles.secondaryBtn}>
               Learn More
             </button>
-
           </div>
-
         </div>
 
         {/* Right Content */}
+
         <div className={styles.heroImageSection}>
-
           <div className={styles.dashboardCard}>
-
-            {/* Top Bar */}
-
             <div className={styles.dashboardTop}>
-
               <div>
                 <h3>ERP Dashboard</h3>
                 <span>Business Overview</span>
               </div>
 
               <div className={styles.status}></div>
-
             </div>
-
-            {/* Chart Placeholder */}
 
             <div className={styles.chartArea}>
-
-              <div className={styles.chartLine}></div>
-              <img
-                src={
-                  landing.heroImage
-                    ? `${API_URL}/uploads/landingpageimage/${landing.heroImage}`
-                    : "/placeholder.png"
-                }
-                alt="Hero"
-                loading="lazy"
-                className={styles.dashboardImage}
-              />
-
+              {landing.heroImage ? (
+                <img
+                  src={`${API_URL}/uploads/landingpageimage/${landing.heroImage}`}
+                  alt="ERP Dashboard"
+                  className={styles.dashboardImage}
+                />
+              ) : (
+                <div className={styles.imagePlaceholder}>
+                  ERP Dashboard
+                </div>
+              )}
             </div>
 
-            {/* Bottom Stats */}
-
             <div className={styles.dashboardStats}>
-
               <div className={styles.statBox}>
                 <h4>$84K</h4>
                 <p>Revenue</p>
@@ -136,69 +115,67 @@ export default function Home() {
                 <h4>3,520</h4>
                 <p>Customers</p>
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </section>
 
       {/* ================= ABOUT ================= */}
 
       <section className={styles.about} id="about">
-
         <div className={styles.aboutImages}>
-
           <div className={styles.imageGrid}>
+            {landing.aboutImage1 ? (
+              <img
+                src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage1}`}
+                alt="About 1"
+                loading="lazy"
+              />
+            ) : (
+              <div className={styles.imagePlaceholder}>
+                About Image 1
+              </div>
+            )}
 
-            <img
-              src={
-                landing.aboutImage1
-                  ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage1}`
-                  : "/placeholder.png"
-              }
-              alt="About 1"
-              loading="lazy"
-            />
+            {landing.aboutImage2 ? (
+              <img
+                src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage2}`}
+                alt="About 2"
+                loading="lazy"
+              />
+            ) : (
+              <div className={styles.imagePlaceholder}>
+                About Image 2
+              </div>
+            )}
 
-            <img
-              src={
-                landing.aboutImage1
-                  ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage2}`
-                  : "/placeholder.png"
-              }
-              alt="About 2"
-              loading="lazy"
-            />
+            {landing.aboutImage3 ? (
+              <img
+                src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage3}`}
+                alt="About 3"
+                loading="lazy"
+              />
+            ) : (
+              <div className={styles.imagePlaceholder}>
+                About Image 3
+              </div>
+            )}
 
-            <img
-              src={
-                landing.aboutImage1
-                  ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage3}`
-                  : "/placeholder.png"
-              }
-              alt="About 3"
-              loading="lazy"
-            />
-
-            <img
-              src={
-                landing.aboutImage1
-                  ? `${API_URL}/uploads/landingpageimage/${landing.aboutImage4}`
-                  : "/placeholder.png"
-              }
-              alt="About 4"
-              loading="lazy"
-            />
-
+            {landing.aboutImage4 ? (
+              <img
+                src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage4}`}
+                alt="About 4"
+                loading="lazy"
+              />
+            ) : (
+              <div className={styles.imagePlaceholder}>
+                About Image 4
+              </div>
+            )}
           </div>
-
         </div>
 
         <div className={styles.aboutContent}>
-
           <h2>{landing.aboutTitle}</h2>
 
           <p>{landing.aboutDescription}</p>
@@ -206,11 +183,10 @@ export default function Home() {
           <button className={styles.learnBtn}>
             Learn More →
           </button>
-
         </div>
+      </section>
 
-
-      </section >
+      {/* ================= FOOTER ================= */}
 
       <footer className={styles.footer}>
         <p>© ERP Cloud. All Rights Reserved.</p>

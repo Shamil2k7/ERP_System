@@ -1,4 +1,5 @@
-import { addEmployeeSchema } from "./employee.schema.js";
+
+import { addEmployeeSchema } from "./employees.schema.js";
 
 const validateAddEmployee = (req, res, next) => {
   const { error } = addEmployeeSchema.validate(req.body);

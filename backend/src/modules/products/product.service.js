@@ -1,6 +1,7 @@
 import * as productRepository from "./product.repository.js";
 import * as categoryRepository from "../categories/category.repository.js";
 import * as brandRepository from "../brands/brand.repository.js";
+import * as unitRepository from "../units/unit.repository.js";
 
 export const createProduct = async (data) => {
   const category = await categoryRepository.getCategoryById(
@@ -16,6 +17,12 @@ export const createProduct = async (data) => {
       throw new Error("Brand not found.");
     }
   }
+
+const unit = await unitRepository.getUnitById(data.unitId);
+  if (!unit) {
+    throw new Error("Unit not found.");
+  }
+
   const existingProduct = await productRepository.getProductBySku(
     data.sku
   );
@@ -72,11 +79,17 @@ export const updateProduct = async (id, data) => {
     }
   }
 
+  if (data.unitId) {
+    const unit = await unitRepository.getUnitById(data.unitId);
+    if (!unit) {
+      throw new Error("Unit not found.");
+    }
+  }
+
   if (data.sku && data.sku !== product.sku) {
     const existingProduct = await productRepository.getProductBySku(
       data.sku
     );
-
     if (existingProduct) {
       throw new Error("SKU already exists.");
     }

@@ -1,12 +1,12 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import {
   getLandingPage,
   updateLandingPage,
-} from "@/services/landing.service";
-import styles from "./landing-admin.module.css";
+} from "@/services/landingAdmin.service";
+
+import styles from "./landing.module.css";
 
 export default function LandingAdminPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -37,9 +37,9 @@ export default function LandingAdminPage() {
     aboutImage4: "",
   });
 
-  // ===========================
+  // ============================
   // Load Landing Data
-  // ===========================
+  // ============================
 
   useEffect(() => {
     loadLanding();
@@ -78,237 +78,299 @@ export default function LandingAdminPage() {
           : "",
       });
     } catch (error) {
-      console.error(error);
-      alert("Failed to load landing page.");
+      console.error("Load landing error:", error);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
-  // ===========================
+  // ============================
   // Text Change
-  // ===========================
+  // ============================
 
   function handleChange(e) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   }
 
-  // ===========================
+  // ============================
   // Image Change
-  // ===========================
+  // ============================
 
   function handleImage(e) {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     const name = e.target.name;
 
-    setFiles({
-      ...files,
+    setFiles((previous) => ({
+      ...previous,
       [name]: file,
-    });
+    }));
 
-    setPreview({
-      ...preview,
+    setPreview((previous) => ({
+      ...previous,
       [name]: URL.createObjectURL(file),
-    });
+    }));
   }
 
-  // ===========================
+  // ============================
   // Save
-  // ===========================
+  // ============================
 
   async function handleSubmit(e) {
     e.preventDefault();
 
-    setSaving(true);
-
-    const formData = new FormData();
-
-    formData.append("heroTitle", form.heroTitle);
-    formData.append("heroDescription", form.heroDescription);
-
-    formData.append("aboutTitle", form.aboutTitle);
-    formData.append("aboutDescription", form.aboutDescription);
-
-    if (files.heroImage)
-      formData.append("heroImage", files.heroImage);
-
-    if (files.aboutImage1)
-      formData.append("aboutImage1", files.aboutImage1);
-
-    if (files.aboutImage2)
-      formData.append("aboutImage2", files.aboutImage2);
-
-    if (files.aboutImage3)
-      formData.append("aboutImage3", files.aboutImage3);
-
-    if (files.aboutImage4)
-      formData.append("aboutImage4", files.aboutImage4);
-
     try {
+      setSaving(true);
+
+      const formData = new FormData();
+
+      formData.append("heroTitle", form.heroTitle);
+      formData.append("heroDescription", form.heroDescription);
+      formData.append("aboutTitle", form.aboutTitle);
+      formData.append("aboutDescription", form.aboutDescription);
+
+      if (files.heroImage) {
+        formData.append("heroImage", files.heroImage);
+      }
+
+      if (files.aboutImage1) {
+        formData.append("aboutImage1", files.aboutImage1);
+      }
+
+      if (files.aboutImage2) {
+        formData.append("aboutImage2", files.aboutImage2);
+      }
+
+      if (files.aboutImage3) {
+        formData.append("aboutImage3", files.aboutImage3);
+      }
+
+      if (files.aboutImage4) {
+        formData.append("aboutImage4", files.aboutImage4);
+      }
+
       await updateLandingPage(formData);
 
       alert("Landing page updated successfully.");
 
-      loadLanding();
-    } catch (error) {
-      console.error(error);
-      alert("Update failed.");
-    }
+      await loadLanding();
 
-    setSaving(false);
+      setFiles({
+        heroImage: null,
+        aboutImage1: null,
+        aboutImage2: null,
+        aboutImage3: null,
+        aboutImage4: null,
+      });
+    } catch (error) {
+      console.error("Update landing error:", error);
+
+      alert(error.message || "Update failed.");
+    } finally {
+      setSaving(false);
+    }
   }
+
+  // ============================
+  // Loading
+  // ============================
 
   if (loading) {
-    return <h2>Loading...</h2>;
+    return (
+      <div className={styles.loading}>
+        Loading...
+      </div>
+    );
   }
+
+  // ============================
+  // Page
+  // ============================
 
   return (
     <div className={styles.container}>
-      <h1>Landing Page Management</h1>
+      <h1 className={styles.title}>
+        Landing Page Management
+      </h1>
 
-      <form onSubmit={handleSubmit} className={styles.form}>
-        {/* HERO */}
+      <form onSubmit={handleSubmit}>
+        {/* ================= HERO ================= */}
 
-        <h2>Hero Section</h2>
+        <section className={styles.section}>
+          <h2>Hero Section</h2>
 
-        <label>Hero Title</label>
+          <div className={styles.formGroup}>
+            <label>Hero Title</label>
 
-        <input
-          type="text"
-          name="heroTitle"
-          value={form.heroTitle}
-          onChange={handleChange}
-        />
+            <input
+              type="text"
+              name="heroTitle"
+              value={form.heroTitle}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <label>Hero Description</label>
+          <div className={styles.formGroup}>
+            <label>Hero Description</label>
 
-        <textarea
-          name="heroDescription"
-          rows="5"
-          value={form.heroDescription}
-          onChange={handleChange}
-        />
+            <textarea
+              name="heroDescription"
+              rows="5"
+              value={form.heroDescription}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <label>Hero Image</label>
+          <div className={styles.formGroup}>
+            <label>Hero Image</label>
 
-        <input
-          type="file"
-          name="heroImage"
-          accept="image/*"
-          onChange={handleImage}
-        />
+            <input
+              type="file"
+              name="heroImage"
+              accept="image/*"
+              onChange={handleImage}
+            />
 
-        {preview.heroImage && (
-          <img
-            src={preview.heroImage}
-            className={styles.preview}
-            alt="Hero"
-          />
-        )}
+            {preview.heroImage && (
+              <img
+                src={preview.heroImage}
+                alt="Hero Preview"
+                className={styles.preview}
+              />
+            )}
+          </div>
+        </section>
 
-        {/* ABOUT */}
+        {/* ================= ABOUT ================= */}
 
-        <h2>About Section</h2>
+        <section className={styles.section}>
+          <h2>About Section</h2>
 
-        <label>About Title</label>
+          <div className={styles.formGroup}>
+            <label>About Title</label>
 
-        <input
-          type="text"
-          name="aboutTitle"
-          value={form.aboutTitle}
-          onChange={handleChange}
-        />
+            <input
+              type="text"
+              name="aboutTitle"
+              value={form.aboutTitle}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        <label>About Description</label>
+          <div className={styles.formGroup}>
+            <label>About Description</label>
 
-        <textarea
-          rows="5"
-          name="aboutDescription"
-          value={form.aboutDescription}
-          onChange={handleChange}
-        />
+            <textarea
+              name="aboutDescription"
+              rows="5"
+              value={form.aboutDescription}
+              onChange={handleChange}
+              required
+            />
+          </div>
 
-        {/* ABOUT IMAGE 1 */}
+          {/* Images */}
 
-        <label>About Image 1</label>
+          <div className={styles.imageGrid}>
+            {/* Image 1 */}
 
-        <input
-          type="file"
-          name="aboutImage1"
-          accept="image/*"
-          onChange={handleImage}
-        />
+            <div className={styles.imageBox}>
+              <label>About Image 1</label>
 
-        {preview.aboutImage1 && (
-          <img
-            src={preview.aboutImage1}
-            className={styles.preview}
-            alt=""
-          />
-        )}
+              <input
+                type="file"
+                name="aboutImage1"
+                accept="image/*"
+                onChange={handleImage}
+              />
 
-        {/* ABOUT IMAGE 2 */}
+              {preview.aboutImage1 && (
+                <img
+                  src={preview.aboutImage1}
+                  alt="About 1"
+                  className={styles.preview}
+                />
+              )}
+            </div>
 
-        <label>About Image 2</label>
+            {/* Image 2 */}
 
-        <input
-          type="file"
-          name="aboutImage2"
-          accept="image/*"
-          onChange={handleImage}
-        />
+            <div className={styles.imageBox}>
+              <label>About Image 2</label>
 
-        {preview.aboutImage2 && (
-          <img
-            src={preview.aboutImage2}
-            className={styles.preview}
-            alt=""
-          />
-        )}
+              <input
+                type="file"
+                name="aboutImage2"
+                accept="image/*"
+                onChange={handleImage}
+              />
 
-        {/* ABOUT IMAGE 3 */}
+              {preview.aboutImage2 && (
+                <img
+                  src={preview.aboutImage2}
+                  alt="About 2"
+                  className={styles.preview}
+                />
+              )}
+            </div>
 
-        <label>About Image 3</label>
+            {/* Image 3 */}
 
-        <input
-          type="file"
-          name="aboutImage3"
-          accept="image/*"
-          onChange={handleImage}
-        />
+            <div className={styles.imageBox}>
+              <label>About Image 3</label>
 
-        {preview.aboutImage3 && (
-          <img
-            src={preview.aboutImage3}
-            className={styles.preview}
-            alt=""
-          />
-        )}
+              <input
+                type="file"
+                name="aboutImage3"
+                accept="image/*"
+                onChange={handleImage}
+              />
 
-        {/* ABOUT IMAGE 4 */}
+              {preview.aboutImage3 && (
+                <img
+                  src={preview.aboutImage3}
+                  alt="About 3"
+                  className={styles.preview}
+                />
+              )}
+            </div>
 
-        <label>About Image 4</label>
+            {/* Image 4 */}
 
-        <input
-          type="file"
-          name="aboutImage4"
-          accept="image/*"
-          onChange={handleImage}
-        />
+            <div className={styles.imageBox}>
+              <label>About Image 4</label>
 
-        {preview.aboutImage4 && (
-          <img
-            src={preview.aboutImage4}
-            className={styles.preview}
-            alt=""
-          />
-        )}
+              <input
+                type="file"
+                name="aboutImage4"
+                accept="image/*"
+                onChange={handleImage}
+              />
+
+              {preview.aboutImage4 && (
+                <img
+                  src={preview.aboutImage4}
+                  alt="About 4"
+                  className={styles.preview}
+                />
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ================= SAVE ================= */}
 
         <button
           type="submit"

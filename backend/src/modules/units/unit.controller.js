@@ -1,13 +1,12 @@
-import * as purchaseService from "./purchase.service.js";
+import * as unitService from "./unit.service.js";
 
-export const createPurchase = async (req, res) => {
+export const createUnit = async (req, res) => {
   try {
-    const purchase = await purchaseService.createPurchase(req.body);
-
+    const unit = await unitService.createUnit(req.body);
     return res.status(201).json({
       success: true,
-      message: "Purchase created successfully",
-      data: purchase,
+      message: "Unit created successfully",
+      data: unit,
     });
   } catch (error) {
     return res.status(400).json({
@@ -17,15 +16,14 @@ export const createPurchase = async (req, res) => {
   }
 };
 
-export const getAllPurchases = async (req, res) => {
+export const getAllUnits = async (req, res) => {
   try {
-    const purchases = await purchaseService.getAllPurchases();
-
+    const units = await unitService.getAllUnits();
     return res.status(200).json({
       success: true,
-      message: "Purchases fetched successfully",
-      count: purchases.length,
-      data: purchases,
+      message: "Units fetched successfully",
+      count: units.length,
+      data: units,
     });
   } catch (error) {
     return res.status(500).json({
@@ -35,16 +33,14 @@ export const getAllPurchases = async (req, res) => {
   }
 };
 
-export const getPurchaseById = async (req, res) => {
+export const getUnitById = async (req, res) => {
   try {
     const { id } = req.params;
-
-    const purchase = await purchaseService.getPurchaseById(id);
-
+    const unit = await unitService.getUnitById(id);
     return res.status(200).json({
       success: true,
-      message: "Purchase fetched successfully",
-      data: purchase,
+      message: "Unit fetched successfully",
+      data: unit,
     });
   } catch (error) {
     return res.status(404).json({
@@ -54,16 +50,14 @@ export const getPurchaseById = async (req, res) => {
   }
 };
 
-export const updatePurchase = async (req, res) => {
+export const updateUnit = async (req, res) => {
   try {
     const { id } = req.params;
-
-    const purchase = await purchaseService.updatePurchase(id, req.body);
-
+    const unit = await unitService.updateUnit(id, req.body);
     return res.status(200).json({
       success: true,
-      message: "Purchase updated successfully",
-      data: purchase,
+      message: "Unit updated successfully",
+      data: unit,
     });
   } catch (error) {
     return res.status(400).json({
@@ -73,15 +67,13 @@ export const updatePurchase = async (req, res) => {
   }
 };
 
-export const deletePurchase = async (req, res) => {
+export const deleteUnit = async (req, res) => {
   try {
     const { id } = req.params;
-
-    await purchaseService.deletePurchase(id);
-
+    await unitService.deleteUnit(id);
     return res.status(200).json({
       success: true,
-      message: "Purchase deleted successfully",
+      message: "Unit deleted successfully",
     });
   } catch (error) {
     return res.status(404).json({

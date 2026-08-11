@@ -33,11 +33,14 @@ const addEmployeeSchema = Joi.object({
     }),
 
   phone: Joi.string()
-    .pattern(/^[6-9]\d{9}$/)
+    .trim()
+    .min(7)
+    .max(20)
     .required()
     .messages({
-      "string.pattern.base": "Phone number must be 10 digits",
       "string.empty": "Phone number is required",
+      "string.min": "Phone number must be at least 7 characters",
+      "string.max": "Phone number cannot exceed 20 characters",
       "any.required": "Phone number is required",
     }),
 

@@ -2,7 +2,6 @@ import express from "express";
 
 import {
   login,
-  // verifyEmail,
   changePassword,
   forgotPassword,
   verifyResetOTP,
@@ -28,9 +27,6 @@ router.get("/test", (req, res) => {
     message: "Auth Route Working",
   });
 });
-
-// Verify Email
-// router.get("/verify-email", verifyEmail);
 
 
 // Login

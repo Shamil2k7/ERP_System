@@ -20,25 +20,29 @@ model Role {
 model User {
   id String @id @default(uuid())
 
-  fullName   String?
-  email      String @unique
+  fullName String?
+
+  email String @unique
+
   employeeId String? @unique
-  phone      String @unique
+
+  phone String @unique
 
   passwordHash String
 
   isVerified Boolean @default(false)
 
-  //  Add these three fields
   firstLogin Boolean @default(true)
 
   verificationToken   String?
   verificationExpires DateTime?
 
   roleId String?
-  role   Role? @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  role Role? @relation(fields: [roleId], references: [id], onDelete: Restrict)
 
   createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
 }
 
@@ -46,7 +50,8 @@ model EmailOTP {
   id String @id @default(uuid())
 
   email String
-  otp   String
+
+  otp String
 
   isUsed Boolean @default(false)
 
@@ -169,16 +174,23 @@ model Brand {
 
 // PRODUCT
 
-enum Unit {
-  PCS
-  KG
-  G
-  LTR
-  ML
-  BOX
-  PACK
-  BAG
-  DOZEN
+model Unit {
+  id String @id @default(uuid())
+
+  name String @unique @db.VarChar(50)
+
+  code String @unique @db.VarChar(20)
+
+  status Status @default(ACTIVE)
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@map("units")
 }
 
 model Product {
@@ -192,6 +204,8 @@ model Product {
 
   brandId String?
 
+  unitId String
+
   costPrice Decimal @db.Decimal(18, 2)
 
   sellingPrice Decimal @db.Decimal(18, 2)
@@ -200,13 +214,7 @@ model Product {
 
   discountValue Decimal? @db.Decimal(18, 2)
 
-  baseUnit Unit @default(PCS)
-
-  image String?
-
-  description String?
-
-  status ProductStatus @default(ACTIVE)
+  unit Unit @relation(fields: [unitId], references: [id])
 
   category Category @relation(fields: [categoryId], references: [id])
 
@@ -228,6 +236,7 @@ model Product {
 
   @@index([categoryId])
   @@index([brandId])
+  @@index([unitId])
   @@map("products")
 }
 
@@ -747,7 +756,6 @@ model Discount {
 }
 
 //landing page database design
-
 
 model LandingPage {
   id String @id @default(uuid())

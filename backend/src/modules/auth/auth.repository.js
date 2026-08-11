@@ -2,11 +2,12 @@ import prisma from "../../config/prisma.js";
 
 // Login
 const findUserByLogin = async (login) => {
+  const cleanLogin = (login || "").trim();
   return await prisma.user.findFirst({
     where: {
       OR: [
-        { email: login },
-        { employeeId: login },
+        { email: { equals: cleanLogin, mode: "insensitive" } },
+        { employeeId: { equals: cleanLogin, mode: "insensitive" } },
       ],
     },
 
