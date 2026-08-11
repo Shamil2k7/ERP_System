@@ -48,10 +48,11 @@ body("discountValue")
   .isFloat({ min: 0 })
   .withMessage("Discount value must be greater than or equal to 0"),
 
- body("baseUnit")
-  .optional()
-  .isIn(["PCS", "KG", "G", "LTR", "ML", "BOX", "PACK", "BAG", "DOZEN"])
-  .withMessage("Invalid base unit"),
+body("unitId")
+  .notEmpty()
+  .withMessage("Unit is required")
+  .isUUID()
+  .withMessage("Invalid Unit ID"),
 
   body("image")
     .optional()
@@ -128,10 +129,10 @@ body("discountValue")
   .isFloat({ min: 0 })
   .withMessage("Discount value must be greater than or equal to 0"),
 
-  body("baseUnit")
+ body("unitId")
   .optional()
-  .isIn(["PCS", "KG", "G", "LTR", "ML", "BOX", "PACK", "BAG", "DOZEN"])
-  .withMessage("Invalid base unit"),
+  .isUUID()
+  .withMessage("Invalid Unit ID"),
   
   body("image")
     .optional()

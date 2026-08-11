@@ -1,11 +1,13 @@
 import prisma from "../../config/prisma.js";
 
+
 export const createProduct = async (data) => {
   return await prisma.product.create({
     data,
     include: {
       category: true,
       brand: true,
+      unit: true,
     },
   });
 };
@@ -15,6 +17,7 @@ export const getAllProducts = async () => {
     include: {
       category: true,
       brand: true,
+      unit: true,
       barcodes: true,
       inventories: true,
     },
@@ -32,6 +35,7 @@ export const getProductById = async (id) => {
     include: {
       category: true,
       brand: true,
+      unit: true,
       barcodes: true,
       inventories: true,
     },
@@ -55,6 +59,7 @@ export const updateProduct = async (id, data) => {
     include: {
       category: true,
       brand: true,
+      unit: true,
     },
   });
 };
@@ -89,6 +94,7 @@ export const searchProducts = async (search) => {
     include: {
       category: true,
       brand: true,
+      unit: true,
     },
     orderBy: {
       createdAt: "desc",
