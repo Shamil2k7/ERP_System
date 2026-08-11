@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import {
   getLandingPage,
   updateLandingPage,
-} from "@/services/landingAdmin.service";
+} from "@/services/landing.service";
 import styles from "./landing-admin.module.css";
 
 export default function LandingAdminPage() {
