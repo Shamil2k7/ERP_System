@@ -35,6 +35,7 @@ import brandRoutes from "./modules/brands/brand.routes.js";
 
 // M7
 import landingRoutes from "./modules/landing/landing.routes.js";
+import settingsRoutes from "./modules/settings/settings.routes.js";
 
 
 const app = express();
@@ -104,6 +105,7 @@ app.use("/api/brands", brandRoutes);
 
 // M7
 app.use("/api/landing", landingRoutes);
+app.use("/api/settings", settingsRoutes);
 
 // =====================
 // 404 Handler
