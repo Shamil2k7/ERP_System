@@ -368,6 +368,62 @@
   color: var(--status-out-text);
 }
 
+/* Backwards compatibility for .status */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.active {
+  background: var(--status-active-bg);
+  color: var(--status-active-text);
+}
+
+.status.inactive {
+  background: var(--status-out-bg);
+  color: var(--status-out-text);
+}
+
+/* Card Body spacing */
+.warehouse-card-body {
+  margin: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.warehouse-card-body p {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.warehouse-card-body strong {
+  color: var(--text-dark);
+  font-weight: 600;
+}
+
+/* Card action danger variant */
+.btn-card-action.danger {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  cursor: pointer;
+}
+
+.btn-card-action.danger:hover {
+  background: #fca5a5;
+  color: #b91c1c;
+}
+
+
 /* Tables Section (Stock & Transfer Tables) */
 .warehouse-table-container {
   background: #ffffff;

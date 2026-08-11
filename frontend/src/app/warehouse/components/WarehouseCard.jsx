@@ -51,18 +51,21 @@ export default function WarehouseCard({
 
         <Link
           href={`/warehouse/${warehouse.id}`}
+          className="btn-card-action secondary"
         >
           View
         </Link>
 
         <Link
           href={`/warehouse/edit/${warehouse.id}`}
+          className="btn-card-action secondary"
         >
           Edit
         </Link>
 
         <button
           onClick={() => onDelete(warehouse.id)}
+          className="btn-card-action danger"
         >
           Delete
         </button>

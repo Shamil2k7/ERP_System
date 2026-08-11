@@ -19,6 +19,10 @@ export const createWarehouseValidation = [
     .optional()
     .trim(),
 
+  body("location")
+    .optional()
+    .trim(),
+
   body("city")
     .optional()
     .trim(),
@@ -57,6 +61,10 @@ export const updateWarehouseValidation = [
     .withMessage("Warehouse code must be between 2 and 50 characters"),
 
   body("address")
+    .optional()
+    .trim(),
+
+  body("location")
     .optional()
     .trim(),
 

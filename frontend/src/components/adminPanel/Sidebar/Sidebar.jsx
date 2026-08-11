@@ -48,7 +48,7 @@ export default function Sidebar() {
 
         <h4 className={styles.title}>Main</h4>
 
-        <Link href="/admin">
+        <Link href="/dashboard">
           <FiGrid />
           <span>Dashboard</span>
         </Link>
@@ -97,12 +97,12 @@ export default function Sidebar() {
           <span>Suppliers</span>
         </Link>
 
-        <Link href="/admin/warehouse">
+        <Link href="/warehouse">
           <FiHome />
           <span>Warehouse</span>
         </Link>
 
-        <Link href="/admin/stock">
+        <Link href="/warehouse/stock">
           <FiPackage />
           <span>Stock</span>
         </Link>
@@ -110,17 +110,17 @@ export default function Sidebar() {
 
         <h4 className={styles.title}>Sales</h4>
 
-        <Link href="/admin/customers">
+        <Link href="/customers">
           <FiUsers />
           <span>Customers</span>
         </Link>
 
-        <Link href="/admin/sales-orders">
+        <Link href="/sales">
           <FiShoppingCart />
           <span>Sales Orders</span>
         </Link>
 
-        <Link href="/admin/invoices">
+        <Link href="/invoices">
           <FiFileText />
           <span>Recurring Invoices</span>
         </Link>
@@ -164,7 +164,7 @@ export default function Sidebar() {
 
         <h4 className={styles.title}>POS</h4>
 
-        <Link href="/admin/pos">
+        <Link href="/pos">
           <FiMonitor />
           <span>POS</span>
         </Link>
@@ -193,7 +193,7 @@ export default function Sidebar() {
 
         <h4 className={styles.title}>Purchase</h4>
 
-        <Link href="/admin/purchases">
+        <Link href="/purchases">
           <FiShoppingCart />
           <span>Purchases</span>
         </Link>
@@ -252,7 +252,7 @@ export default function Sidebar() {
           <span>Taxes</span>
         </Link>
 
-        <Link href="/admin/reports">
+        <Link href="/reports">
           <FiBarChart2 />
           <span>Reports</span>
         </Link>

@@ -35,8 +35,10 @@ export default function OrderPanel({
   removeItem,
   clearCart,
   updateQuantity,
-  customer = "Walk-in Customer",
+  customer = "",
   onCustomerChange,
+  customers = [],
+  onAddCustomer,
   discountValue = 50,
   onDiscountChange,
   taxRate = 10,
@@ -80,10 +82,12 @@ export default function OrderPanel({
               value={customer}
               onChange={(e) => onCustomerChange?.(e.target.value)}
             >
-              <option value="Walk-in Customer">Walk-in Customer</option>
-              <option value="John Doe">John Doe</option>
-              <option value="Jane Smith">Jane Smith</option>
-              <option value="Acme Corp">Acme Corp</option>
+              <option value="">Walk-in Customer</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} {c.phone ? `(${c.phone})` : ""}
+                </option>
+              ))}
             </select>
             <IconChevronDown className="pos-select-arrow" />
           </div>
@@ -101,13 +105,18 @@ export default function OrderPanel({
             title="Add Customer"
             onClick={() => {
               const name = prompt("Enter customer name:");
-              if (name) onCustomerChange?.(name);
+              if (!name) return;
+              const phone = prompt("Enter customer phone number:");
+              if (!phone) return;
+              const email = prompt("Enter customer email (optional):") || "";
+              onAddCustomer?.({ name, phone, email });
             }}
           >
             <IconPlus />
           </button>
         </div>
       </div>
+
 
       {/* 2. Cart Table */}
       <div className="pos-cart-table-wrapper">
