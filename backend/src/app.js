@@ -31,6 +31,7 @@ import warehouseRoutes from "./modules/warehouse/warehouse.routes.js";
 // import stockTransferRoutes from "./modules/stockTransfer/stockTransfer.routes.js";
 // import barcodeRoutes from "./modules/barcode/barcode.routes.js";
 import brandRoutes from "./modules/brands/brand.routes.js";
+import unitRoutes from "./modules/units/unit.routes.js";
 
 
 // M7
@@ -100,6 +101,7 @@ app.use("/api/employees", employeeRoutes);
 //  app.use("/api/stock-transfers", stockTransferRoutes);
 //  app.use("/api/barcodes", barcodeRoutes);
 app.use("/api/brands", brandRoutes);
+app.use("/api/units", unitRoutes);
 
 
 // M7
