@@ -30,16 +30,16 @@ export default function AddEmployeePage() {
   };
 
   const handleCancel = () => {
-    router.push('/employees');
+    router.push('/admin/employee');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await axios.post('http://localhost:5000/api/auth/employees', formData);
+      await axios.post('http://localhost:5000/api/employees', formData);
       toast.success('Employee added successfully');
-      router.push('/employees');
+      router.push('/admin/employee');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Operation failed');
       console.error(error);

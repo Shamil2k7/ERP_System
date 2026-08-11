@@ -31,29 +31,32 @@ export default function AddEmployeePage() {
   };
 
   const handleCancel = () => {
-    router.push("/employees");
+    router.push("/admin/employees/view");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setSubmitting(true);
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/auth/employees",
+      const response = await axios.post(
+        "http://localhost:5000/api/employees",
         formData
       );
+
+      console.log("Employee created:", response.data);
 
       toast.success("Employee added successfully");
 
       setTimeout(() => {
-        router.push("/employees");
+        router.push("/admin/employees/view");
       }, 800);
     } catch (error) {
-      console.error(error);
+      console.error("Add employee error:", error);
 
       toast.error(
-        error.response?.data?.message || "Operation failed"
+        error.response?.data?.message || "Failed to add employee"
       );
     } finally {
       setSubmitting(false);
@@ -75,11 +78,14 @@ export default function AddEmployeePage() {
 
       <div className={styles.container}>
         <div className={styles.content}>
+
           <form onSubmit={handleSubmit}>
+
             {/* Top Bar */}
             <div className={styles.topBar}>
               <div>
                 <div className={styles.breadcrumb}>
+
                   <span
                     className={styles.breadcrumbLink}
                     onClick={handleCancel}
@@ -90,6 +96,7 @@ export default function AddEmployeePage() {
                   <ChevronRight size={14} />
 
                   <span>Add New</span>
+
                 </div>
 
                 <h1 className={styles.title}>
@@ -98,6 +105,7 @@ export default function AddEmployeePage() {
               </div>
 
               <div className={styles.topActions}>
+
                 <button
                   type="button"
                   className={styles.cancelButton}
@@ -111,6 +119,7 @@ export default function AddEmployeePage() {
                   className={styles.submitButton}
                   disabled={submitting}
                 >
+
                   {submitting && (
                     <Loader2
                       className={styles.spinnerIcon}
@@ -121,22 +130,31 @@ export default function AddEmployeePage() {
                   {submitting
                     ? "Saving..."
                     : "Save Employee"}
+
                 </button>
+
               </div>
             </div>
 
+
             {/* Main Grid */}
             <div className={styles.grid}>
+
               {/* Employee Form */}
               <div className={styles.mainColumn}>
+
                 <div className={styles.card}>
+
                   <h2 className={styles.cardTitle}>
                     Employee Information
                   </h2>
 
+
                   {/* Full Name + Employee ID */}
                   <div className={styles.formRow}>
+
                     <div className={styles.formGroup}>
+
                       <label className={styles.label}>
                         Full Name{" "}
                         <span className={styles.required}>
@@ -153,9 +171,12 @@ export default function AddEmployeePage() {
                         required
                         placeholder="John Doe"
                       />
+
                     </div>
 
+
                     <div className={styles.formGroup}>
+
                       <label className={styles.label}>
                         Employee ID{" "}
                         <span className={styles.required}>
@@ -172,12 +193,17 @@ export default function AddEmployeePage() {
                         required
                         placeholder="EMP-001"
                       />
+
                     </div>
+
                   </div>
+
 
                   {/* Email + Phone */}
                   <div className={styles.formRow}>
+
                     <div className={styles.formGroup}>
+
                       <label className={styles.label}>
                         Email{" "}
                         <span className={styles.required}>
@@ -194,9 +220,12 @@ export default function AddEmployeePage() {
                         required
                         placeholder="john@example.com"
                       />
+
                     </div>
 
+
                     <div className={styles.formGroup}>
+
                       <label className={styles.label}>
                         Phone Number{" "}
                         <span className={styles.required}>
@@ -211,14 +240,19 @@ export default function AddEmployeePage() {
                         onChange={handleInputChange}
                         className={styles.input}
                         required
-                        placeholder="+1 (555) 000-0000"
+                        placeholder="9876543210"
                       />
+
                     </div>
+
                   </div>
+
 
                   {/* Role + Password */}
                   <div className={styles.formRow}>
+
                     <div className={styles.formGroup}>
+
                       <label className={styles.label}>
                         Role{" "}
                         <span className={styles.required}>
@@ -233,11 +267,14 @@ export default function AddEmployeePage() {
                         onChange={handleInputChange}
                         className={styles.input}
                         required
-                        placeholder="Admin"
+                        placeholder="manager"
                       />
+
                     </div>
 
+
                     <div className={styles.formGroup}>
+
                       <label className={styles.label}>
                         Password{" "}
                         <span className={styles.required}>
@@ -252,60 +289,76 @@ export default function AddEmployeePage() {
                         onChange={handleInputChange}
                         className={styles.input}
                         required
-                        placeholder="Enter password"
+                        placeholder="Enter temporary password"
                       />
+
                     </div>
+
                   </div>
+
                 </div>
+
               </div>
+
 
               {/* Preview */}
               <div className={styles.sideColumn}>
+
                 <div className={styles.card}>
+
                   <h2 className={styles.cardTitle}>
                     Preview
                   </h2>
 
                   <div className={styles.previewBody}>
+
                     <div className={styles.avatar}>
+
                       {initials ? (
                         initials
                       ) : (
                         <User size={28} />
                       )}
+
                     </div>
 
+
                     <div className={styles.previewName}>
-                      {formData.fullName ||
-                        "New Employee"}
+                      {formData.fullName || "New Employee"}
                     </div>
+
 
                     <div className={styles.previewRole}>
                       {formData.role || "Role not set"}
                     </div>
 
+
                     {formData.employeeId && (
                       <span
-                        className={
-                          styles.previewIdBadge
-                        }
+                        className={styles.previewIdBadge}
                       >
                         {formData.employeeId}
                       </span>
                     )}
+
                   </div>
+
 
                   <p className={styles.previewHint}>
                     This is how the employee will appear
                     in your team list once saved.
                   </p>
+
                 </div>
+
               </div>
+
             </div>
+
           </form>
+
         </div>
       </div>
     </div>
   );
 }
-
