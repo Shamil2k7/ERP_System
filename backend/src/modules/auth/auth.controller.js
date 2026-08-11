@@ -5,6 +5,7 @@ import {
   verifyResetOTPService,
   resetPasswordService,
 } from "./auth.service.js";
+import { recordAuditLog } from "../audit/audit.service.js";
 
 // Login
 const login = async (req, res) => {
@@ -12,6 +13,16 @@ const login = async (req, res) => {
     const { login, password } = req.body;
 
     const result = await loginService(login, password);
+
+    if (result.success && result.user) {
+      recordAuditLog(req, {
+        action: "LOGIN",
+        entity: "Auth",
+        entityId: result.user.id,
+        user: result.user,
+        details: { email: result.user.email, role: result.user.role },
+      });
+    }
 
     return res.status(200).json(result);
   } catch (error) {
