@@ -20,25 +20,29 @@ model Role {
 model User {
   id String @id @default(uuid())
 
-  fullName   String?
-  email      String @unique
+  fullName String?
+
+  email String @unique
+
   employeeId String? @unique
-  phone      String @unique
+
+  phone String @unique
 
   passwordHash String
 
   isVerified Boolean @default(false)
 
-  //  Add these three fields
   firstLogin Boolean @default(true)
 
   verificationToken   String?
   verificationExpires DateTime?
 
   roleId String?
-  role   Role? @relation(fields: [roleId], references: [id], onDelete: Restrict)
+
+  role Role? @relation(fields: [roleId], references: [id], onDelete: Restrict)
 
   createdAt DateTime @default(now())
+
   updatedAt DateTime @updatedAt
 }
 
@@ -46,7 +50,8 @@ model EmailOTP {
   id String @id @default(uuid())
 
   email String
-  otp   String
+
+  otp String
 
   isUsed Boolean @default(false)
 
@@ -747,7 +752,6 @@ model Discount {
 }
 
 //landing page database design
-
 
 model LandingPage {
   id String @id @default(uuid())
