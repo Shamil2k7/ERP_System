@@ -836,5 +836,53 @@ model AuditLog {
   @@index([entity])
   @@index([createdAt])
   @@map("audit_logs")
+// System Settings Model
+// ==============================
+
+model SystemSettings {
+  id String @id @default(uuid())
+
+  // Business Info
+  companyName    String  @default("ERP Enterprise Ltd") @map("company_name")
+  legalName      String? @map("legal_name")
+  taxNumber      String? @map("tax_number")
+  companyEmail   String? @map("company_email")
+  companyPhone   String? @map("company_phone")
+  companyAddress String? @map("company_address")
+  companyLogo    String? @map("company_logo")
+
+  // Localization & Finance
+  currency        String @default("USD")
+  currencySymbol  String @default("$") @map("currency_symbol")
+  timezone        String @default("UTC")
+  dateFormat      String @default("YYYY-MM-DD") @map("date_format")
+  fiscalYearStart String @default("January") @map("fiscal_year_start")
+
+  // Invoicing & Sales
+  invoicePrefix       String  @default("INV-") @map("invoice_prefix")
+  salesOrderPrefix    String  @default("SO-") @map("sales_order_prefix")
+  purchaseOrderPrefix String  @default("PO-") @map("purchase_order_prefix")
+  defaultTaxRate      Decimal @default(0.00) @map("default_tax_rate") @db.Decimal(5, 2)
+  enableMultiBranch   Boolean @default(false) @map("enable_multi_branch")
+
+  // Inventory & POS
+  enableStockAlerts Boolean @default(true) @map("enable_stock_alerts")
+  lowStockThreshold Int     @default(10) @map("low_stock_threshold")
+  receiptHeader     String? @map("receipt_header")
+  receiptFooter     String? @default("Thank you for your business!") @map("receipt_footer")
+  receiptPaperSize  String  @default("80mm") @map("receipt_paper_size")
+  autoPrintReceipt  Boolean @default(true) @map("auto_print_receipt")
+  showTaxOnReceipt  Boolean @default(true) @map("show_tax_on_receipt")
+
+  // Security & Preferences
+  emailNotifications    Boolean @default(true) @map("email_notifications")
+  dailyReportEmail      Boolean @default(false) @map("daily_report_email")
+  sessionTimeoutMinutes Int     @default(60) @map("session_timeout_minutes")
+  themePreference       String  @default("system") @map("theme_preference")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
 }
 

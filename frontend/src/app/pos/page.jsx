@@ -1,174 +1,101 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import "./pos.css";
 
 import PosToolbar from "./components/PosToolbar";
 import CategoryTabs from "./components/CategoryTabs";
 import ProductGrid from "./components/ProductGrid";
 import OrderPanel from "./components/OrderPanel";
-
-const PRODUCTS = [
-  {
-    id: 1,
-    name: "iPhone 15 Pro",
-    sku: "IP15PRO",
-    code: "IP15PRO",
-    price: 999.00,
-    stock: 32,
-    category: "Mobile Phones",
-    brand: "Apple",
-    imageUrl: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 2,
-    name: "Sony WH-1000XM5",
-    sku: "SONY1000XM5",
-    code: "SONY1000XM5",
-    price: 349.00,
-    stock: 15,
-    category: "Accessories",
-    brand: "Sony",
-    imageUrl: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 3,
-    name: "Apple Watch Series 9",
-    sku: "AW-S9",
-    code: "AW-S9",
-    price: 399.00,
-    stock: 18,
-    category: "Electronics",
-    brand: "Apple",
-    imageUrl: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 4,
-    name: "Dell Inspiron 15",
-    sku: "DELL15",
-    code: "DELL15",
-    price: 650.00,
-    stock: 8,
-    category: "Computers",
-    brand: "Dell",
-    imageUrl: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 5,
-    name: "Logitech Keyboard",
-    sku: "LOGI-KB",
-    code: "LOGI-KB",
-    price: 45.00,
-    stock: 50,
-    category: "Accessories",
-    brand: "Logitech",
-    imageUrl: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 6,
-    name: "Logitech Mouse",
-    sku: "LOGI-MS",
-    code: "LOGI-MS",
-    price: 45.00,
-    stock: 60,
-    category: "Accessories",
-    brand: "Logitech",
-    imageUrl: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 7,
-    name: "HP LaserJet Pro",
-    sku: "HP-LJ",
-    code: "HP-LJ",
-    price: 230.00,
-    stock: 7,
-    category: "Electronics",
-    brand: "HP",
-    imageUrl: "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 8,
-    name: "JBL Flip 6",
-    sku: "JBLFLIP6",
-    code: "JBLFLIP6",
-    price: 129.00,
-    stock: 22,
-    category: "Accessories",
-    brand: "JBL",
-    imageUrl: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400&auto=format&fit=crop&q=80",
-  },
-  {
-    id: 9,
-    name: "Canon EOS 200D",
-    sku: "CANON200D",
-    code: "CANON200D",
-    price: 450.00,
-    stock: 5,
-    category: "Electronics",
-    brand: "Canon",
-    imageUrl: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&auto=format&fit=crop&q=80",
-  },
-];
-
-const BRANDS = ["All", "Apple", "Sony", "Dell", "Logitech", "HP", "JBL", "Canon"];
-const CATEGORY_NAMES = [
-  "All",
-  "Electronics",
-  "Mobile Phones",
-  "Computers",
-  "Accessories",
-  "Home Appliances",
-  "Clothing",
-  "Footwear",
-  "Beauty",
-  "Toys",
-  "Others",
-];
+import API_URL from "@/config/api";
 
 export default function POSPage() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [customers, setCustomers] = useState([]);
+  const [taxes, setTaxes] = useState([]);
+  const [discounts, setDiscounts] = useState([]);
+
   const [activeTab, setActiveTab] = useState("Products");
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedBrand, setSelectedBrand] = useState("All");
   const [query, setQuery] = useState("");
 
-  const [customer, setCustomer] = useState("Walk-in Customer");
-  const [discountValue, setDiscountValue] = useState(50);
-  const [amountReceived, setAmountReceived] = useState(1500);
+  const [customer, setCustomer] = useState("");
+  const [discountValue, setDiscountValue] = useState(0);
+  const [amountReceived, setAmountReceived] = useState(0);
   const [selectedPayment, setSelectedPayment] = useState("Cash");
+  const [cart, setCart] = useState([]);
 
-  // Initial cart items matching screenshot
-  const [cart, setCart] = useState([
-    {
-      cartId: 1,
-      id: 1,
-      name: "iPhone 15 Pro",
-      sku: "IP15PRO",
-      price: 999.00,
-      qty: 1,
-      imageUrl: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&auto=format&fit=crop&q=80",
-    },
-    {
-      cartId: 2,
-      id: 2,
-      name: "Sony WH-1000XM5",
-      sku: "SONY1000XM5",
-      price: 349.00,
-      qty: 1,
-      imageUrl: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&auto=format&fit=crop&q=80",
-    },
-    {
-      cartId: 3,
-      id: 6,
-      name: "Logitech Mouse",
-      sku: "LOGI-MS",
-      price: 25.00,
-      qty: 2,
-      imageUrl: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400&auto=format&fit=crop&q=80",
-    },
-  ]);
+  // Fetch all POS dependencies from the backend
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [prodRes, catRes, brandRes, custRes, taxRes, discRes] = await Promise.all([
+          fetch(`${API_URL}/products`).then((r) => r.json()),
+          fetch(`${API_URL}/categories`).then((r) => r.json()),
+          fetch(`${API_URL}/brands`).then((r) => r.json()),
+          fetch(`${API_URL}/customers`).then((r) => r.json()),
+          fetch(`${API_URL}/taxes`).then((r) => r.json()),
+          fetch(`${API_URL}/discounts`).then((r) => r.json()),
+        ]);
+
+        if (prodRes.success) {
+          const mapped = prodRes.data.map((p) => ({
+            id: p.id,
+            name: p.name,
+            sku: p.sku || p.id,
+            code: p.sku || p.id,
+            price: Number(p.sellingPrice) || 0,
+            stock: p.inventories?.reduce((sum, inv) => sum + (inv.quantity || 0), 0) ?? 0,
+            category: p.category?.name || "Others",
+            brand: p.brand?.name || "Generic",
+            imageUrl: p.image
+              ? p.image.startsWith("http")
+                ? p.image
+                : `http://localhost:5000${p.image}`
+              : "",
+          }));
+          setProducts(mapped);
+        }
+
+        if (catRes.success) {
+          setCategories(catRes.data);
+        }
+
+        if (brandRes.success) {
+          setBrands(brandRes.data);
+        }
+
+        if (custRes.success) {
+          setCustomers(custRes.data);
+        }
+
+        if (taxRes.success) {
+          setTaxes(taxRes.data);
+        }
+
+        if (discRes.success) {
+          setDiscounts(discRes.data);
+        }
+      } catch (err) {
+        console.error("Error loading POS dynamic data:", err);
+      }
+    }
+    loadData();
+  }, []);
+
+  const categoryNames = useMemo(() => {
+    return ["All", ...categories.map((c) => c.name)];
+  }, [categories]);
+
+  const brandNames = useMemo(() => {
+    return ["All", ...brands.map((b) => b.name)];
+  }, [brands]);
 
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((p) => {
+    return products.filter((p) => {
       const matchesCategory =
         activeCategory === "All" || p.category === activeCategory;
       const matchesBrand =
@@ -180,7 +107,7 @@ export default function POSPage() {
         p.sku.toLowerCase().includes(q);
       return matchesCategory && matchesBrand && matchesQuery;
     });
-  }, [activeCategory, selectedBrand, query]);
+  }, [products, activeCategory, selectedBrand, query]);
 
   const addToCart = (product) => {
     setCart((prev) => {
@@ -206,7 +133,7 @@ export default function POSPage() {
   };
 
   const addScannedBarcode = (code) => {
-    const found = PRODUCTS.find(
+    const found = products.find(
       (p) =>
         p.sku.toLowerCase() === code.toLowerCase() ||
         p.code.toLowerCase() === code.toLowerCase()
@@ -242,26 +169,134 @@ export default function POSPage() {
     setCart([]);
   };
 
-  const handleCompleteSale = () => {
+  const handleAddCustomer = async ({ name, phone, email }) => {
+    try {
+      const res = await fetch(`${API_URL}/customers`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, phone, email, branchId: "00000000-0000-0000-0000-000000000000" }),
+      }).then((r) => r.json());
+
+      if (res.success) {
+        setCustomers((prev) => [...prev, res.data]);
+        setCustomer(res.data.id);
+        alert(`Customer ${name} added successfully!`);
+      } else {
+        alert(res.message || "Failed to add customer");
+      }
+    } catch (err) {
+      console.error("Error adding customer:", err);
+      alert("Error adding customer: " + err.message);
+    }
+  };
+
+  const handleCompleteSale = async () => {
     if (cart.length === 0) {
       alert("Cart is empty!");
       return;
     }
-    alert("Sale Completed Successfully!");
-    clearCart();
+
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const taxRate = taxes[0]?.rate ? Number(taxes[0].rate) : 10;
+    const taxAmount = (subtotal - Number(discountValue)) * (taxRate / 100);
+    const totalAmount = subtotal;
+    const netAmount = subtotal + taxAmount - Number(discountValue);
+
+    const salePayload = {
+      branchId: "00000000-0000-0000-0000-000000000000",
+      customerId: customer || null,
+      orderNumber: `SO-${Date.now()}`,
+      status: "CONFIRMED",
+      orderDate: new Date().toISOString(),
+      totalAmount,
+      taxAmount,
+      discountAmount: Number(discountValue),
+      netAmount,
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/sales`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(salePayload),
+      }).then((r) => r.json());
+
+      if (res.success) {
+        alert("Sale Completed and Saved Successfully!");
+        clearCart();
+        setDiscountValue(0);
+        setAmountReceived(0);
+        setCustomer("");
+      } else {
+        alert(res.message || "Failed to save sale");
+      }
+    } catch (err) {
+      console.error("Error completing sale:", err);
+      alert("Error completing sale: " + err.message);
+    }
   };
 
-  const handleHoldSale = () => {
-    alert("Sale held on order draft!");
+  const handleHoldSale = async () => {
+    await handleSaveDraft("Sale held on draft order!");
   };
 
-  const handleSaveDraft = () => {
-    alert("Draft saved!");
+  const handleSaveDraft = async (customMessage) => {
+    if (cart.length === 0) {
+      alert("Cart is empty!");
+      return;
+    }
+
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const taxRate = taxes[0]?.rate ? Number(taxes[0].rate) : 10;
+    const taxAmount = (subtotal - Number(discountValue)) * (taxRate / 100);
+    const totalAmount = subtotal;
+    const netAmount = subtotal + taxAmount - Number(discountValue);
+
+    const salePayload = {
+      branchId: "00000000-0000-0000-0000-000000000000",
+      customerId: customer || null,
+      orderNumber: `SO-${Date.now()}`,
+      status: "DRAFT",
+      orderDate: new Date().toISOString(),
+      totalAmount,
+      taxAmount,
+      discountAmount: Number(discountValue),
+      netAmount,
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/sales`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(salePayload),
+      }).then((r) => r.json());
+
+      if (res.success) {
+        alert(customMessage || "Draft saved!");
+        clearCart();
+        setDiscountValue(0);
+        setAmountReceived(0);
+        setCustomer("");
+      } else {
+        alert(res.message || "Failed to save draft");
+      }
+    } catch (err) {
+      console.error("Error saving draft:", err);
+      alert("Error saving draft: " + err.message);
+    }
   };
 
   const handlePrintReceipt = () => {
     window.print();
   };
+
+  const activeTaxRate = taxes[0]?.rate ? Number(taxes[0].rate) : 10;
 
   return (
     <div className="pos-page-wrapper">
@@ -277,15 +312,19 @@ export default function POSPage() {
             onCategoryChange={setActiveCategory}
             selectedBrand={selectedBrand}
             onBrandChange={setSelectedBrand}
-            categories={CATEGORY_NAMES}
-            brands={BRANDS}
+            categories={categoryNames}
+            brands={brandNames}
             activeTab={activeTab}
             onTabChange={setActiveTab}
           />
 
           {/* Main Left Content: Category Sidebar + Product Grid */}
           <div className="pos-left-body">
-            <CategoryTabs active={activeCategory} onSelect={setActiveCategory} />
+            <CategoryTabs
+              active={activeCategory}
+              onSelect={setActiveCategory}
+              categories={categoryNames}
+            />
             <ProductGrid products={filteredProducts} addToCart={addToCart} />
           </div>
         </div>
@@ -299,9 +338,11 @@ export default function POSPage() {
             updateQuantity={updateQuantity}
             customer={customer}
             onCustomerChange={setCustomer}
+            customers={customers}
+            onAddCustomer={handleAddCustomer}
             discountValue={discountValue}
             onDiscountChange={setDiscountValue}
-            taxRate={10}
+            taxRate={activeTaxRate}
             shipping={0}
             otherCharges={0}
             amountReceived={amountReceived}
@@ -310,7 +351,7 @@ export default function POSPage() {
             onSelectPayment={setSelectedPayment}
             onCompleteSale={handleCompleteSale}
             onHoldSale={handleHoldSale}
-            onSaveDraft={handleSaveDraft}
+            onSaveDraft={() => handleSaveDraft()}
             onPrintReceipt={handlePrintReceipt}
           />
         </div>

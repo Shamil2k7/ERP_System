@@ -36,7 +36,7 @@ import unitRoutes from "./modules/units/unit.routes.js";
 
 // M7
 import landingRoutes from "./modules/landing/landing.routes.js";
-import auditRoutes from "./modules/audit/audit.routes.js";
+import settingsRoutes from "./modules/settings/settings.routes.js";
 
 
 const app = express();
@@ -63,7 +63,15 @@ app.use(express.urlencoded({ extended: true }));
 // Static Folder
 // =====================
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    next();
+  },
+  express.static(path.join(__dirname, "uploads"))
+);
 
 // =====================
 // Home Route
@@ -108,7 +116,7 @@ app.use("/api/units", unitRoutes);
 
 // M7
 app.use("/api/landing", landingRoutes);
-app.use("/api/audit-logs", auditRoutes);
+app.use("/api/settings", settingsRoutes);
 
 // =====================
 // 404 Handler

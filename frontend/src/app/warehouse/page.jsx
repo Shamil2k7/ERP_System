@@ -7,6 +7,7 @@ import {
   searchWarehouses,
   deleteWarehouse,
 } from "@/services/warehouseService";
+import WarehouseCard from "./components/WarehouseCard";
 
 import "./warehouse.css";
 
@@ -19,6 +20,11 @@ export default function WarehousePage() {
   const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
+
+  // Stats computation
+  const totalWarehouses = warehouses.length;
+  const activeWarehouses = warehouses.filter((w) => w.status !== "INACTIVE").length;
+  const inactiveWarehouses = warehouses.filter((w) => w.status === "INACTIVE").length;
 
   // Load warehouses
   const loadWarehouses = async () => {
@@ -116,141 +122,102 @@ export default function WarehousePage() {
   };
 
   return (
-    <div className="warehouse-page">
+    <div className="warehouse-page-wrapper">
+      {/* Sub-Navigation */}
+      <nav className="warehouse-nav-tabs">
+        <Link href="/warehouse" className="nav-tab-item active">
+          Warehouse Overview
+        </Link>
+        <Link href="/warehouse/stock" className="nav-tab-item">
+          Stock Inventory
+        </Link>
+        <Link href="/warehouse/transfer" className="nav-tab-item">
+          Stock Transfer
+        </Link>
+        <button className="nav-tab-item" onClick={() => alert("Analytics module coming soon!")}>
+          Reports & Analytics
+        </button>
+      </nav>
 
-      {/* Header */}
+      {/* Main Content Area */}
+      <main className="warehouse-main-content">
+        {/* Action Toolbar */}
+        <div className="warehouse-toolbar">
+          <Link href="/warehouse/add" className="btn-add-action">
+            Add Warehouse <span>+</span>
+          </Link>
 
-      <div className="warehouse-header">
-
-        <div>
-          <h1>Warehouse Management</h1>
-
-          <p>
-            Manage warehouses and storage locations
-          </p>
+          <div className="toolbar-controls">
+            <input
+              type="text"
+              placeholder="Search warehouse..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="search-input-pill"
+            />
+            <button className="btn-search-icon" title="Search">
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+            </button>
+            {searchLoading && (
+              <span style={{ fontSize: "13px", color: "#6b7280", marginLeft: "8px" }}>
+                Searching...
+              </span>
+            )}
+          </div>
         </div>
 
-        <Link
-          href="/warehouse/add"
-          className="add-warehouse-btn"
-        >
-          + Add Warehouse
-        </Link>
+        {/* Stats Summary Row */}
+        <div className="warehouse-stats-summary">
+          <div className="stat-pill-card">
+            <span className="stat-pill-label">Total Warehouses</span>
+            <span className="stat-pill-value">{totalWarehouses}</span>
+          </div>
+          <div className="stat-pill-card">
+            <span className="stat-pill-label">Active Locations</span>
+            <span className="stat-pill-value" style={{ color: "var(--status-active-text)" }}>
+              {activeWarehouses}
+            </span>
+          </div>
+          <div className="stat-pill-card">
+            <span className="stat-pill-label">Inactive Locations</span>
+            <span className="stat-pill-value" style={{ color: "var(--status-out-text)" }}>
+              {inactiveWarehouses}
+            </span>
+          </div>
+        </div>
 
-      </div>
-
-      {/* Search */}
-
-      <div className="warehouse-search">
-
-        <input
-          type="text"
-          placeholder="Search warehouse..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-
-        {searchLoading && (
-          <span>
-            Searching...
-          </span>
+        {/* Error */}
+        {error && (
+          <div className="warehouse-error" style={{ color: "var(--status-out-text)", backgroundColor: "var(--status-out-bg)", padding: "12px", borderRadius: "8px", marginBottom: "20px", border: "1px solid #fecaca", fontWeight: 500 }}>
+            {error}
+          </div>
         )}
 
-      </div>
-
-      {/* Error */}
-
-      {error && (
-        <div className="warehouse-error">
-          {error}
-        </div>
-      )}
-
-      {/* Loading */}
-
-      {loading ? (
-        <div className="warehouse-loading">
-          Loading warehouses...
-        </div>
-      ) : warehouses.length === 0 ? (
-        <div className="warehouse-empty">
-          <h2>No warehouses found</h2>
-
-          <p>
-            Add a warehouse or change your search.
-          </p>
-        </div>
-      ) : (
-        <div className="warehouse-grid">
-
-          {warehouses.map((warehouse) => (
-            <div
-              key={warehouse.id}
-              className="warehouse-card-wrapper"
-            >
-
-              <Link
-                href={`/warehouse/${warehouse.id}`}
-              >
-                <div className="warehouse-card">
-
-                  <h2>
-                    {warehouse.name || "Unnamed Warehouse"}
-                  </h2>
-
-                  <p>
-                    Code:{" "}
-                    {warehouse.code || "-"}
-                  </p>
-
-                  <p>
-                    Location:{" "}
-                    {warehouse.location || "-"}
-                  </p>
-
-                  <span
-                    className={
-                      warehouse.status === "INACTIVE"
-                        ? "status inactive"
-                        : "status active"
-                    }
-                  >
-                    {warehouse.status || "ACTIVE"}
-                  </span>
-
-                </div>
-              </Link>
-
-              <div className="warehouse-actions">
-
-                <Link
-                  href={`/warehouse/${warehouse.id}`}
-                >
-                  View
-                </Link>
-
-                <Link
-                  href={`/warehouse/edit/${warehouse.id}`}
-                >
-                  Edit
-                </Link>
-
-                <button
-                  onClick={() =>
-                    handleDelete(warehouse.id)
-                  }
-                >
-                  Delete
-                </button>
-
-              </div>
-
-            </div>
-          ))}
-
-        </div>
-      )}
-
+        {/* Loading / Cards Grid */}
+        {loading ? (
+          <div className="warehouse-loading" style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)", fontSize: "16px" }}>
+            Loading warehouses...
+          </div>
+        ) : warehouses.length === 0 ? (
+          <div className="warehouse-empty" style={{ textAlign: "center", padding: "60px 20px", background: "#fff", borderRadius: "14px", border: "1px solid #e5e7eb", boxShadow: "0 2px 10px rgba(0, 0, 0, 0.05)" }}>
+            <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-dark)", marginBottom: "8px" }}>No warehouses found</h2>
+            <p style={{ color: "var(--text-muted)" }}>Add a warehouse or change your search.</p>
+          </div>
+        ) : (
+          <div className="warehouse-cards-grid">
+            {warehouses.map((warehouse) => (
+              <WarehouseCard
+                key={warehouse.id}
+                warehouse={warehouse}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
 }

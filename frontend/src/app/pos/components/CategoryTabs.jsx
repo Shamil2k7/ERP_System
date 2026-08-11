@@ -14,24 +14,32 @@ import {
   IconOthers,
 } from "./icons";
 
-const CATEGORY_ITEMS = [
-  { id: "All", label: "All", icon: IconAll },
-  { id: "Electronics", label: "Electronics", icon: IconElectronics },
-  { id: "Mobile Phones", label: "Mobile Phones", icon: IconMobile },
-  { id: "Computers", label: "Computers", icon: IconComputers },
-  { id: "Accessories", label: "Accessories", icon: IconAccessories },
-  { id: "Home Appliances", label: "Home Appliances", icon: IconHomeAppliances },
-  { id: "Clothing", label: "Clothing", icon: IconClothing },
-  { id: "Footwear", label: "Footwear", icon: IconFootwear },
-  { id: "Beauty", label: "Beauty", icon: IconBeauty },
-  { id: "Toys", label: "Toys", icon: IconToys },
-  { id: "Others", label: "Others", icon: IconOthers },
-];
+const ICON_MAP = {
+  All: IconAll,
+  Electronics: IconElectronics,
+  "Mobile Phones": IconMobile,
+  Computers: IconComputers,
+  Accessories: IconAccessories,
+  "Home Appliances": IconHomeAppliances,
+  Clothing: IconClothing,
+  Footwear: IconFootwear,
+  Beauty: IconBeauty,
+  Toys: IconToys,
+};
 
-export default function CategoryTabs({ active, onSelect }) {
+export default function CategoryTabs({ active, onSelect, categories = [] }) {
+  const items = categories.map((cat) => {
+    const name = typeof cat === "string" ? cat : cat.name;
+    return {
+      id: name,
+      label: name,
+      icon: ICON_MAP[name] || IconOthers,
+    };
+  });
+
   return (
     <aside className="pos-category-sidebar">
-      {CATEGORY_ITEMS.map((item) => {
+      {items.map((item) => {
         const IconComp = item.icon;
         const isActive = active === item.id;
         return (
