@@ -31,6 +31,7 @@ import {
   FiLayers,
   FiMenu,
   FiX,
+  FiClock,
 } from "react-icons/fi";
 
 import styles from "./Sidebar.module.css";
@@ -476,6 +477,15 @@ export default function Sidebar({ isOpen, onClose }) {
         </Link>
 
         <h4 className={styles.title}>System</h4>
+
+        <Link
+          href="/admin/audit-logs"
+          className={isActivePath("/admin/audit-logs") ? styles.active : ""}
+          onClick={handleLinkClick}
+        >
+          <FiClock />
+          <span>Audit Logs</span>
+        </Link>
 
         <Link
           href="/admin/settings"

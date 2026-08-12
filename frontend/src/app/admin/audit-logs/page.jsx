@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import {
   FiClock,
   FiSearch,
@@ -19,6 +18,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
 } from "react-icons/fi";
+import { getAuditLogs } from "@/services/auditService";
 import styles from "./auditLogs.module.css";
 
 export default function AuditLogsPage() {
@@ -48,27 +48,18 @@ export default function AuditLogsPage() {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      const params = {
-        page,
-        limit: 20,
-      };
+      const params = { page, limit: 20 };
 
       if (search.trim()) params.search = search.trim();
       if (actionFilter) params.action = actionFilter;
       if (entityFilter) params.entity = entityFilter;
 
-      const res = await axios.get("http://localhost:5000/api/audit", {
-        headers,
-        params,
-      });
+      const res = await getAuditLogs(params);
 
-      if (res.data && res.data.success) {
-        setLogs(res.data.data || []);
-        if (res.data.pagination) {
-          setPagination(res.data.pagination);
+      if (res && res.success) {
+        setLogs(res.data || []);
+        if (res.pagination) {
+          setPagination(res.pagination);
         }
       }
     } catch (error) {
@@ -332,7 +323,7 @@ export default function AuditLogsPage() {
                     <th className={styles.th}>Action</th>
                     <th className={styles.th}>Module</th>
                     <th className={styles.th}>Activity Description</th>
-                    <th className={styles.th} align="right">
+                    <th className={styles.th} style={{ textAlign: "right" }}>
                       Details
                     </th>
                   </tr>
@@ -395,7 +386,7 @@ export default function AuditLogsPage() {
                           </div>
                         </td>
 
-                        <td className={styles.td} align="right">
+                        <td className={styles.td} style={{ textAlign: "right" }}>
                           <button
                             className={styles.detailsButton}
                             onClick={() => setSelectedLog(log)}
@@ -490,7 +481,9 @@ export default function AuditLogsPage() {
                 )}
               </div>
 
-              <h4>Raw Details Metadata:</h4>
+              <h4 style={{ margin: "16px 0 8px 0", fontSize: "0.95rem", color: "#334155" }}>
+                Raw Details Metadata:
+              </h4>
               <div className={styles.jsonBox}>
                 {JSON.stringify(selectedLog.details || {}, null, 2)}
               </div>
