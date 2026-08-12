@@ -33,11 +33,12 @@ import supplierRoutes from "./modules/suppliers/supplier.routes.js";
 import warehouseRoutes from "./modules/warehouse/warehouse.routes.js";
 import inventoryRoutes from "./modules/inventory/inventory.routes.js";
 import purchaseRoutes from "./modules/purchase/purchase.routes.js";
-// import stockRoutes from "./modules/stock/stock.routes.js";
+// import stockMovementRoutes from "./modules/stockMovement/stock.routes.js";
 // import stockTransferRoutes from "./modules/stockTransfer/stockTransfer.routes.js";
-// import barcodeRoutes from "./modules/barcode/barcode.routes.js";
+import barcodeRoutes from "./modules/barcode/barcode.routes.js";
 import brandRoutes from "./modules/brands/brand.routes.js";
 import unitRoutes from "./modules/units/unit.routes.js";
+
 import departmentRoutes from "./modules/departments/department.routes.js";
 import roleRoutes from "./modules/roles/roles.routes.js";
 import designationRoutes from "./modules/designations/designations.routes.js";
@@ -112,6 +113,7 @@ app.use("/api/purchases", purchaseRoutes);
 
 app.use("/api/brands", brandRoutes);
 app.use("/api/units", unitRoutes);
+
 app.use("/api/departments", departmentRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/designations", designationRoutes);
