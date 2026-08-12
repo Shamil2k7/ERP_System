@@ -39,6 +39,7 @@ import departmentRoutes from "./modules/departments/department.routes.js";
 import landingRoutes from "./modules/landing/landing.routes.js";
 import settingsRoutes from "./modules/settings/settings.routes.js";
 import auditRoutes from "./modules/audit/audit.routes.js";
+import reportsRoutes from "./modules/reports/reports.routes.js";
 
 const app = express();
 
@@ -120,6 +121,7 @@ app.use("/api/departments", departmentRoutes);
 app.use("/api/landing", landingRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/audit", auditRoutes);
+app.use("/api/reports", reportsRoutes);
 
 // =====================
 // 404 Handler
