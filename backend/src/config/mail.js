@@ -210,9 +210,106 @@ const sendOTPEmail = async (email, otp) => {
 };
 
 
+// Send employee update notification email
+const sendEmployeeUpdatedEmail = async (
+  email,
+  employeeId,
+  fullName,
+  newPassword = null
+) => {
+  try {
+    const tx = getTransporter();
+
+    let passwordHtml = "";
+    if (newPassword) {
+      passwordHtml = `
+        <p style="margin-top: 10px;">
+          <strong>Account Password:</strong>
+          <span style="font-family: monospace; background: #e0e7ff; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 15px;">
+            ${newPassword}
+          </span>
+        </p>
+      `;
+    }
+
+    await tx.sendMail({
+      from: `"ERP System" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Your ERP Employee Account Has Been Updated",
+
+      html: `
+        <div style="
+          font-family: Arial, sans-serif;
+          max-width: 600px;
+          margin: auto;
+          padding: 25px;
+          border: 1px solid #ddd;
+          border-radius: 10px;
+        ">
+
+          <h2 style="color: #2563eb;">
+            ERP Account Details Updated
+          </h2>
+
+          <p>
+            Hello ${fullName},
+          </p>
+
+          <p>
+            Your employee account email or information has been updated by the administrator.
+          </p>
+
+          <div style="
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+          ">
+
+            <p>
+              <strong>Employee ID:</strong>
+              ${employeeId}
+            </p>
+
+            <p>
+              <strong>Updated Email Address:</strong>
+              ${email}
+            </p>
+
+            ${passwordHtml}
+
+          </div>
+
+          <p>
+            You can use your updated <strong>Email (${email})</strong> or <strong>Employee ID (${employeeId})</strong> to log into the ERP system.
+          </p>
+
+          <p style="color: #dc2626;">
+            If you did not request or expect this change, please contact your administrator immediately.
+          </p>
+
+          <p style="margin-top: 30px;">
+            Regards,<br>
+            <strong>ERP System</strong>
+          </p>
+
+        </div>
+      `,
+    });
+
+    console.log(`Employee update notification email sent to ${email}`);
+  } catch (error) {
+    console.error("Failed to send employee update notification email:", error.message);
+    console.error(error);
+  }
+};
+
+
 export {
   sendEmployeeCredentialsEmail,
   sendVerificationEmail,
   sendOTPEmail,
+  sendEmployeeUpdatedEmail,
 };
+
 
