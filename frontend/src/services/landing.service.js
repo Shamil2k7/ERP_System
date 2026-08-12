@@ -8,6 +8,5 @@ export async function getLandingPage() {
   }
 
   const result = await response.json();
-
   return result.data;
 }

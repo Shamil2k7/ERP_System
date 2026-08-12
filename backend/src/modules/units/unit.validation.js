@@ -5,15 +5,15 @@ export const createUnitValidation = [
     .trim()
     .notEmpty()
     .withMessage("Unit name is required")
-    .isLength({ min: 2, max: 100 })
-    .withMessage("Unit name must be between 2 and 100 characters"),
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Unit name must be between 1 and 100 characters"),
 
-  body("shortName")
+  body("code")
     .trim()
     .notEmpty()
-    .withMessage("Short name is required")
+    .withMessage("Unit code is required")
     .isLength({ min: 1, max: 20 })
-    .withMessage("Short name must be between 1 and 20 characters"),
+    .withMessage("Unit code must be between 1 and 20 characters"),
 
   body("status")
     .optional()
@@ -25,8 +25,8 @@ export const updateUnitValidation = [
   body("name")
     .optional()
     .trim()
-    .isLength({ min: 2, max: 100 })
-    .withMessage("Unit name must be between 2 and 100 characters"),
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Unit name must be between 1 and 100 characters"),
 
   body("shortName")
     .optional()

@@ -259,6 +259,7 @@ export default function DesignationsPage() {
       });
     }
 
+    setEditingId(item._id);
     setShowAddForm(true);
     setOpenMenu(null);
   };

@@ -46,6 +46,7 @@ import designationRoutes from "./modules/designations/designations.routes.js";
 import landingRoutes from "./modules/landing/landing.routes.js";
 import settingsRoutes from "./modules/settings/settings.routes.js";
 import auditRoutes from "./modules/audit/audit.routes.js";
+import reportsRoutes from "./modules/reports/reports.routes.js";
 
 import { attachUserIfAuthenticated } from "./middlewares/auth.middleware.js";
 
@@ -119,6 +120,7 @@ app.use("/api/designations", designationRoutes);
 app.use("/api/landing", landingRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/audit", auditRoutes);
+app.use("/api/reports", reportsRoutes);
 
 // 404 Handler
 

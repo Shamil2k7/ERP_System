@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Edit2, Trash2, X, Users, Loader2, Plus } from "lucide-react";
@@ -9,14 +9,20 @@ import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { getRoles } from "@/services/roleService";
 
+import styles from "./viewEmployees.module.css";
+
 export default function EmployeePage() {
   const router = useRouter();
 
   const [roles, setRoles] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [currentEmployee, setCurrentEmployee] = useState(null);
+
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -26,7 +32,9 @@ export default function EmployeePage() {
     role: "",
   });
 
-  const [submitting, setSubmitting] = useState(false);
+  // =====================================================
+  // FETCH EMPLOYEES
+  // =====================================================
 
   useEffect(() => {
     fetchEmployees();
@@ -54,34 +62,49 @@ export default function EmployeePage() {
     try {
       setLoading(true);
 
-      const res = await axios.get(
-        "http://localhost:5000/api/employees",
-        getAuthHeaders()
+      const response = await axios.get(
+        "http://localhost:5000/api/employees"
       );
 
-      setEmployees(res.data.data || []);
+      setEmployees(response.data?.data || []);
     } catch (error) {
-      toast.error("Failed to fetch employees");
-      console.error(error);
+      console.error("Fetch employees error:", error);
+
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to fetch employees"
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  // =====================================================
+  // INPUT CHANGE
+  // =====================================================
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
+    setFormData((previous) => ({
+      ...previous,
       [name]: value,
     }));
   };
 
-  const handleAddClick = () => {
+  // =====================================================
+  // ADD EMPLOYEE
+  // =====================================================
+
+  const handleAddEmployee = () => {
     router.push("/admin/employees/add");
   };
 
-  const handleEditClick = (employee) => {
+  // =====================================================
+  // EDIT EMPLOYEE
+  // =====================================================
+
+  const handleEditEmployee = (employee) => {
     setCurrentEmployee(employee);
 
     setFormData({
@@ -95,32 +118,53 @@ export default function EmployeePage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this employee?")) {
+  // =====================================================
+  // DELETE EMPLOYEE
+  // =====================================================
+
+  const handleDeleteEmployee = async (employeeId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this employee?"
+    );
+
+    if (!confirmed) {
       return;
     }
 
     try {
       await axios.delete(
-        `http://localhost:5000/api/employees/${id}`,
-        getAuthHeaders()
+        `http://localhost:5000/api/employees/${employeeId}`
       );
 
-      toast.success("Employee deleted successfully");
+      toast.success(
+        "Employee deleted successfully"
+      );
 
-      fetchEmployees();
+      setEmployees((previous) =>
+        previous.filter(
+          (employee) => employee.id !== employeeId
+        )
+      );
     } catch (error) {
-      toast.error("Failed to delete employee");
-      console.error(error);
+      console.error("Delete employee error:", error);
+
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to delete employee"
+      );
     }
   };
+
+  // =====================================================
+  // UPDATE EMPLOYEE
+  // =====================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!currentEmployee) return;
-
-    setSubmitting(true);
+    if (!currentEmployee) {
+      return;
+    }
 
     try {
       const updateData = { ...formData };
@@ -131,234 +175,582 @@ export default function EmployeePage() {
         getAuthHeaders()
       );
 
-      toast.success("Employee updated successfully");
+      toast.success(
+        response.data?.message ||
+          "Employee updated successfully"
+      );
 
-      setIsModalOpen(false);
+      closeModal();
 
       fetchEmployees();
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Operation failed"
-      );
+      console.error("Update employee error:", error);
 
-      console.error(error);
+      toast.error(
+        error.response?.data?.message ||
+          "Failed to update employee"
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
+  // =====================================================
+  // CLOSE MODAL
+  // =====================================================
+
+  const closeModal = () => {
+    if (submitting) {
+      return;
+    }
+
+    setIsModalOpen(false);
+
+    setCurrentEmployee(null);
+
+    setFormData({
+      fullName: "",
+      email: "",
+      phone: "",
+      employeeId: "",
+      role: "",
+      password: "",
+    });
+  };
+
+  // =====================================================
+  // GET INITIALS
+  // =====================================================
+
+  const getInitials = (name) => {
+    if (!name) {
+      return "EM";
+    }
+
+    return name
+      .trim()
+      .split(/\s+/)
+      .map((word) => word.charAt(0))
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
+  };
+
+  // =====================================================
+  // GET ROLE
+  // =====================================================
+
+  const getRoleName = (employee) => {
+    if (!employee) {
+      return "Employee";
+    }
+
+    if (
+      employee.role &&
+      typeof employee.role === "object"
+    ) {
+      return employee.role.name || "Employee";
+    }
+
+    if (
+      employee.role &&
+      typeof employee.role === "string"
+    ) {
+      return employee.role;
+    }
+
+    return "Employee";
+  };
+
+  // =====================================================
+  // GET EMPLOYEE IMAGE
+  // =====================================================
+
+  const getEmployeeImage = (employee) => {
+    if (!employee) {
+      return null;
+    }
+
+    return (
+      employee.image ||
+      employee.profileImage ||
+      employee.photo ||
+      employee.avatar ||
+      null
+    );
+  };
+
+  // =====================================================
+  // RENDER
+  // =====================================================
+
   return (
     <div className={styles.layout}>
       <div className={styles.container}>
         <div className={styles.content}>
-          <Toaster position="top-right" />
 
-          {/* Page Header */}
+          {/* =================================================
+              TOASTER
+          ================================================= */}
+
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 3000,
+            }}
+          />
+
+          {/* =================================================
+              PAGE HEADER
+          ================================================= */}
+
           <div className={styles.header}>
+
             <div>
-              <h1 className={styles.title}>Employees</h1>
+              <h1 className={styles.title}>
+                Employees
+              </h1>
 
               <p className={styles.subtitle}>
-                Manage your team members and their access.
+                Manage employees, roles and employee
+                information.
               </p>
             </div>
 
             <button
+              type="button"
               className={styles.addButton}
-              onClick={handleAddClick}
+              onClick={handleAddEmployee}
             >
-              <Plus size={20} />
+              <Plus size={18} />
+
               Add Employee
             </button>
+
           </div>
 
-          {/* Employee Table */}
-          <div className={styles.tableContainer}>
-            {loading ? (
-              <div className={styles.emptyState}>
+
+          {/* =================================================
+              EMPLOYEE GRID
+          ================================================= */}
+
+          <div className={styles.employeeGrid}>
+
+            {/* =================================================
+                LOADING
+            ================================================= */}
+
+            {loading && (
+              <div className={styles.loadingState}>
+
                 <Loader2
+                  size={38}
                   className={styles.spinner}
-                  size={40}
                 />
-
-                <p>Loading employees...</p>
-              </div>
-            ) : employees.length === 0 ? (
-              <div className={styles.emptyState}>
-                <Users className={styles.emptyIcon} />
-
-                <h3>No employees found</h3>
 
                 <p>
-                  Get started by adding a new employee.
+                  Loading employees...
                 </p>
+
               </div>
-            ) : (
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th className={styles.th}>
-                      Employee ID
-                    </th>
+            )}
 
-                    <th className={styles.th}>
-                      Name
-                    </th>
 
-                    <th className={styles.th}>
-                      Contact
-                    </th>
+            {/* =================================================
+                EMPTY STATE
+            ================================================= */}
 
-                    <th className={styles.th}>
-                      Status
-                    </th>
+            {!loading &&
+              employees.length === 0 && (
+                <div className={styles.emptyState}>
 
-                    <th
-                      className={`${styles.th} ${styles.thRight}`}
-                    >
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
+                  <Users
+                    className={styles.emptyIcon}
+                  />
 
-                <tbody>
-                  {employees.map((employee) => (
-                    <tr
-                      key={employee.id}
-                      className={styles.tr}
-                    >
-                      <td className={styles.td}>
-                        <span
-                          className={styles.employeeIdBadge}
+                  <h3>
+                    No employees found
+                  </h3>
+
+                  <p>
+                    Start by adding your first
+                    employee.
+                  </p>
+
+                  <button
+                    type="button"
+                    className={
+                      styles.emptyAddButton
+                    }
+                    onClick={handleAddEmployee}
+                  >
+                    <Plus size={17} />
+
+                    Add Employee
+                  </button>
+
+                </div>
+              )}
+
+
+            {/* =================================================
+                EMPLOYEE CARDS
+            ================================================= */}
+
+            {!loading &&
+              employees.length > 0 &&
+              employees.map((employee) => {
+
+                const employeeName =
+                  employee.fullName ||
+                  "Unknown Employee";
+
+                const initials =
+                  getInitials(employeeName);
+
+                const role =
+                  getRoleName(employee);
+
+                const image =
+                  getEmployeeImage(employee);
+
+                const employeeId =
+                  employee.employeeId ||
+                  "EMP-000";
+
+                const isVerified =
+                  Boolean(employee.isVerified);
+
+                return (
+                  <div
+                    className={
+                      styles.employeeCard
+                    }
+                    key={employee.id}
+                  >
+
+                    {/* =================================================
+                        PROFESSIONAL EMPLOYEE CARD
+                    ================================================= */}
+
+                    <div className={styles.idCard}>
+
+                      {/* =================================================
+                          CARD HEADER
+                      ================================================= */}
+
+                      <div
+                        className={
+                          styles.cardTop
+                        }
+                      >
+
+                        <div
+                          className={
+                            styles.companyLogo
+                          }
                         >
-                          {employee.employeeId || "N/A"}
+                          LE
+                        </div>
+
+                        <span
+                          className={
+                            styles.cardType
+                          }
+                        >
+                          Employee ID
                         </span>
-                      </td>
 
-                      <td className={styles.td}>
-                        <div className={styles.employeeName}>
-                          {employee.fullName || "Unknown"}
-                        </div>
+                      </div>
 
-                        <div className={styles.employeeRole}>
-                          {employee.role?.name ||
-                            "Role Not Assigned"}
-                        </div>
-                      </td>
 
-                      <td className={styles.td}>
-                        <div>
-                          {employee.email}
-                        </div>
+                      {/* =================================================
+                          PROFILE IMAGE
+                      ================================================= */}
 
-                        <div className={styles.phone}>
-                          {employee.phone}
-                        </div>
-                      </td>
+                      <div
+                        className={
+                          styles.photoWrapper
+                        }
+                      >
 
-                      <td className={styles.td}>
-                        <span
-                          className={`${styles.badge} ${
-                            employee.isVerified
-                              ? styles.badgeActive
-                              : styles.badgeInactive
-                          }`}
+                        {image ? (
+
+                          <img
+                            src={image}
+                            alt={employeeName}
+                            className={
+                              styles.employeePhoto
+                            }
+                          />
+
+                        ) : (
+
+                          <div
+                            className={
+                              styles.initialAvatar
+                            }
+                          >
+                            {initials}
+                          </div>
+
+                        )}
+
+                      </div>
+
+
+                      {/* =================================================
+                          EMPLOYEE DETAILS
+                      ================================================= */}
+
+                      <div
+                        className={
+                          styles.employeeInfo
+                        }
+                      >
+
+                        <h2>
+                          {employeeName}
+                        </h2>
+
+                        <p
+                          className={
+                            styles.role
+                          }
                         >
-                          {employee.isVerified
+                          {role}
+                        </p>
+
+
+                        {/* ===============================
+                            EMPLOYEE ID
+                        =============================== */}
+
+                        <div
+                          className={
+                            styles.infoRow
+                          }
+                        >
+
+                          <div
+                            className={
+                              styles.infoLabel
+                            }
+                          >
+
+                            <CreditCard
+                              size={13}
+                            />
+
+                            <span>
+                              Employee ID
+                            </span>
+
+                          </div>
+
+                          <strong>
+                            {employeeId}
+                          </strong>
+
+                        </div>
+
+
+                        {/* ===============================
+                            EMAIL
+                        =============================== */}
+
+                        <div
+                          className={
+                            styles.infoRow
+                          }
+                        >
+
+                          <div
+                            className={
+                              styles.infoLabel
+                            }
+                          >
+
+                            <Mail size={13} />
+
+                            <span>
+                              Email
+                            </span>
+
+                          </div>
+
+                          <strong
+                            title={
+                              employee.email ||
+                              "N/A"
+                            }
+                          >
+                            {employee.email ||
+                              "N/A"}
+                          </strong>
+
+                        </div>
+
+
+                        {/* ===============================
+                            PHONE
+                        =============================== */}
+
+                        <div
+                          className={
+                            styles.infoRow
+                          }
+                        >
+
+                          <div
+                            className={
+                              styles.infoLabel
+                            }
+                          >
+
+                            <Phone size={13} />
+
+                            <span>
+                              Phone
+                            </span>
+
+                          </div>
+
+                          <strong>
+                            {employee.phone ||
+                              "N/A"}
+                          </strong>
+
+                        </div>
+
+                      </div>
+
+
+                      {/* =================================================
+                          CARD FOOTER
+                      ================================================= */}
+
+                      <div
+                        className={
+                          styles.cardFooter
+                        }
+                      >
+
+                        {/* ===============================
+                            VERIFICATION STATUS
+                        =============================== */}
+
+                        <span
+                          className={`
+                            ${styles.status}
+                            ${
+                              isVerified
+                                ? styles.statusVerified
+                                : styles.statusPending
+                            }
+                          `}
+                        >
+
+                          <span
+                            className={
+                              styles.statusDot
+                            }
+                          />
+
+                          {isVerified
                             ? "Verified"
                             : "Pending"}
-                        </span>
-                      </td>
 
-                      <td className={styles.td}>
+                        </span>
+
+
+                        {/* ===============================
+                            ACTIONS
+                        =============================== */}
+
                         <div
-                          className={`${styles.actions} ${styles.actionsRight}`}
+                          className={
+                            styles.cardActions
+                          }
                         >
+
                           <button
-                            className={`${styles.iconButton} ${styles.edit}`}
+                            type="button"
+                            className={
+                              styles.editButton
+                            }
                             onClick={() =>
-                              handleEditClick(employee)
+                              handleEditEmployee(
+                                employee
+                              )
                             }
                             title="Edit Employee"
+                            aria-label="Edit Employee"
                           >
-                            <Edit2 size={18} />
+                            <Edit2 size={15} />
                           </button>
+
 
                           <button
-                            className={`${styles.iconButton} ${styles.delete}`}
+                            type="button"
+                            className={
+                              styles.deleteButton
+                            }
                             onClick={() =>
-                              handleDelete(employee.id)
+                              handleDeleteEmployee(
+                                employee.id
+                              )
                             }
                             title="Delete Employee"
+                            aria-label="Delete Employee"
                           >
-                            <Trash2 size={18} />
+                            <Trash2 size={15} />
                           </button>
+
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+
+                      </div>
+
+                    </div>
+
+                  </div>
+                );
+              })}
+
           </div>
-        </div>
-      </div>
 
-      {/* Edit Employee Modal */}
-      {isModalOpen && (
-        <div
-          className={styles.modalOverlay}
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div
-            className={styles.modalContent}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={styles.modalHeader}>
-              <h2 className={styles.modalTitle}>
-                Edit Employee
-              </h2>
 
-              <button
-                className={styles.closeButton}
-                onClick={() => setIsModalOpen(false)}
+          {/* =================================================
+              EDIT EMPLOYEE MODAL
+          ================================================= */}
+
+          {isModalOpen && (
+
+            <div
+              className={
+                styles.modalOverlay
+              }
+              onClick={closeModal}
+            >
+
+              <div
+                className={
+                  styles.modalContent
+                }
+                onClick={(e) =>
+                  e.stopPropagation()
+                }
               >
-                <X size={22} />
-              </button>
-            </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Full Name
-                </label>
+                {/* =================================================
+                    MODAL HEADER
+                ================================================= */}
 
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  required
-                  placeholder="John Doe"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Employee ID
-                </label>
-
-                <input
-                  type="text"
-                  name="employeeId"
-                  value={formData.employeeId}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  required
-                  placeholder="EMP-001"
-                />
-              </div>
+                <div
+                  className={
+                    styles.modalHeader
+                  }
+                >
 
               <div className={styles.formGroup}>
                 <label className={styles.label}>
@@ -390,37 +782,21 @@ export default function EmployeePage() {
 
               </div>
 
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Email
-                </label>
+                    <h2
+                      className={
+                        styles.modalTitle
+                      }
+                    >
+                      Edit Employee
+                    </h2>
 
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  required
-                  placeholder="john@example.com"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Phone Number
-                </label>
-
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  required
-                  placeholder="+91 9876543210"
-                />
-              </div>
+                    <p
+                      className={
+                        styles.modalSubtitle
+                      }
+                    >
+                      Update employee information
+                    </p>
 
               <div className={styles.formGroup}>
                 <p style={{ fontSize: "0.85rem", color: "#64748b", margin: 0, padding: "10px 0" }}>
@@ -435,30 +811,304 @@ export default function EmployeePage() {
                 </p>
               </div>
 
-              <div className={styles.formActions}>
-                <button
-                  type="button"
-                  className={styles.cancelButton}
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Cancel
-                </button>
 
-                <button
-                  type="submit"
-                  className={styles.submitButton}
-                  disabled={submitting}
+                {/* =================================================
+                    EDIT FORM
+                ================================================= */}
+
+                <form
+                  onSubmit={handleSubmit}
                 >
-                  {submitting
-                    ? "Saving..."
-                    : "Save Employee"}
-                </button>
+
+                  {/* FULL NAME */}
+
+                  <div
+                    className={
+                      styles.formGroup
+                    }
+                  >
+
+                    <label
+                      className={
+                        styles.label
+                      }
+                      htmlFor="fullName"
+                    >
+                      Full Name
+                    </label>
+
+                    <input
+                      id="fullName"
+                      type="text"
+                      name="fullName"
+                      value={
+                        formData.fullName
+                      }
+                      onChange={
+                        handleInputChange
+                      }
+                      className={
+                        styles.input
+                      }
+                      placeholder="Enter full name"
+                      required
+                    />
+
+                  </div>
+
+
+                  {/* EMPLOYEE ID */}
+
+                  <div
+                    className={
+                      styles.formGroup
+                    }
+                  >
+
+                    <label
+                      className={
+                        styles.label
+                      }
+                      htmlFor="employeeId"
+                    >
+                      Employee ID
+                    </label>
+
+                    <input
+                      id="employeeId"
+                      type="text"
+                      name="employeeId"
+                      value={
+                        formData.employeeId
+                      }
+                      onChange={
+                        handleInputChange
+                      }
+                      className={
+                        styles.input
+                      }
+                      placeholder="EMP-001"
+                      required
+                    />
+
+                  </div>
+
+
+                  {/* ROLE */}
+
+                  <div
+                    className={
+                      styles.formGroup
+                    }
+                  >
+
+                    <label
+                      className={
+                        styles.label
+                      }
+                      htmlFor="role"
+                    >
+                      Role
+                    </label>
+
+                    <input
+                      id="role"
+                      type="text"
+                      name="role"
+                      value={
+                        formData.role
+                      }
+                      onChange={
+                        handleInputChange
+                      }
+                      className={
+                        styles.input
+                      }
+                      placeholder="Admin / Manager / Employee"
+                      required
+                    />
+
+                  </div>
+
+
+                  {/* EMAIL */}
+
+                  <div
+                    className={
+                      styles.formGroup
+                    }
+                  >
+
+                    <label
+                      className={
+                        styles.label
+                      }
+                      htmlFor="email"
+                    >
+                      Email Address
+                    </label>
+
+                    <input
+                      id="email"
+                      type="email"
+                      name="email"
+                      value={
+                        formData.email
+                      }
+                      onChange={
+                        handleInputChange
+                      }
+                      className={
+                        styles.input
+                      }
+                      placeholder="employee@example.com"
+                      required
+                    />
+
+                  </div>
+
+
+                  {/* PHONE */}
+
+                  <div
+                    className={
+                      styles.formGroup
+                    }
+                  >
+
+                    <label
+                      className={
+                        styles.label
+                      }
+                      htmlFor="phone"
+                    >
+                      Phone Number
+                    </label>
+
+                    <input
+                      id="phone"
+                      type="tel"
+                      name="phone"
+                      value={
+                        formData.phone
+                      }
+                      onChange={
+                        handleInputChange
+                      }
+                      className={
+                        styles.input
+                      }
+                      placeholder="+91 9876543210"
+                      required
+                    />
+
+                  </div>
+
+
+                  {/* PASSWORD */}
+
+                  <div
+                    className={
+                      styles.formGroup
+                    }
+                  >
+
+                    <label
+                      className={
+                        styles.label
+                      }
+                      htmlFor="password"
+                    >
+                      New Password
+                    </label>
+
+                    <input
+                      id="password"
+                      type="password"
+                      name="password"
+                      value={
+                        formData.password
+                      }
+                      onChange={
+                        handleInputChange
+                      }
+                      className={
+                        styles.input
+                      }
+                      placeholder="Leave blank to keep current password"
+                    />
+
+                    <small
+                      className={
+                        styles.inputHint
+                      }
+                    >
+                      Leave blank if you do not
+                      want to change the password.
+                    </small>
+
+                  </div>
+
+
+                  {/* =================================================
+                      FORM ACTIONS
+                  ================================================= */}
+
+                  <div
+                    className={
+                      styles.formActions
+                    }
+                  >
+
+                    <button
+                      type="button"
+                      className={
+                        styles.cancelButton
+                      }
+                      onClick={closeModal}
+                      disabled={submitting}
+                    >
+                      Cancel
+                    </button>
+
+
+                    <button
+                      type="submit"
+                      className={
+                        styles.submitButton
+                      }
+                      disabled={submitting}
+                    >
+
+                      {submitting ? (
+                        <>
+                          <Loader2
+                            size={16}
+                            className={
+                              styles.buttonSpinner
+                            }
+                          />
+
+                          Saving...
+                        </>
+                      ) : (
+                        "Save Changes"
+                      )}
+
+                    </button>
+
+                  </div>
+
+                </form>
+
               </div>
-            </form>
-          </div>
+
+            </div>
+
+          )}
+
         </div>
-      )}
+      </div>
     </div>
   );
 }
-

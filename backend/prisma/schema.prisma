@@ -27,6 +27,8 @@ model Department {
   employees   Int      @default(0)
   status      Status   @default(ACTIVE)
 
+  designations Designation[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
