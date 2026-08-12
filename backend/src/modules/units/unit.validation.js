@@ -28,11 +28,11 @@ export const updateUnitValidation = [
     .isLength({ min: 1, max: 100 })
     .withMessage("Unit name must be between 1 and 100 characters"),
 
-  body("shortName")
+  body("code")
     .optional()
     .trim()
     .isLength({ min: 1, max: 20 })
-    .withMessage("Short name must be between 1 and 20 characters"),
+    .withMessage("Unit code must be between 1 and 20 characters"),
 
   body("status")
     .optional()

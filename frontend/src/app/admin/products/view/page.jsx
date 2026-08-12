@@ -499,7 +499,11 @@ export default function ProductsPage() {
                 filteredProducts.map((product) => {
                   const status = getProductStatus(product);
                   return (
-                  <tr key={product.id}>
+                  <tr 
+                    key={product.id}
+                    onClick={() => window.location.href = `/admin/products/view/${product.id}`}
+                    style={{ cursor: 'pointer' }}
+                  >
 
                     <td className={styles.code}>
                       {product.code || `#${product.id?.substring(0,6)}`}
@@ -580,13 +584,14 @@ export default function ProductsPage() {
 
                         <button
                           className={styles.actionButton}
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setOpenMenu(
                               openMenu === product.id
                                 ? null
                                 : product.id
-                            )
-                          }
+                            );
+                          }}
                         >
                           <FiMoreVertical />
                         </button>
@@ -598,15 +603,15 @@ export default function ProductsPage() {
                               styles.actionMenu
                             }
                           >
-                            <button onClick={() => window.location.href = `/admin/products/view/${product.id}`}>
+                            <button onClick={(e) => { e.stopPropagation(); window.location.href = `/admin/products/view/${product.id}`; }}>
                               View
                             </button>
 
-                            <button onClick={() => window.location.href = `/admin/products/edit/${product.id}`}>
+                            <button onClick={(e) => { e.stopPropagation(); window.location.href = `/admin/products/edit/${product.id}`; }}>
                               Edit
                             </button>
 
-                            <button onClick={() => handleDelete(product.id)} style={{ color: 'red' }}>
+                            <button onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }} style={{ color: 'red' }}>
                               Delete
                             </button>
                           </div>
