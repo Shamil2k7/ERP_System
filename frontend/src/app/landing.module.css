@@ -195,7 +195,7 @@
 
   border-radius: 999px;
 
-  background: rgba(255, 255, 255, 0.92);
+  /* background: rgba(255, 255, 255, 0.92); */
 
   backdrop-filter: blur(15px);
 
@@ -260,7 +260,6 @@
   min-height: 100vh;
 
   display: flex;
-
   justify-content: space-between;
   align-items: center;
 
@@ -269,20 +268,10 @@
   padding: 120px 8% 80px;
 
   position: relative;
-
   overflow: hidden;
 
-  background:
-    linear-gradient(
-      rgba(255, 255, 255, 0.72),
-      rgba(255, 255, 255, 0.72)
-    ),
-    url("https://images.pexels.com/photos/15682040/pexels-photo-15682040.jpeg?auto=compress&cs=tinysrgb&w=1600");
-
   background-size: cover;
-
   background-position: center;
-
   background-repeat: no-repeat;
 }
 
@@ -430,13 +419,33 @@
 }
 
 .secondaryBtn {
-  padding: 15px 35px;
+
+  display: inline-block;
+
+  width: fit-content;
+
+  padding: 8px 18px;
+
+  border-radius: 999px;
+
+  background: #dbeafe;
+
+  color: #2563eb;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  /* letter-spacing: 1px; */
+
+  margin-bottom: 15px;
+  /* 
 
   background: white;
 
   color: #2563eb;
 
-  border: 2px solid #2563eb;
+  border: 2px solid #000000;
 
   border-radius: 999px;
 
@@ -446,11 +455,11 @@
 
   cursor: pointer;
 
-  transition: 0.3s;
+  transition: 0.3s; */
 }
 
 .secondaryBtn:hover {
-  background: #2563eb;
+  background: #000000;
 
   color: white;
 }
