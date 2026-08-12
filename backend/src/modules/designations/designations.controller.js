@@ -1,14 +1,14 @@
 import {
-  fetchAllRoles,
-  fetchRoleById,
-  addRole,
-  modifyRole,
-  removeRole,
-} from "./roles.service.js";
+  fetchAllDesignations,
+  fetchDesignationById,
+  addDesignation,
+  modifyDesignation,
+  removeDesignation,
+} from "./designations.service.js";
 
-const getRoles = async (req, res) => {
+const getDesignations = async (req, res) => {
   try {
-    const result = await fetchAllRoles();
+    const result = await fetchAllDesignations();
     return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
@@ -18,10 +18,10 @@ const getRoles = async (req, res) => {
   }
 };
 
-const getRole = async (req, res) => {
+const getDesignation = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await fetchRoleById(id);
+    const result = await fetchDesignationById(id);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(404).json({
@@ -31,9 +31,9 @@ const getRole = async (req, res) => {
   }
 };
 
-const createRole = async (req, res) => {
+const createDesignation = async (req, res) => {
   try {
-    const result = await addRole(req.body);
+    const result = await addDesignation(req.body);
     return res.status(201).json(result);
   } catch (error) {
     return res.status(400).json({
@@ -43,10 +43,10 @@ const createRole = async (req, res) => {
   }
 };
 
-const updateRole = async (req, res) => {
+const updateDesignation = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await modifyRole(id, req.body);
+    const result = await modifyDesignation(id, req.body);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(400).json({
@@ -56,10 +56,10 @@ const updateRole = async (req, res) => {
   }
 };
 
-const deleteRole = async (req, res) => {
+const deleteDesignation = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await removeRole(id);
+    const result = await removeDesignation(id);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(400).json({
@@ -70,9 +70,9 @@ const deleteRole = async (req, res) => {
 };
 
 export {
-  getRoles,
-  getRole,
-  createRole,
-  updateRole,
-  deleteRole,
+  getDesignations,
+  getDesignation,
+  createDesignation,
+  updateDesignation,
+  deleteDesignation,
 };

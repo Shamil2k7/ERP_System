@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, User, Loader2 } from "lucide-react";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import styles from "./addEmployees.module.css";
+import { getRoles } from "@/services/roleService";
 
 export default function AddEmployeePage() {
   const router = useRouter();
 
+  const [roles, setRoles] = useState([]);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -18,6 +20,22 @@ export default function AddEmployeePage() {
     role: "",
     password: "",
   });
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  const fetchRoles = async () => {
+    try {
+      const res = await getRoles();
+      if (res.success && Array.isArray(res.data)) {
+        setRoles(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch roles:", err);
+    }
+  };
+
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -260,15 +278,29 @@ export default function AddEmployeePage() {
                         </span>
                       </label>
 
-                      <input
-                        type="text"
+                      <select
                         name="role"
                         value={formData.role}
                         onChange={handleInputChange}
                         className={styles.input}
                         required
-                        placeholder="manager"
-                      />
+                      >
+                        <option value="">Select Role</option>
+                        {roles.length > 0 ? (
+                          roles.map((r) => (
+                            <option key={r.id} value={r.name}>
+                              {r.name}
+                            </option>
+                          ))
+                        ) : (
+                          <>
+                            <option value="Admin">Admin</option>
+                            <option value="Manager">Manager</option>
+                            <option value="HR">HR</option>
+                          </>
+                        )}
+                      </select>
+
 
                     </div>
 

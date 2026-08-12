@@ -7,10 +7,12 @@ import { Edit2, Trash2, X, Users, Loader2, Plus } from "lucide-react";
 import styles from "./viewEmployees.module.css";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
+import { getRoles } from "@/services/roleService";
 
 export default function EmployeePage() {
   const router = useRouter();
 
+  const [roles, setRoles] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,9 +30,22 @@ export default function EmployeePage() {
 
   useEffect(() => {
     fetchEmployees();
+    fetchRoles();
   }, []);
 
+  const fetchRoles = async () => {
+    try {
+      const res = await getRoles();
+      if (res.success && Array.isArray(res.data)) {
+        setRoles(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch roles:", err);
+    }
+  };
+
   const fetchEmployees = async () => {
+
     try {
       setLoading(true);
 
@@ -342,15 +357,29 @@ export default function EmployeePage() {
                   Role
                 </label>
 
-                <input
-                  type="text"
+                <select
                   name="role"
                   value={formData.role}
                   onChange={handleInputChange}
                   className={styles.input}
                   required
-                  placeholder="Admin"
-                />
+                >
+                  <option value="">Select Role</option>
+                  {roles.length > 0 ? (
+                    roles.map((r) => (
+                      <option key={r.id} value={r.name}>
+                        {r.name}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Admin">Admin</option>
+                      <option value="Manager">Manager</option>
+                      <option value="HR">HR</option>
+                    </>
+                  )}
+                </select>
+
               </div>
 
               <div className={styles.formGroup}>
