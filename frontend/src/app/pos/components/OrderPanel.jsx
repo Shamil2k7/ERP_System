@@ -308,7 +308,7 @@ export default function OrderPanel({
       <div className="pos-bottom-actions-row">
         <button className="pos-action-btn hold" onClick={onHoldSale}>
           <IconHold />
-          <span>Hold Sale</span>
+          <span>Bill Hold</span>
         </button>
 
         <button className="pos-action-btn draft" onClick={onSaveDraft}>
