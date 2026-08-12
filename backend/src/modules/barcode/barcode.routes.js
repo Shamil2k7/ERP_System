@@ -30,6 +30,17 @@ router.get(
   "/product/:productId",
   barcodeController.getBarcodeByProductId
 );
+
+router.get(
+  "/scan/:barcode",
+  barcodeController.getProductByBarcode
+);
+
+router.get(
+  "/:id",
+  barcodeController.getBarcodeById
+);
+
 router.get(
   "/:id",
   barcodeController.getBarcodeById
