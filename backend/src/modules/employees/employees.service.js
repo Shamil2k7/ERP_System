@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 
+
 import {
   sendEmployeeCredentialsEmail,
   sendEmployeeUpdatedEmail,
@@ -29,6 +30,7 @@ const removeSensitiveFields = (employee) => {
 
   const {
     passwordHash,
+    plainPassword,
     verificationToken,
     verificationExpires,
     ...safeEmployee
@@ -133,7 +135,7 @@ const addEmployee = async (
   }
 
 
-  // Hash password
+  // Hash password and store the plain text for future reference
   const passwordHash = await bcrypt.hash(password, 12);
 
 
@@ -144,6 +146,7 @@ const addEmployee = async (
     email: cleanEmail,
     phone: cleanPhone,
     passwordHash,
+    plainPassword: password,
 
     // Admin created the account
     isVerified: true,
@@ -307,13 +310,17 @@ const modifyEmployee = async (
   }
 
 
-  // Password update (if provided)
-  let rawNewPassword = null;
+  // Password update — if admin provides a new password, save it (hashed + plain)
+  // and email the plain text to the employee.
+  let plainPasswordToSend = null;
 
   if (updateData.password && updateData.password.trim() !== "") {
-    rawNewPassword = updateData.password.trim();
-    safeUpdateData.passwordHash = await bcrypt.hash(rawNewPassword, 12);
+    plainPasswordToSend = updateData.password.trim();
+    safeUpdateData.passwordHash  = await bcrypt.hash(plainPasswordToSend, 12);
+    safeUpdateData.plainPassword = plainPasswordToSend;
+    safeUpdateData.firstLogin    = true;
   }
+
 
 
   // Flags
@@ -338,27 +345,25 @@ const modifyEmployee = async (
     );
 
 
-  // Send notification email to the updated email address if email was modified or provided
+  // Send notification email with the employee's current password
   let emailSent = false;
 
-  if (safeUpdateData.email || updateData.email) {
-    try {
-      const targetEmail = updatedEmployee.email;
+  try {
+    const targetEmail = updatedEmployee.email;
 
-      await sendEmployeeUpdatedEmail(
-        targetEmail,
-        updatedEmployee.employeeId,
-        updatedEmployee.fullName,
-        rawNewPassword
-      );
+    await sendEmployeeUpdatedEmail(
+      targetEmail,
+      updatedEmployee.employeeId,
+      updatedEmployee.fullName,
+      plainPasswordToSend
+    );
 
-      emailSent = true;
-    } catch (emailErr) {
-      console.error(
-        "Failed to send employee update notification email:",
-        emailErr.message
-      );
-    }
+    emailSent = true;
+  } catch (emailErr) {
+    console.error(
+      "Failed to send employee update notification email:",
+      emailErr.message
+    );
   }
 
 
