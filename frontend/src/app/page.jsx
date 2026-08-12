@@ -31,9 +31,9 @@ export default function Home() {
     loadLanding();
   }, []);
 
-  /* =========================
-     LOADING SCREEN
-  ========================= */
+  // ============================
+  // LOADING
+  // ============================
 
   if (loading) {
     return (
@@ -53,9 +53,9 @@ export default function Home() {
     );
   }
 
-  /* =========================
-     ERROR SCREEN
-  ========================= */
+  // ============================
+  // ERROR
+  // ============================
 
   if (error || !landing) {
     return (
@@ -80,33 +80,54 @@ export default function Home() {
     );
   }
 
+  // ============================
+  // IMAGE URL HELPER
+  // ============================
+
+  const getImageUrl = (image) => {
+    if (!image) return "";
+
+    return `${API_URL}/uploads/landingpageimage/${image}`;
+  };
+
+  // ============================
+  // HERO BACKGROUND
+  // ============================
+
+  const heroBackground = landing.heroBackgroundImage
+    ? `linear-gradient(
+        rgba(255, 255, 255, 0.72),
+        rgba(255, 255, 255, 0.72)
+      ),
+      url("${getImageUrl(landing.heroBackgroundImage)}")`
+    : "linear-gradient(135deg, #f8fafc, #eff6ff)";
+
   return (
     <>
-      {/* ================= NAVBAR ================= */}
+      {/* =========================
+          NAVBAR
+      ========================= */}
 
       <nav className={styles.navbar}>
         <div className={styles.logo}>
-          ERP<span>Cloud</span>
+          {landing.logoText}
+          <span>{landing.logoHighlight}</span>
         </div>
 
         <button className={styles.loginBtn}>
-          Login →
+          {landing.loginText}
         </button>
       </nav>
 
-      {/* ================= HERO ================= */}
+      {/* =========================
+          HERO
+      ========================= */}
 
       <section
         className={styles.hero}
         id="home"
         style={{
-          backgroundImage: `
-      linear-gradient(
-        rgba(255, 255, 255, 0.72),
-        rgba(255, 255, 255, 0.72)
-      ),
-      url("${API_URL}/uploads/landingpageimage/${landing.heroImage}")
-    `,
+          backgroundImage: heroBackground,
         }}
       >
         <div className={styles.blurOne}></div>
@@ -116,7 +137,7 @@ export default function Home() {
 
         <div className={styles.heroContent}>
           <span className={styles.heroTag}>
-            CLOUD ERP PLATFORM
+            {landing.heroTag}
           </span>
 
           <h1 className={styles.heroTitle}>
@@ -127,20 +148,9 @@ export default function Home() {
             {landing.heroDescription}
           </p>
 
-          {/* <div className={styles.heroButtons}>
-            <button className={styles.primaryBtn}>
-              Request Demo
-            </button>
-            
-
-            <button className={styles.secondaryBtn}>
-              Learn More
-            </button>
-          </div> */}
-
           <button className={styles.secondaryBtn}>
-            Upgrade Your Company In Minutes
-            </button>
+            {landing.heroButtonText}
+          </button>
         </div>
 
         {/* RIGHT CONTENT */}
@@ -152,19 +162,24 @@ export default function Home() {
 
             <div className={styles.dashboardTop}>
               <div>
-                <h3>ERP Dashboard</h3>
-                <span>Business Overview</span>
+                <h3>
+                  {landing.dashboardTitle}
+                </h3>
+
+                <span>
+                  {landing.dashboardSubtitle}
+                </span>
               </div>
 
               <div className={styles.status}></div>
             </div>
 
-            {/* Hero Image */}
+            {/* Dashboard Image */}
 
             <div className={styles.chartArea}>
               {landing.heroImage ? (
                 <img
-                  src={`${API_URL}/uploads/landingpageimage/${landing.heroImage}`}
+                  src={getImageUrl(landing.heroImage)}
                   alt="ERP Dashboard"
                   className={styles.dashboardImage}
                 />
@@ -202,18 +217,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ================= ABOUT ================= */}
+      {/* =========================
+          ABOUT
+      ========================= */}
 
-      <section className={styles.about} id="about">
+      <section
+        className={styles.about}
+        id="about"
+      >
+        {/* ABOUT IMAGES */}
 
         <div className={styles.aboutImages}>
           <div className={styles.imageGrid}>
 
-            {/* IMAGE 1 */}
-
             {landing.aboutImage1 ? (
               <img
-                src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage1}`}
+                src={getImageUrl(landing.aboutImage1)}
                 alt="ERP business management"
                 loading="lazy"
               />
@@ -223,11 +242,9 @@ export default function Home() {
               </div>
             )}
 
-            {/* IMAGE 2 */}
-
             {landing.aboutImage2 ? (
               <img
-                src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage2}`}
+                src={getImageUrl(landing.aboutImage2)}
                 alt="ERP inventory management"
                 loading="lazy"
               />
@@ -237,11 +254,9 @@ export default function Home() {
               </div>
             )}
 
-            {/* IMAGE 3 */}
-
             {landing.aboutImage3 ? (
               <img
-                src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage3}`}
+                src={getImageUrl(landing.aboutImage3)}
                 alt="ERP analytics"
                 loading="lazy"
               />
@@ -251,11 +266,9 @@ export default function Home() {
               </div>
             )}
 
-            {/* IMAGE 4 */}
-
             {landing.aboutImage4 ? (
               <img
-                src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage4}`}
+                src={getImageUrl(landing.aboutImage4)}
                 alt="ERP business dashboard"
                 loading="lazy"
               />
@@ -271,9 +284,8 @@ export default function Home() {
         {/* ABOUT CONTENT */}
 
         <div className={styles.aboutContent}>
-
           <span className={styles.sectionTag}>
-            ABOUT ERP CLOUD
+            {landing.aboutTag}
           </span>
 
           <h2>
@@ -294,18 +306,18 @@ export default function Home() {
           <button className={styles.learnBtn}>
             Learn More →
           </button>
-
         </div>
       </section>
 
-      {/* ================= FOOTER ================= */}
+      {/* =========================
+          FOOTER
+      ========================= */}
 
       <footer className={styles.footer}>
         <p>
-          © ERP Cloud. All Rights Reserved.
+          {landing.footerText}
         </p>
       </footer>
     </>
   );
 }
-

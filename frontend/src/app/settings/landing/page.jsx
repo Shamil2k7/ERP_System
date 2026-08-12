@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import {
   getLandingPage,
   updateLandingPage,
@@ -14,23 +15,50 @@ export default function LandingAdminPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // ============================
+  // Text Fields
+  // ============================
+
   const [form, setForm] = useState({
+    logoText: "",
+    logoHighlight: "",
+    loginText: "",
+
+    heroTag: "",
     heroTitle: "",
     heroDescription: "",
+    heroButtonText: "",
+
+    dashboardTitle: "",
+    dashboardSubtitle: "",
+
+    aboutTag: "",
     aboutTitle: "",
     aboutDescription: "",
+
+    footerText: "",
   });
+
+  // ============================
+  // Image Files
+  // ============================
 
   const [files, setFiles] = useState({
     heroImage: null,
+    heroBackgroundImage: null,
     aboutImage1: null,
     aboutImage2: null,
     aboutImage3: null,
     aboutImage4: null,
   });
 
+  // ============================
+  // Image Preview
+  // ============================
+
   const [preview, setPreview] = useState({
     heroImage: "",
+    heroBackgroundImage: "",
     aboutImage1: "",
     aboutImage2: "",
     aboutImage3: "",
@@ -47,18 +75,45 @@ export default function LandingAdminPage() {
 
   async function loadLanding() {
     try {
+      setLoading(true);
+
       const data = await getLandingPage();
 
+      // ============================
+      // Text Data
+      // ============================
+
       setForm({
+        logoText: data.logoText || "",
+        logoHighlight: data.logoHighlight || "",
+        loginText: data.loginText || "",
+
+        heroTag: data.heroTag || "",
         heroTitle: data.heroTitle || "",
         heroDescription: data.heroDescription || "",
+        heroButtonText: data.heroButtonText || "",
+
+        dashboardTitle: data.dashboardTitle || "",
+        dashboardSubtitle: data.dashboardSubtitle || "",
+
+        aboutTag: data.aboutTag || "",
         aboutTitle: data.aboutTitle || "",
         aboutDescription: data.aboutDescription || "",
+
+        footerText: data.footerText || "",
       });
+
+      // ============================
+      // Image Previews
+      // ============================
 
       setPreview({
         heroImage: data.heroImage
           ? `${API_URL}/uploads/landingpageimage/${data.heroImage}`
+          : "",
+
+        heroBackgroundImage: data.heroBackgroundImage
+          ? `${API_URL}/uploads/landingpageimage/${data.heroBackgroundImage}`
           : "",
 
         aboutImage1: data.aboutImage1
@@ -133,13 +188,57 @@ export default function LandingAdminPage() {
 
       const formData = new FormData();
 
+      // ============================
+      // Navbar
+      // ============================
+
+      formData.append("logoText", form.logoText);
+      formData.append("logoHighlight", form.logoHighlight);
+      formData.append("loginText", form.loginText);
+
+      // ============================
+      // Hero
+      // ============================
+
+      formData.append("heroTag", form.heroTag);
       formData.append("heroTitle", form.heroTitle);
       formData.append("heroDescription", form.heroDescription);
+      formData.append("heroButtonText", form.heroButtonText);
+
+      // ============================
+      // Dashboard
+      // ============================
+
+      formData.append("dashboardTitle", form.dashboardTitle);
+      formData.append("dashboardSubtitle", form.dashboardSubtitle);
+
+      // ============================
+      // About
+      // ============================
+
+      formData.append("aboutTag", form.aboutTag);
       formData.append("aboutTitle", form.aboutTitle);
       formData.append("aboutDescription", form.aboutDescription);
 
+      // ============================
+      // Footer
+      // ============================
+
+      formData.append("footerText", form.footerText);
+
+      // ============================
+      // Images
+      // ============================
+
       if (files.heroImage) {
         formData.append("heroImage", files.heroImage);
+      }
+
+      if (files.heroBackgroundImage) {
+        formData.append(
+          "heroBackgroundImage",
+          files.heroBackgroundImage
+        );
       }
 
       if (files.aboutImage1) {
@@ -158,14 +257,21 @@ export default function LandingAdminPage() {
         formData.append("aboutImage4", files.aboutImage4);
       }
 
+      // ============================
+      // API Update
+      // ============================
+
       await updateLandingPage(formData);
 
       alert("Landing page updated successfully.");
 
+      // Reload latest database data
       await loadLanding();
 
+      // Clear selected files
       setFiles({
         heroImage: null,
+        heroBackgroundImage: null,
         aboutImage1: null,
         aboutImage2: null,
         aboutImage3: null,
@@ -203,10 +309,69 @@ export default function LandingAdminPage() {
       </h1>
 
       <form onSubmit={handleSubmit}>
-        {/* ================= HERO ================= */}
+
+        {/* =====================================================
+            NAVBAR
+        ===================================================== */}
+
+        <section className={styles.section}>
+          <h2>Navbar</h2>
+
+          <div className={styles.formGroup}>
+            <label>Logo Text</label>
+
+            <input
+              type="text"
+              name="logoText"
+              value={form.logoText}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Logo Highlight</label>
+
+            <input
+              type="text"
+              name="logoHighlight"
+              value={form.logoHighlight}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Login Button Text</label>
+
+            <input
+              type="text"
+              name="loginText"
+              value={form.loginText}
+              onChange={handleChange}
+            />
+          </div>
+        </section>
+
+        {/* =====================================================
+            HERO
+        ===================================================== */}
 
         <section className={styles.section}>
           <h2>Hero Section</h2>
+
+          {/* Hero Tag */}
+
+          <div className={styles.formGroup}>
+            <label>Hero Tag</label>
+
+            <input
+              type="text"
+              name="heroTag"
+              value={form.heroTag}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Hero Title */}
 
           <div className={styles.formGroup}>
             <label>Hero Title</label>
@@ -220,6 +385,8 @@ export default function LandingAdminPage() {
             />
           </div>
 
+          {/* Hero Description */}
+
           <div className={styles.formGroup}>
             <label>Hero Description</label>
 
@@ -232,8 +399,23 @@ export default function LandingAdminPage() {
             />
           </div>
 
+          {/* Hero Button */}
+
           <div className={styles.formGroup}>
-            <label>Hero Image</label>
+            <label>Hero Button Text</label>
+
+            <input
+              type="text"
+              name="heroButtonText"
+              value={form.heroButtonText}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Hero Image */}
+
+          <div className={styles.formGroup}>
+            <label>Hero Dashboard Image</label>
 
             <input
               type="file"
@@ -250,12 +432,76 @@ export default function LandingAdminPage() {
               />
             )}
           </div>
+
+          {/* Hero Background Image */}
+
+          <div className={styles.formGroup}>
+            <label>Hero Background Image</label>
+
+            <input
+              type="file"
+              name="heroBackgroundImage"
+              accept="image/*"
+              onChange={handleImage}
+            />
+
+            {preview.heroBackgroundImage && (
+              <img
+                src={preview.heroBackgroundImage}
+                alt="Hero Background Preview"
+                className={styles.preview}
+              />
+            )}
+          </div>
+
+          {/* Dashboard Title */}
+
+          <div className={styles.formGroup}>
+            <label>Dashboard Title</label>
+
+            <input
+              type="text"
+              name="dashboardTitle"
+              value={form.dashboardTitle}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Dashboard Subtitle */}
+
+          <div className={styles.formGroup}>
+            <label>Dashboard Subtitle</label>
+
+            <input
+              type="text"
+              name="dashboardSubtitle"
+              value={form.dashboardSubtitle}
+              onChange={handleChange}
+            />
+          </div>
         </section>
 
-        {/* ================= ABOUT ================= */}
+        {/* =====================================================
+            ABOUT
+        ===================================================== */}
 
         <section className={styles.section}>
           <h2>About Section</h2>
+
+          {/* About Tag */}
+
+          <div className={styles.formGroup}>
+            <label>About Tag</label>
+
+            <input
+              type="text"
+              name="aboutTag"
+              value={form.aboutTag}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* About Title */}
 
           <div className={styles.formGroup}>
             <label>About Title</label>
@@ -269,6 +515,8 @@ export default function LandingAdminPage() {
             />
           </div>
 
+          {/* About Description */}
+
           <div className={styles.formGroup}>
             <label>About Description</label>
 
@@ -281,9 +529,10 @@ export default function LandingAdminPage() {
             />
           </div>
 
-          {/* Images */}
+          {/* About Images */}
 
           <div className={styles.imageGrid}>
+
             {/* Image 1 */}
 
             <div className={styles.imageBox}>
@@ -367,10 +616,32 @@ export default function LandingAdminPage() {
                 />
               )}
             </div>
+
           </div>
         </section>
 
-        {/* ================= SAVE ================= */}
+        {/* =====================================================
+            FOOTER
+        ===================================================== */}
+
+        <section className={styles.section}>
+          <h2>Footer</h2>
+
+          <div className={styles.formGroup}>
+            <label>Footer Text</label>
+
+            <input
+              type="text"
+              name="footerText"
+              value={form.footerText}
+              onChange={handleChange}
+            />
+          </div>
+        </section>
+
+        {/* =====================================================
+            SAVE
+        ===================================================== */}
 
         <button
           type="submit"
@@ -379,6 +650,7 @@ export default function LandingAdminPage() {
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>
+
       </form>
     </div>
   );

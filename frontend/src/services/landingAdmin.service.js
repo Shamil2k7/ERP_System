@@ -1,8 +1,9 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // ==============================
-// Get Landing Page
+// GET LANDING PAGE
 // ==============================
+
 export async function getLandingPage() {
   const response = await fetch(`${API_URL}/api/landing`);
 
@@ -18,8 +19,9 @@ export async function getLandingPage() {
 }
 
 // ==============================
-// Update Landing Page
+// UPDATE LANDING PAGE
 // ==============================
+
 export async function updateLandingPage(formData) {
   const response = await fetch(`${API_URL}/api/landing`, {
     method: "PUT",
