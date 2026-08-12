@@ -23,7 +23,7 @@ import styles from "./viewUnits.module.css";
 
 const emptyForm = {
   name: "",
-  shortName: "",
+  code: "",
   status: "ACTIVE",
 };
 
@@ -62,7 +62,7 @@ export default function UnitsPage() {
       const searchValue = search.toLowerCase();
       return (
         unit.name?.toLowerCase().includes(searchValue) ||
-        unit.shortName?.toLowerCase().includes(searchValue) ||
+        unit.code?.toLowerCase().includes(searchValue) ||
         unit.status?.toLowerCase().includes(searchValue)
       );
     });
@@ -89,13 +89,13 @@ export default function UnitsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.shortName.trim()) return;
+    if (!formData.name.trim() || !formData.code.trim()) return;
 
     setIsSubmitting(true);
     try {
       const payload = {
         name: formData.name.trim(),
-        shortName: formData.shortName.trim(),
+        code: formData.code.trim(),
         status: formData.status.toUpperCase(),
       };
 
@@ -125,7 +125,7 @@ export default function UnitsPage() {
   const handleEdit = (unit) => {
     setFormData({
       name: unit.name,
-      shortName: unit.shortName,
+      code: unit.code,
       status: unit.status,
     });
     setEditingId(unit.id);
@@ -173,7 +173,7 @@ export default function UnitsPage() {
     const headers = ["Unit", "Short Name", "No of Products", "Status"];
     const rows = units.map((unit) => [
       unit.name,
-      unit.shortName,
+      unit.code,
       unit.products?.length || 0,
       unit.status,
     ]);
@@ -240,9 +240,9 @@ export default function UnitsPage() {
             <div className={styles.formGroup}>
               <label htmlFor="shortName">Short Name <span>*</span></label>
               <input
-                id="shortName"
-                name="shortName"
-                value={formData.shortName}
+                id="code"
+                name="code"
+                value={formData.code}
                 onChange={handleFormChange}
                 placeholder="Example: kg"
                 required
@@ -312,7 +312,7 @@ export default function UnitsPage() {
                 paginatedUnits.map((unit) => (
                   <tr key={unit.id}>
                     <td><strong className={styles.unitName}>{unit.name}</strong></td>
-                    <td><span className={styles.shortName}>{unit.shortName}</span></td>
+                    <td><span className={styles.shortName}>{unit.code}</span></td>
                     <td><span className={styles.products}>{String(unit.products?.length || 0).padStart(2, "0")}</span></td>
                     <td>
                       <span className={`${styles.status} ${unit.status === "ACTIVE" ? styles.active : styles.inactive}`}>
