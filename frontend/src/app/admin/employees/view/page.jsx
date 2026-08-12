@@ -3,13 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Edit2, Trash2, X, Users, Loader2, Plus } from "lucide-react";
+import { Edit2, Trash2, X, Users, Loader2, Plus, CreditCard, Mail, Phone } from "lucide-react";
 import styles from "./viewEmployees.module.css";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { getRoles } from "@/services/roleService";
-
-import styles from "./viewEmployees.module.css";
 
 export default function EmployeePage() {
   const router = useRouter();
@@ -751,65 +749,22 @@ export default function EmployeePage() {
                     styles.modalHeader
                   }
                 >
-
-              <div className={styles.formGroup}>
-                <label className={styles.label}>
-                  Role
-                </label>
-
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  className={styles.input}
-                  required
-                >
-                  <option value="">Select Role</option>
-                  {roles.length > 0 ? (
-                    roles.map((r) => (
-                      <option key={r.id} value={r.name}>
-                        {r.name}
-                      </option>
-                    ))
-                  ) : (
-                    <>
-                      <option value="Admin">Admin</option>
-                      <option value="Manager">Manager</option>
-                      <option value="HR">HR</option>
-                    </>
-                  )}
-                </select>
-
-              </div>
-
-                    <h2
-                      className={
-                        styles.modalTitle
-                      }
-                    >
-                      Edit Employee
-                    </h2>
-
-                    <p
-                      className={
-                        styles.modalSubtitle
-                      }
-                    >
-                      Update employee information
-                    </p>
-
-              <div className={styles.formGroup}>
-                <p style={{ fontSize: "0.85rem", color: "#64748b", margin: 0, padding: "10px 0" }}>
-                  To change the employee&apos;s password, direct them to their{" "}
-                  <Link
-                    href="/settings/profile"
-                    style={{ color: "#6366f1", fontWeight: 600, textDecoration: "underline" }}
+                  <h2
+                    className={
+                      styles.modalTitle
+                    }
                   >
-                    Profile Page
-                  </Link>
-                  .
-                </p>
-              </div>
+                    Edit Employee
+                  </h2>
+
+                  <p
+                    className={
+                      styles.modalSubtitle
+                    }
+                  >
+                    Update employee information
+                  </p>
+                </div>
 
 
                 {/* =================================================
@@ -911,22 +866,29 @@ export default function EmployeePage() {
                       Role
                     </label>
 
-                    <input
+                    <select
                       id="role"
-                      type="text"
                       name="role"
-                      value={
-                        formData.role
-                      }
-                      onChange={
-                        handleInputChange
-                      }
-                      className={
-                        styles.input
-                      }
-                      placeholder="Admin / Manager / Employee"
+                      value={formData.role}
+                      onChange={handleInputChange}
+                      className={styles.input}
                       required
-                    />
+                    >
+                      <option value="">Select Role</option>
+                      {roles.length > 0 ? (
+                        roles.map((r) => (
+                          <option key={r.id} value={r.name}>
+                            {r.name}
+                          </option>
+                        ))
+                      ) : (
+                        <>
+                          <option value="Admin">Admin</option>
+                          <option value="Manager">Manager</option>
+                          <option value="HR">HR</option>
+                        </>
+                      )}
+                    </select>
 
                   </div>
 
@@ -1005,48 +967,19 @@ export default function EmployeePage() {
                   </div>
 
 
-                  {/* PASSWORD */}
+                  {/* PASSWORD REDIRECT NOTICE */}
 
-                  <div
-                    className={
-                      styles.formGroup
-                    }
-                  >
-
-                    <label
-                      className={
-                        styles.label
-                      }
-                      htmlFor="password"
-                    >
-                      New Password
-                    </label>
-
-                    <input
-                      id="password"
-                      type="password"
-                      name="password"
-                      value={
-                        formData.password
-                      }
-                      onChange={
-                        handleInputChange
-                      }
-                      className={
-                        styles.input
-                      }
-                      placeholder="Leave blank to keep current password"
-                    />
-
-                    <small
-                      className={
-                        styles.inputHint
-                      }
-                    >
-                      Leave blank if you do not
-                      want to change the password.
-                    </small>
-
+                  <div className={styles.formGroup}>
+                    <p style={{ fontSize: "0.85rem", color: "#64748b", margin: 0, padding: "10px 0" }}>
+                      To change the employee&apos;s password, direct them to their{" "}
+                      <Link
+                        href="/settings/profile"
+                        style={{ color: "#6366f1", fontWeight: 600, textDecoration: "underline" }}
+                      >
+                        Profile Page
+                      </Link>
+                      .
+                    </p>
                   </div>
 
 

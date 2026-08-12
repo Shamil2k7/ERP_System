@@ -6,10 +6,27 @@ import {
   deleteBranchService,
 } from "./branch.service.js";
 
+import {
+  branchSchema,
+  updateBranchSchema,
+} from "./branch.validation.js";
+
 // Add branch
 const addBranch = async (req, res) => {
   try {
-    const branch = await addBranchService(req.body);
+    const { error, value } = branchSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: error.details.map((item) => item.message),
+      });
+    }
+
+    const branch = await addBranchService(value);
 
     return res.status(201).json({
       success: true,
@@ -61,9 +78,21 @@ const getBranch = async (req, res) => {
 // Edit branch
 const editBranch = async (req, res) => {
   try {
+    const { error, value } = updateBranchSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: error.details.map((item) => item.message),
+      });
+    }
+
     const branch = await editBranchService(
       req.params.id,
-      req.body
+      value
     );
 
     return res.status(200).json({
