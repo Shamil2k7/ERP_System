@@ -804,10 +804,21 @@ model Discount {
 model LandingPage {
   id String @id @default(uuid())
 
+  logoText       String  @default("ERP")
+  logoHighlight  String  @default("Cloud")
+  loginText      String  @default("Login →")
+
+  heroTag        String  @default("CLOUD ERP PLATFORM")
   heroTitle       String
   heroDescription String
   heroImage       String?
+  heroBackgroundImage String?
+  heroButtonText String @default("Upgrade Your Company In Minutes")
 
+  dashboardTitle    String @default("ERP Dashboard")
+  dashboardSubtitle String @default("Business Overview")
+
+  aboutTag         String @default("ABOUT ERP CLOUD")
   aboutTitle       String
   aboutDescription String
 
@@ -815,6 +826,8 @@ model LandingPage {
   aboutImage2 String?
   aboutImage3 String?
   aboutImage4 String?
+
+  footerText String @default("© ERP Cloud. All Rights Reserved.")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

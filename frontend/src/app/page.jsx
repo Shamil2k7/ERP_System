@@ -46,7 +46,7 @@ export default function Home() {
           <div className={styles.loader}></div>
 
           <p className={styles.loadingText}>
-            Loading your business platform... 
+            Loading your business platform...
           </p>
         </div>
       </div>
@@ -96,7 +96,19 @@ export default function Home() {
 
       {/* ================= HERO ================= */}
 
-      <section className={styles.hero} id="home">
+      <section
+        className={styles.hero}
+        id="home"
+        style={{
+          backgroundImage: `
+      linear-gradient(
+        rgba(255, 255, 255, 0.72),
+        rgba(255, 255, 255, 0.72)
+      ),
+      url("${API_URL}/uploads/landingpageimage/${landing.heroImage}")
+    `,
+        }}
+      >
         <div className={styles.blurOne}></div>
         <div className={styles.blurTwo}></div>
 
@@ -115,15 +127,20 @@ export default function Home() {
             {landing.heroDescription}
           </p>
 
-          <div className={styles.heroButtons}>
+          {/* <div className={styles.heroButtons}>
             <button className={styles.primaryBtn}>
               Request Demo
             </button>
+            
 
             <button className={styles.secondaryBtn}>
               Learn More
             </button>
-          </div>
+          </div> */}
+
+          <button className={styles.secondaryBtn}>
+            Upgrade Your Company In Minutes
+            </button>
         </div>
 
         {/* RIGHT CONTENT */}
