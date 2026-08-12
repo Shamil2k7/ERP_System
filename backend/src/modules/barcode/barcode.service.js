@@ -111,3 +111,14 @@ export const generateBarcodeImage = async (barcode) => {
     textxalign: "center",
   });
 };
+
+export const getProductByBarcode = async (barcode) => {
+  const barcodeData =
+    await barcodeRepository.getBarcodeWithProduct(barcode);
+
+  if (!barcodeData) {
+    throw new Error("Barcode not found.");
+  }
+
+  return barcodeData.product;
+};

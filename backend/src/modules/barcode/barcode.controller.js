@@ -125,3 +125,23 @@ export const generateBarcodeImage = async (req, res) => {
     });
   }
 };
+
+export const getProductByBarcode = async (req, res) => {
+  try {
+    const { barcode } = req.params;
+
+    const product =
+      await barcodeService.getProductByBarcode(barcode);
+
+    return res.status(200).json({
+      success: true,
+      message: "Product found by barcode",
+      data: product,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

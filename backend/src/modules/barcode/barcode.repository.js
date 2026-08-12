@@ -66,3 +66,21 @@ export const deleteBarcode = async (id) => {
     },
   });
 };
+
+export const getBarcodeWithProduct = async (barcode) => {
+  return await prisma.barcode.findUnique({
+    where: {
+      barcode,
+    },
+    include: {
+      product: {
+        include: {
+          category: true,
+          brand: true,
+          unit: true,
+          inventories: true,
+        },
+      },
+    },
+  });
+};
