@@ -46,10 +46,10 @@ const productSchema = {
         nullable: true,
         example: 10,
       },
-      baseUnit: {
+      unitId: {
         type: "string",
-        enum: ["PCS", "KG", "G", "LTR", "ML", "BOX", "PACK", "BAG", "DOZEN"],
-        example: "PCS",
+        format: "uuid",
+        example: "9d4c0a95-9d84-4d1d-8f39-5ef8a6d7b123",
       },
       image: {
         type: "string",
@@ -121,10 +121,10 @@ const productSchema = {
         type: "number",
         example: 10,
       },
-      baseUnit: {
+      unitId: {
         type: "string",
-        enum: ["PCS", "KG", "G", "LTR", "ML", "BOX", "PACK", "BAG", "DOZEN"],
-        example: "PCS",
+        format: "uuid",
+        example: "9d4c0a95-9d84-4d1d-8f39-5ef8a6d7b123",
       },
       image: {
         type: "string",
@@ -179,10 +179,10 @@ const productSchema = {
         type: "number",
         example: 500,
       },
-      baseUnit: {
+      unitId: {
         type: "string",
-        enum: ["PCS", "KG", "G", "LTR", "ML", "BOX", "PACK", "BAG", "DOZEN"],
-        example: "PCS",
+        format: "uuid",
+        example: "9d4c0a95-9d84-4d1d-8f39-5ef8a6d7b123",
       },
       image: {
         type: "string",
