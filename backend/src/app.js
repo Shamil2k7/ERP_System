@@ -33,6 +33,7 @@ import purchaseRoutes from "./modules/purchase/purchase.routes.js";
 import brandRoutes from "./modules/brands/brand.routes.js";
 import unitRoutes from "./modules/units/unit.routes.js";
 import departmentRoutes from "./modules/departments/department.routes.js";
+import designationRoutes from "./modules/designations/designations.routes.js";
 
 
 // M7
@@ -113,6 +114,7 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/brands", brandRoutes);
 app.use("/api/units", unitRoutes);
 app.use("/api/departments", departmentRoutes);
+app.use("/api/designations", designationRoutes);
 
 
 // M7

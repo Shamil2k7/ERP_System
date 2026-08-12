@@ -27,12 +27,35 @@ model Department {
   employees   Int      @default(0)
   status      Status   @default(ACTIVE)
 
+  designations Designation[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([name])
   @@index([code])
   @@map("departments")
+}
+
+// DESIGNATION
+
+model Designation {
+  id           String     @id @default(uuid())
+  name         String     @unique @db.VarChar(150)
+  code         String     @unique @db.VarChar(50)
+  departmentId String     @map("department_id")
+  employees    Int        @default(0)
+  status       Status     @default(ACTIVE)
+
+  department   Department @relation(fields: [departmentId], references: [id])
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([name])
+  @@index([code])
+  @@index([departmentId])
+  @@map("designations")
 }
 
 model User {

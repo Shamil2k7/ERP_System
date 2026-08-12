@@ -16,87 +16,14 @@ import {
 } from "react-icons/fi";
 
 import styles from "./designations.module.css";
-
-const initialDesignations = [
-  {
-    id: "#DSG001",
-    designation: "Engineering Manager",
-    department: "Engineering",
-    employees: 8,
-    createdOn: "11 Sep 2025",
-    status: "Active",
-  },
-  {
-    id: "#DSG002",
-    designation: "Senior Developer",
-    department: "Engineering",
-    employees: 15,
-    createdOn: "05 Sep 2025",
-    status: "Active",
-  },
-  {
-    id: "#DSG003",
-    designation: "UX Designer",
-    department: "Design",
-    employees: 12,
-    createdOn: "27 Aug 2025",
-    status: "Active",
-  },
-  {
-    id: "#DSG004",
-    designation: "HR Manager",
-    department: "HR",
-    employees: 3,
-    createdOn: "16 Aug 2025",
-    status: "Active",
-  },
-  {
-    id: "#DSG005",
-    designation: "Accountant",
-    department: "Finance",
-    employees: 6,
-    createdOn: "25 Jul 2025",
-    status: "Active",
-  },
-  {
-    id: "#DSG006",
-    designation: "Sales Executive",
-    department: "Sales",
-    employees: 20,
-    createdOn: "12 Jul 2025",
-    status: "Active",
-  },
-  {
-    id: "#DSG007",
-    designation: "Marketing Lead",
-    department: "Marketing",
-    employees: 5,
-    createdOn: "23 Jun 2025",
-    status: "Active",
-  },
-  {
-    id: "#DSG008",
-    designation: "Support Specialist",
-    department: "Support",
-    employees: 10,
-    createdOn: "18 May 2025",
-    status: "Inactive",
-  },
-];
-
-const departments = [
-  "Engineering",
-  "Design",
-  "HR",
-  "Finance",
-  "Sales",
-  "Marketing",
-  "Operations",
-  "Support",
-];
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function DesignationsPage() {
-  const [designations, setDesignations] = useState(initialDesignations);
+  const [designations, setDesignations] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -104,10 +31,50 @@ export default function DesignationsPage() {
   const [sortAsc, setSortAsc] = useState(true);
   const [filterStatus, setFilterStatus] = useState("All");
 
+  const [editingId, setEditingId] = useState(null);
+
   const [formData, setFormData] = useState({
     designation: "",
     department: "",
-    status: "Active",
+    status: "ACTIVE",
+  });
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [designationsRes, departmentsRes] = await Promise.all([
+        axios.get("http://localhost:5000/api/designations"),
+        axios.get("http://localhost:5000/api/departments"),
+      ]);
+
+      const fetchedDesignations = designationsRes.data.data.map((d) => ({
+        _id: d.id,
+        id: d.code,
+        designation: d.name,
+        department: d.department?.name || "",
+        employees: d.employees || 0,
+        createdOn: new Date(d.createdAt).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        }),
+        status: d.status,
+      }));
+
+      setDesignations(fetchedDesignations);
+      setDepartments(departmentsRes.data.data.map((dep) => dep.name));
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  import("react").then((react) => {
+    react.useEffect(() => {
+      fetchData();
+    }, []);
   });
 
   const filteredDesignations = useMemo(() => {
@@ -143,48 +110,64 @@ export default function DesignationsPage() {
     }));
   };
 
-  const handleAddDesignation = (e) => {
+  const handleAddDesignation = async (e) => {
     e.preventDefault();
 
     if (!formData.designation.trim() || !formData.department) {
-      alert("Please enter designation and select department.");
+      toast.warn("Please enter designation and select department.");
       return;
     }
 
-    const newDesignation = {
-      id: `#DSG${String(designations.length + 1).padStart(3, "0")}`,
-      designation: formData.designation.trim(),
-      department: formData.department,
-      employees: 0,
-      createdOn: new Date().toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
-      status: formData.status,
-    };
+    try {
+      if (editingId) {
+        await axios.put(`http://localhost:5000/api/designations/${editingId}`, {
+          name: formData.designation.trim(),
+          department: formData.department,
+          status: formData.status,
+        });
+        toast.success("Designation updated successfully");
+      } else {
+        await axios.post("http://localhost:5000/api/designations", {
+          name: formData.designation.trim(),
+          department: formData.department,
+          status: formData.status,
+        });
+        toast.success("Designation created successfully");
+      }
 
-    setDesignations((prev) => [...prev, newDesignation]);
-
-    setFormData({
-      designation: "",
-      department: "",
-      status: "Active",
-    });
-
-    setShowAddForm(false);
+      setFormData({
+        designation: "",
+        department: "",
+        status: "ACTIVE",
+      });
+      setEditingId(null);
+      setShowAddForm(false);
+      fetchData();
+    } catch (error) {
+      console.error("Error saving designation:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to save designation"
+      );
+    }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id, realId) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this designation?"
     );
 
     if (!confirmed) return;
 
-    setDesignations((prev) =>
-      prev.filter((item) => item.id !== id)
-    );
+    try {
+      await axios.delete(`http://localhost:5000/api/designations/${realId}`);
+      toast.success("Designation deleted successfully");
+      fetchData();
+    } catch (error) {
+      console.error("Error deleting designation:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to delete designation"
+      );
+    }
 
     setOpenMenu(null);
   };
@@ -196,6 +179,7 @@ export default function DesignationsPage() {
       status: item.status,
     });
 
+    setEditingId(item._id);
     setShowAddForm(true);
     setOpenMenu(null);
   };
@@ -254,6 +238,7 @@ export default function DesignationsPage() {
 
   return (
     <div className={styles.page}>
+      <ToastContainer position="top-right" autoClose={3000} />
       {/* =========================
           HEADER
       ========================= */}
@@ -307,13 +292,21 @@ export default function DesignationsPage() {
         <section className={styles.addCard}>
           <div className={styles.addCardHeader}>
             <div>
-              <h2>Add New Designation</h2>
-              <p>Create a new employee designation.</p>
+              <h2>{editingId ? "Edit Designation" : "Add New Designation"}</h2>
+              <p>{editingId ? "Update existing designation details." : "Create a new employee designation."}</p>
             </div>
 
             <button
               className={styles.closeButton}
-              onClick={() => setShowAddForm(false)}
+              onClick={() => {
+                setShowAddForm(false);
+                setEditingId(null);
+                setFormData({
+                  designation: "",
+                  department: "",
+                  status: "ACTIVE",
+                });
+              }}
             >
               <FiX size={18} />
             </button>
@@ -375,8 +368,8 @@ export default function DesignationsPage() {
                 value={formData.status}
                 onChange={handleInputChange}
               >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
+                <option value="ACTIVE">Active</option>
+                <option value="INACTIVE">Inactive</option>
               </select>
             </div>
 
@@ -384,7 +377,15 @@ export default function DesignationsPage() {
               <button
                 type="button"
                 className={styles.cancelButton}
-                onClick={() => setShowAddForm(false)}
+                onClick={() => {
+                  setShowAddForm(false);
+                  setEditingId(null);
+                  setFormData({
+                    designation: "",
+                    department: "",
+                    status: "ACTIVE",
+                  });
+                }}
               >
                 Cancel
               </button>
@@ -394,7 +395,7 @@ export default function DesignationsPage() {
                 className={styles.saveButton}
               >
                 <FiSave size={16} />
-                Save Designation
+                {editingId ? "Update Designation" : "Save Designation"}
               </button>
             </div>
           </form>
@@ -429,9 +430,9 @@ export default function DesignationsPage() {
                 onClick={() =>
                   setFilterStatus(
                     filterStatus === "All"
-                      ? "Active"
-                      : filterStatus === "Active"
-                      ? "Inactive"
+                      ? "ACTIVE"
+                      : filterStatus === "ACTIVE"
+                      ? "INACTIVE"
                       : "All"
                   )
                 }
@@ -525,12 +526,12 @@ export default function DesignationsPage() {
                     <td>
                       <span
                         className={`${styles.status} ${
-                          item.status === "Active"
+                          item.status === "ACTIVE"
                             ? styles.active
                             : styles.inactive
                         }`}
                       >
-                        {item.status}
+                        {item.status === "ACTIVE" ? "Active" : "Inactive"}
                       </span>
                     </td>
 
@@ -562,7 +563,7 @@ export default function DesignationsPage() {
                             <button
                               className={styles.deleteItem}
                               onClick={() =>
-                                handleDelete(item.id)
+                                handleDelete(item.id, item._id)
                               }
                             >
                               Delete

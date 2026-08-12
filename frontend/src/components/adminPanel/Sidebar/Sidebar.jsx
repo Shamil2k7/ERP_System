@@ -266,10 +266,10 @@ export default function Sidebar() {
           <span>Employees</span>
         </Link>
 
-        <Link href="/admin/departments">
+        {/* <Link href="/admin/departments">
           <FiBriefcase />
           <span>Departments</span>
-        </Link>
+        </Link> */}
 
         <Link href="/admin/designations">
           <FiUsers />
