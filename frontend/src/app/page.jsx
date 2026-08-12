@@ -6,26 +6,76 @@ import { getLandingPage } from "@/services/landing.service";
 
 export default function Home() {
   const [landing, setLanding] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
   useEffect(() => {
     async function loadLanding() {
       try {
+        setLoading(true);
+        setError("");
+
         const data = await getLandingPage();
+
         setLanding(data);
       } catch (error) {
         console.error("Landing page error:", error);
+        setError("Unable to load the landing page.");
+      } finally {
+        setLoading(false);
       }
     }
 
     loadLanding();
   }, []);
 
-  if (!landing) {
+  /* =========================
+     LOADING SCREEN
+  ========================= */
+
+  if (loading) {
     return (
-      <div className={styles.loading}>
-        Loading...
+      <div className={styles.loadingScreen}>
+        <div className={styles.loadingContent}>
+          <div className={styles.loadingLogo}>
+            ERP<span>Cloud</span>
+          </div>
+
+          <div className={styles.loader}></div>
+
+          <p className={styles.loadingText}>
+            Loading your business platform... 
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /* =========================
+     ERROR SCREEN
+  ========================= */
+
+  if (error || !landing) {
+    return (
+      <div className={styles.errorScreen}>
+        <div className={styles.errorCard}>
+          <div className={styles.errorIcon}>!</div>
+
+          <h2>Something went wrong</h2>
+
+          <p>
+            {error || "Landing page data could not be loaded."}
+          </p>
+
+          <button
+            className={styles.retryBtn}
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
@@ -50,9 +100,13 @@ export default function Home() {
         <div className={styles.blurOne}></div>
         <div className={styles.blurTwo}></div>
 
-        {/* Left Content */}
+        {/* LEFT CONTENT */}
 
         <div className={styles.heroContent}>
+          <span className={styles.heroTag}>
+            CLOUD ERP PLATFORM
+          </span>
+
           <h1 className={styles.heroTitle}>
             {landing.heroTitle}
           </h1>
@@ -62,16 +116,23 @@ export default function Home() {
           </p>
 
           <div className={styles.heroButtons}>
+            <button className={styles.primaryBtn}>
+              Request Demo
+            </button>
+
             <button className={styles.secondaryBtn}>
               Learn More
             </button>
           </div>
         </div>
 
-        {/* Right Content */}
+        {/* RIGHT CONTENT */}
 
         <div className={styles.heroImageSection}>
           <div className={styles.dashboardCard}>
+
+            {/* Dashboard Header */}
+
             <div className={styles.dashboardTop}>
               <div>
                 <h3>ERP Dashboard</h3>
@@ -80,6 +141,8 @@ export default function Home() {
 
               <div className={styles.status}></div>
             </div>
+
+            {/* Hero Image */}
 
             <div className={styles.chartArea}>
               {landing.heroImage ? (
@@ -94,6 +157,8 @@ export default function Home() {
                 </div>
               )}
             </div>
+
+            {/* Statistics */}
 
             <div className={styles.dashboardStats}>
               <div className={styles.statBox}>
@@ -123,12 +188,16 @@ export default function Home() {
       {/* ================= ABOUT ================= */}
 
       <section className={styles.about} id="about">
+
         <div className={styles.aboutImages}>
           <div className={styles.imageGrid}>
+
+            {/* IMAGE 1 */}
+
             {landing.aboutImage1 ? (
               <img
                 src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage1}`}
-                alt="About 1"
+                alt="ERP business management"
                 loading="lazy"
               />
             ) : (
@@ -137,10 +206,12 @@ export default function Home() {
               </div>
             )}
 
+            {/* IMAGE 2 */}
+
             {landing.aboutImage2 ? (
               <img
                 src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage2}`}
-                alt="About 2"
+                alt="ERP inventory management"
                 loading="lazy"
               />
             ) : (
@@ -149,10 +220,12 @@ export default function Home() {
               </div>
             )}
 
+            {/* IMAGE 3 */}
+
             {landing.aboutImage3 ? (
               <img
                 src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage3}`}
-                alt="About 3"
+                alt="ERP analytics"
                 loading="lazy"
               />
             ) : (
@@ -161,10 +234,12 @@ export default function Home() {
               </div>
             )}
 
+            {/* IMAGE 4 */}
+
             {landing.aboutImage4 ? (
               <img
                 src={`${API_URL}/uploads/landingpageimage/${landing.aboutImage4}`}
-                alt="About 4"
+                alt="ERP business dashboard"
                 loading="lazy"
               />
             ) : (
@@ -172,25 +247,48 @@ export default function Home() {
                 About Image 4
               </div>
             )}
+
           </div>
         </div>
 
-        <div className={styles.aboutContent}>
-          <h2>{landing.aboutTitle}</h2>
+        {/* ABOUT CONTENT */}
 
-          <p>{landing.aboutDescription}</p>
+        <div className={styles.aboutContent}>
+
+          <span className={styles.sectionTag}>
+            ABOUT ERP CLOUD
+          </span>
+
+          <h2>
+            {landing.aboutTitle}
+          </h2>
+
+          <p>
+            {landing.aboutDescription}
+          </p>
+
+          <div className={styles.features}>
+            <div>✓ Inventory Management</div>
+            <div>✓ Smart Billing</div>
+            <div>✓ Business Analytics</div>
+            <div>✓ Cloud Based System</div>
+          </div>
 
           <button className={styles.learnBtn}>
             Learn More →
           </button>
+
         </div>
       </section>
 
       {/* ================= FOOTER ================= */}
 
       <footer className={styles.footer}>
-        <p>© ERP Cloud. All Rights Reserved.</p>
+        <p>
+          © ERP Cloud. All Rights Reserved.
+        </p>
       </footer>
     </>
   );
 }
+
