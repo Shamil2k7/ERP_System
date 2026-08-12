@@ -21,7 +21,11 @@ const login = async (req, res) => {
         entity: "Auth",
         entityId: result.user.id,
         user: result.user,
-        details: { email: result.user.email, role: result.user.role },
+        details: {
+          email: result.user.email,
+          role: result.user.role,
+          description: `User "${result.user.fullName || result.user.email}" logged in successfully`,
+        },
       });
     }
 
