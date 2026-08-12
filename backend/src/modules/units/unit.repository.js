@@ -30,6 +30,14 @@ export const getUnitByCode = async (code) => {
   });
 };
 
+export const getUnitByName = async (name) => {
+  return await prisma.unit.findUnique({
+    where: {
+      name: name,
+    },
+  });
+};
+
 export const updateUnit = async (id, data) => {
   return await prisma.unit.update({
     where: {

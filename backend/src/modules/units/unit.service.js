@@ -9,6 +9,11 @@ export const createUnit = async (data) => {
     throw new Error("Unit code already exists.");
   }
 
+  const existingName = await unitRepository.getUnitByName(data.name);
+  if (existingName) {
+    throw new Error("Unit name already exists.");
+  }
+
   return await unitRepository.createUnit(data);
 };
 
@@ -40,6 +45,16 @@ export const updateUnit = async (id, data) => {
 
     if (existingUnit) {
       throw new Error("Unit code already exists.");
+    }
+  }
+
+  if (data.name && data.name !== unit.name) {
+    const existingName = await unitRepository.getUnitByName(
+      data.name
+    );
+
+    if (existingName) {
+      throw new Error("Unit name already exists.");
     }
   }
 
