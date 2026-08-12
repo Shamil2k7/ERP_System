@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import CustomerCard from "../components/CustomerCard";
 
+
 export default function CustomerDetailsPage() {
   const { id } = useParams();
 

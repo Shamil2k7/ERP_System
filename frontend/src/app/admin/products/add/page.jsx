@@ -170,7 +170,7 @@ export default function AddProductPage() {
       brandId: product.brandId || null,
       costPrice: parseFloat(product.costPrice || 0),
       sellingPrice: parseFloat(product.sellingPrice || 0),
-      baseUnitId: product.baseUnitId || null,
+      unitId: product.baseUnitId || null,
       description: product.description,
       status: product.status,
     };
