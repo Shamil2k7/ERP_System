@@ -58,9 +58,13 @@ export default function AddEmployeePage() {
     setSubmitting(true);
 
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
       const response = await axios.post(
         "http://localhost:5000/api/employees",
-        formData
+        formData,
+        { headers }
       );
 
       console.log("Employee created:", response.data);

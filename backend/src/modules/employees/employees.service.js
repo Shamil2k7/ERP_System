@@ -185,6 +185,7 @@ const addEmployee = async (
       email: cleanEmail,
       phone: cleanPhone,
       role: cleanRole,
+      description: `Created new employee "${cleanFullName}" (ID: ${cleanEmployeeId}) with role "${cleanRole}"`,
     },
   });
 
@@ -367,8 +368,11 @@ const modifyEmployee = async (
     entityId: id,
 
     details: {
-      updatedFields:
-        Object.keys(safeUpdateData),
+      fullName: updatedEmployee.fullName || existingEmployee.fullName,
+      employeeId: updatedEmployee.employeeId || existingEmployee.employeeId,
+      email: updatedEmployee.email || existingEmployee.email,
+      updatedFields: Object.keys(safeUpdateData),
+      description: `Updated employee "${updatedEmployee.fullName || existingEmployee.fullName}" (ID: ${updatedEmployee.employeeId || existingEmployee.employeeId}) [Modified: ${Object.keys(safeUpdateData).join(", ")}]`,
     },
   });
 
@@ -411,14 +415,10 @@ const removeEmployee = async (
     entityId: id,
 
     details: {
-      fullName:
-        existingEmployee.fullName,
-
-      employeeId:
-        existingEmployee.employeeId,
-
-      email:
-        existingEmployee.email,
+      fullName: existingEmployee.fullName,
+      employeeId: existingEmployee.employeeId,
+      email: existingEmployee.email,
+      description: `Deleted employee "${existingEmployee.fullName}" (ID: ${existingEmployee.employeeId})`,
     },
   });
 

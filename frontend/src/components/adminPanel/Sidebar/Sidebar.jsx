@@ -29,6 +29,7 @@ import {
   FiPrinter,
   FiLayers,
   FiMenu,
+  FiClock,
 } from "react-icons/fi";
 
 import styles from "./Sidebar.module.css";
@@ -298,6 +299,11 @@ export default function Sidebar() {
         <Link href="/admin/settings">
           <FiSettings />
           <span>Settings</span>
+        </Link>
+
+        <Link href="/admin/audit-logs">
+          <FiClock />
+          <span>Audit Logs</span>
         </Link>
 
         <Link href="/logout" className={styles.logout}>

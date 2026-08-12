@@ -1,0 +1,105 @@
+import {
+  addBranchService,
+  getAllBranchesService,
+  getBranchService,
+  editBranchService,
+  deleteBranchService,
+} from "./branch.service.js";
+
+// Add branch
+const addBranch = async (req, res) => {
+  try {
+    const branch = await addBranchService(req.body);
+
+    return res.status(201).json({
+      success: true,
+      message: "Branch added successfully",
+      data: branch,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get all branches
+const getBranches = async (req, res) => {
+  try {
+    const branches = await getAllBranchesService();
+
+    return res.status(200).json({
+      success: true,
+      data: branches,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Get one branch
+const getBranch = async (req, res) => {
+  try {
+    const branch = await getBranchService(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      data: branch,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Edit branch
+const editBranch = async (req, res) => {
+  try {
+    const branch = await editBranchService(
+      req.params.id,
+      req.body
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Branch updated successfully",
+      data: branch,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Delete branch
+const deleteBranch = async (req, res) => {
+  try {
+    await deleteBranchService(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Branch deleted successfully",
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export {
+  addBranch,
+  getBranches,
+  getBranch,
+  editBranch,
+  deleteBranch,
+};
