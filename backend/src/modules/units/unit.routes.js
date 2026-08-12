@@ -1,32 +1,54 @@
-import { Router } from "express";
-import * as unitController from "./unit.controller.js";
+import express from "express";
+
+import {
+  createUnit,
+  getAllUnits,
+  getUnitById,
+  updateUnit,
+  deleteUnit,
+} from "./unit.controller.js";
+
 import {
   createUnitValidation,
   updateUnitValidation,
 } from "./unit.validation.js";
 
-import validateRequest from "../../middlewares/validateRequest.js";
+import { validationResult } from "express-validator";
 
-const router = Router();
+const router = express.Router();
+
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: "Validation failed",
+      errors: errors.array(),
+    });
+  }
+
+  next();
+};
 
 router.post(
   "/",
   createUnitValidation,
-  validateRequest,
-  unitController.createUnit
+  validate,
+  createUnit
 );
 
-router.get("/", unitController.getAllUnits);
+router.get("/", getAllUnits);
 
-router.get("/:id", unitController.getUnitById);
+router.get("/:id", getUnitById);
 
 router.put(
   "/:id",
   updateUnitValidation,
-  validateRequest,
-  unitController.updateUnit
+  validate,
+  updateUnit
 );
 
-router.delete("/:id", unitController.deleteUnit);
+router.delete("/:id", deleteUnit);
 
 export default router;
