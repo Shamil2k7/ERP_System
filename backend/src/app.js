@@ -73,6 +73,7 @@ app.use(
   },
   express.static(path.join(__dirname, "uploads"))
 );
+
 // Home Route
 app.get("/", (req, res) => {
   res.status(200).json({

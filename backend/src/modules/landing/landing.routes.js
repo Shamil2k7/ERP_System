@@ -14,13 +14,14 @@ router.get("/", getLandingPage);
 // UPDATE landing page
 router.put(
   "/",
-  upload.fields([
-    { name: "heroImage", maxCount: 1 },
-    { name: "aboutImage1", maxCount: 1 },
-    { name: "aboutImage2", maxCount: 1 },
-    { name: "aboutImage3", maxCount: 1 },
-    { name: "aboutImage4", maxCount: 1 },
-  ]),
+ upload.fields([
+  { name: "heroImage", maxCount: 1 },
+  { name: "heroBackgroundImage", maxCount: 1 },
+  { name: "aboutImage1", maxCount: 1 },
+  { name: "aboutImage2", maxCount: 1 },
+  { name: "aboutImage3", maxCount: 1 },
+  { name: "aboutImage4", maxCount: 1 },
+]),
   updateLandingPage
 );
 

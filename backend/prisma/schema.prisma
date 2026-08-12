@@ -20,17 +20,17 @@ model Role {
 // DEPARTMENT
 
 model Department {
-  id          String   @id @default(uuid())
-  name        String   @unique @db.VarChar(150)
-  code        String   @unique @db.VarChar(50)
-  head        String?  @db.VarChar(150)
-  employees   Int      @default(0)
-  status      Status   @default(ACTIVE)
+  id        String  @id @default(uuid())
+  name      String  @unique @db.VarChar(150)
+  code      String  @unique @db.VarChar(50)
+  head      String? @db.VarChar(150)
+  employees Int     @default(0)
+  status    Status  @default(ACTIVE)
 
   designations Designation[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([name])
   @@index([code])
@@ -40,20 +40,21 @@ model Department {
 // DESIGNATION
 
 model Designation {
-  id          String   @id @default(uuid())
-  code        String   @unique @db.VarChar(50)
-  designation String   @db.VarChar(150)
-  department  String   @db.VarChar(150)
-  status      Status   @default(ACTIVE)
+  id          String @id @default(uuid())
+  code        String @unique @db.VarChar(50)
+  designation String @db.VarChar(150)
+  department  String @db.VarChar(150)
+  status      Status @default(ACTIVE)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  Department   Department? @relation(fields: [departmentId], references: [id])
+  departmentId String?
 
   @@index([designation])
   @@index([department])
   @@map("designations")
 }
-
 
 model User {
   id String @id @default(uuid())
@@ -254,7 +255,7 @@ model Product {
 
   image String?
 
-   description String?
+  description String?
 
   status ProductStatus @default(ACTIVE)
 
@@ -804,16 +805,16 @@ model Discount {
 model LandingPage {
   id String @id @default(uuid())
 
-  logoText       String  @default("ERP")
-  logoHighlight  String  @default("Cloud")
-  loginText      String  @default("Login →")
+  logoText      String @default("ERP")
+  logoHighlight String @default("Cloud")
+  loginText     String @default("Login →")
 
-  heroTag        String  @default("CLOUD ERP PLATFORM")
-  heroTitle       String
-  heroDescription String
-  heroImage       String?
+  heroTag             String  @default("CLOUD ERP PLATFORM")
+  heroTitle           String
+  heroDescription     String
+  heroImage           String?
   heroBackgroundImage String?
-  heroButtonText String @default("Upgrade Your Company In Minutes")
+  heroButtonText      String  @default("Upgrade Your Company In Minutes")
 
   dashboardTitle    String @default("ERP Dashboard")
   dashboardSubtitle String @default("Business Overview")
@@ -883,7 +884,7 @@ model AuditLog {
   action    String   @db.VarChar(50) // CREATE, UPDATE, DELETE, LOGIN, LOGOUT, EXPORT, etc.
   entity    String   @db.VarChar(100) // Employee, Product, Customer, Invoice, Auth, etc.
   entityId  String?  @map("entity_id")
-  details   Json?    // Detailed metadata, old/new values, request data
+  details   Json? // Detailed metadata, old/new values, request data
   ipAddress String?  @map("ip_address") @db.VarChar(45)
   userAgent String?  @map("user_agent")
   createdAt DateTime @default(now()) @map("created_at")
