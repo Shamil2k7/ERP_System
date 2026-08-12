@@ -111,7 +111,6 @@ export default function EmployeePage() {
       phone: employee.phone || "",
       employeeId: employee.employeeId || "",
       role: employee.role?.name || "Admin",
-      password: "",
     });
 
     setIsModalOpen(true);
@@ -167,9 +166,6 @@ export default function EmployeePage() {
 
     try {
       const updateData = { ...formData };
-      if (!updateData.password || !updateData.password.trim()) {
-        delete updateData.password;
-      }
 
       const response = await axios.put(
         `http://localhost:5000/api/employees/${currentEmployee.id}`,
@@ -216,7 +212,6 @@ export default function EmployeePage() {
       phone: "",
       employeeId: "",
       role: "",
-      password: "",
     });
   };
 
@@ -971,22 +966,7 @@ export default function EmployeePage() {
                   </div>
 
 
-                  {/* PASSWORD */}
 
-                  <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="password">
-                      New Password (leave blank to keep current)
-                    </label>
-                    <input
-                      id="password"
-                      type="password"
-                      name="password"
-                      value={formData.password || ""}
-                      onChange={handleInputChange}
-                      className={styles.input}
-                      placeholder="Enter new password to share with employee"
-                    />
-                  </div>
 
 
                   {/* =================================================
