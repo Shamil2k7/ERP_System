@@ -1,0 +1,96 @@
+import {
+  getAllRoles,
+  getRoleById,
+  getRoleByName,
+  createRole,
+  updateRole,
+  deleteRole,
+} from "./roles.repository.js";
+
+const fetchAllRoles = async () => {
+  const roles = await getAllRoles();
+  return {
+    success: true,
+    data: roles,
+  };
+};
+
+const fetchRoleById = async (id) => {
+  const role = await getRoleById(id);
+  if (!role) {
+    throw new Error("Role not found");
+  }
+  return {
+    success: true,
+    data: role,
+  };
+};
+
+const addRole = async (roleData) => {
+  const { name } = roleData;
+
+  if (!name || !name.trim()) {
+    throw new Error("Role name is required");
+  }
+
+  const existingRole = await getRoleByName(name);
+  if (existingRole) {
+    throw new Error("Role name already exists");
+  }
+
+  const role = await createRole({ name });
+
+  return {
+    success: true,
+    message: "Role created successfully",
+    data: role,
+  };
+};
+
+const modifyRole = async (id, updateData) => {
+  const existingRole = await getRoleById(id);
+  if (!existingRole) {
+    throw new Error("Role not found");
+  }
+
+  if (updateData.name && updateData.name.trim() !== existingRole.name) {
+    const existingName = await getRoleByName(updateData.name);
+    if (existingName) {
+      throw new Error("Role name already exists");
+    }
+  }
+
+  const updatedRole = await updateRole(id, updateData);
+
+  return {
+    success: true,
+    message: "Role updated successfully",
+    data: updatedRole,
+  };
+};
+
+const removeRole = async (id) => {
+  const existingRole = await getRoleById(id);
+  if (!existingRole) {
+    throw new Error("Role not found");
+  }
+
+  if (existingRole._count && existingRole._count.users > 0) {
+    throw new Error("Cannot delete role assigned to active users/employees");
+  }
+
+  await deleteRole(id);
+
+  return {
+    success: true,
+    message: "Role deleted successfully",
+  };
+};
+
+export {
+  fetchAllRoles,
+  fetchRoleById,
+  addRole,
+  modifyRole,
+  removeRole,
+};

@@ -35,6 +35,24 @@ model Department {
   @@map("departments")
 }
 
+// DESIGNATION
+
+model Designation {
+  id          String   @id @default(uuid())
+  code        String   @unique @db.VarChar(50)
+  designation String   @db.VarChar(150)
+  department  String   @db.VarChar(150)
+  status      Status   @default(ACTIVE)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([designation])
+  @@index([department])
+  @@map("designations")
+}
+
+
 model User {
   id String @id @default(uuid())
 
