@@ -32,6 +32,7 @@ import {
   FiMenu,
   FiX,
   FiClock,
+  FiMapPin,
 } from "react-icons/fi";
 
 import styles from "./Sidebar.module.css";
@@ -439,6 +440,15 @@ export default function Sidebar({ isOpen, onClose }) {
           <FiBriefcase />
           <span>Departments</span>
         </Link> 
+
+        <Link
+          href="/admin/branches"
+          className={isActivePath("/admin/branches") ? styles.active : ""}
+          onClick={handleLinkClick}
+        >
+          <FiMapPin />
+          <span>Branches</span>
+        </Link>
 
         <Link
           href="/admin/designations"

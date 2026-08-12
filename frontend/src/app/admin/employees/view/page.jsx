@@ -111,6 +111,7 @@ export default function EmployeePage() {
       phone: employee.phone || "",
       employeeId: employee.employeeId || "",
       role: employee.role?.name || "Admin",
+      password: "",
     });
 
     setIsModalOpen(true);
@@ -166,8 +167,11 @@ export default function EmployeePage() {
 
     try {
       const updateData = { ...formData };
+      if (!updateData.password || !updateData.password.trim()) {
+        delete updateData.password;
+      }
 
-      await axios.put(
+      const response = await axios.put(
         `http://localhost:5000/api/employees/${currentEmployee.id}`,
         updateData,
         getAuthHeaders()
@@ -967,19 +971,21 @@ export default function EmployeePage() {
                   </div>
 
 
-                  {/* PASSWORD REDIRECT NOTICE */}
+                  {/* PASSWORD */}
 
                   <div className={styles.formGroup}>
-                    <p style={{ fontSize: "0.85rem", color: "#64748b", margin: 0, padding: "10px 0" }}>
-                      To change the employee&apos;s password, direct them to their{" "}
-                      <Link
-                        href="/settings/profile"
-                        style={{ color: "#6366f1", fontWeight: 600, textDecoration: "underline" }}
-                      >
-                        Profile Page
-                      </Link>
-                      .
-                    </p>
+                    <label className={styles.label} htmlFor="password">
+                      New Password (leave blank to keep current)
+                    </label>
+                    <input
+                      id="password"
+                      type="password"
+                      name="password"
+                      value={formData.password || ""}
+                      onChange={handleInputChange}
+                      className={styles.input}
+                      placeholder="Enter new password to share with employee"
+                    />
                   </div>
 
 

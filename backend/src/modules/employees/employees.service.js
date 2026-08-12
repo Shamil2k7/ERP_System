@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
 
-import { sendEmployeeCredentialsEmail } from "../../config/mail.js";
+import {
+  sendEmployeeCredentialsEmail,
+  sendEmployeeUpdatedEmail,
+} from "../../config/mail.js";
 
 import { recordAuditLog } from "../audit/audit.service.js";
 
@@ -10,6 +13,7 @@ import {
   findEmployeeByEmail,
   findEmployeeByEmployeeId,
   findEmployeeByPhone,
+  findRoleById,
   findRoleByName,
   createEmployee,
   updateEmployee,
@@ -226,131 +230,104 @@ const modifyEmployee = async (
   }
 
 
-  // Only allow safe employee fields
-  const allowedFields = [
-    "fullName",
-    "email",
-    "phone",
-    "employeeId",
-    "roleId",
-    "isVerified",
-    "firstLogin",
-  ];
-
-
   const safeUpdateData = {};
 
-  for (const field of allowedFields) {
 
-    if (
-      updateData[field] !== undefined
-    ) {
-      safeUpdateData[field] =
-        updateData[field];
-    }
+  // Full Name
+  if (updateData.fullName) {
+    safeUpdateData.fullName = updateData.fullName.trim();
   }
 
 
-  // Email normalization
-  if (safeUpdateData.email) {
+  // Email normalization & check
+  if (updateData.email) {
+    const cleanEmail = updateData.email.trim().toLowerCase();
 
-    safeUpdateData.email =
-      safeUpdateData.email
-        .trim()
-        .toLowerCase();
+    if (cleanEmail !== existingEmployee.email) {
+      const emailExists = await findEmployeeByEmail(cleanEmail);
 
-
-    if (
-      safeUpdateData.email !==
-      existingEmployee.email
-    ) {
-
-      const emailExists =
-        await findEmployeeByEmail(
-          safeUpdateData.email
-        );
-
-      if (emailExists) {
-        throw new Error(
-          "Email already exists"
-        );
+      if (emailExists && emailExists.id !== id) {
+        throw new Error("Email already exists");
       }
     }
+
+    safeUpdateData.email = cleanEmail;
   }
 
 
   // Employee ID check
-  if (safeUpdateData.employeeId) {
+  if (updateData.employeeId) {
+    const cleanEmployeeId = updateData.employeeId.trim();
 
-    safeUpdateData.employeeId =
-      safeUpdateData.employeeId.trim();
+    if (cleanEmployeeId !== existingEmployee.employeeId) {
+      const employeeIdExists = await findEmployeeByEmployeeId(cleanEmployeeId);
 
-
-    if (
-      safeUpdateData.employeeId !==
-      existingEmployee.employeeId
-    ) {
-
-      const employeeIdExists =
-        await findEmployeeByEmployeeId(
-          safeUpdateData.employeeId
-        );
-
-      if (employeeIdExists) {
-        throw new Error(
-          "Employee ID already exists"
-        );
+      if (employeeIdExists && employeeIdExists.id !== id) {
+        throw new Error("Employee ID already exists");
       }
     }
+
+    safeUpdateData.employeeId = cleanEmployeeId;
   }
 
 
   // Phone check
-  if (safeUpdateData.phone) {
+  if (updateData.phone) {
+    const cleanPhone = updateData.phone.trim();
 
-    safeUpdateData.phone =
-      safeUpdateData.phone.trim();
+    if (cleanPhone !== existingEmployee.phone) {
+      const phoneExists = await findEmployeeByPhone(cleanPhone);
 
-
-    if (
-      safeUpdateData.phone !==
-      existingEmployee.phone
-    ) {
-
-      const phoneExists =
-        await findEmployeeByPhone(
-          safeUpdateData.phone
-        );
-
-      if (phoneExists) {
-        throw new Error(
-          "Phone number already exists"
-        );
+      if (phoneExists && phoneExists.id !== id) {
+        throw new Error("Phone number already exists");
       }
     }
+
+    safeUpdateData.phone = cleanPhone;
   }
 
 
-  // Update role if roleId is provided
-  if (safeUpdateData.roleId) {
+  // Role handling (by roleId or role name string)
+  if (updateData.roleId) {
+    const roleExists = await findRoleById(updateData.roleId);
 
-    const roleExists =
-      await findRoleByName(
-        safeUpdateData.roleId
-      );
+    if (!roleExists) {
+      throw new Error(`Role ID "${updateData.roleId}" not found`);
+    }
 
-    // If your frontend sends roleId, this check
-    // should instead be done using a findRoleById
-    // repository method.
+    safeUpdateData.roleId = updateData.roleId;
+  } else if (updateData.role) {
+    const roleObj = await findRoleByName(updateData.role);
+
+    if (!roleObj) {
+      throw new Error(`Role "${updateData.role}" not found`);
+    }
+
+    safeUpdateData.roleId = roleObj.id;
   }
 
 
-  if (
-    Object.keys(safeUpdateData).length === 0
-  ) {
-    throw new Error(
-      "No valid fields to update"
-    );
+  // Password update (if provided)
+  let rawNewPassword = null;
+
+  if (updateData.password && updateData.password.trim() !== "") {
+    rawNewPassword = updateData.password.trim();
+    safeUpdateData.passwordHash = await bcrypt.hash(rawNewPassword, 12);
+  }
+
+
+  // Flags
+  if (updateData.isVerified !== undefined) {
+    safeUpdateData.isVerified = Boolean(updateData.isVerified);
+  }
+
+  if (updateData.firstLogin !== undefined) {
+    safeUpdateData.firstLogin = Boolean(updateData.firstLogin);
+  }
+
+
+  if (Object.keys(safeUpdateData).length === 0) {
+    throw new Error("No valid fields to update");
   }
 
 
@@ -359,6 +336,30 @@ const modifyEmployee = async (
       id,
       safeUpdateData
     );
+
+
+  // Send notification email to the updated email address if email was modified or provided
+  let emailSent = false;
+
+  if (safeUpdateData.email || updateData.email) {
+    try {
+      const targetEmail = updatedEmployee.email;
+
+      await sendEmployeeUpdatedEmail(
+        targetEmail,
+        updatedEmployee.employeeId,
+        updatedEmployee.fullName,
+        rawNewPassword
+      );
+
+      emailSent = true;
+    } catch (emailErr) {
+      console.error(
+        "Failed to send employee update notification email:",
+        emailErr.message
+      );
+    }
+  }
 
 
   // Audit log
@@ -372,19 +373,19 @@ const modifyEmployee = async (
       employeeId: updatedEmployee.employeeId || existingEmployee.employeeId,
       email: updatedEmployee.email || existingEmployee.email,
       updatedFields: Object.keys(safeUpdateData),
-      description: `Updated employee "${updatedEmployee.fullName || existingEmployee.fullName}" (ID: ${updatedEmployee.employeeId || existingEmployee.employeeId}) [Modified: ${Object.keys(safeUpdateData).join(", ")}]`,
+      emailSent,
+      description: `Updated employee "${updatedEmployee.fullName || existingEmployee.fullName}" (ID: ${updatedEmployee.employeeId || existingEmployee.employeeId}) [Modified: ${Object.keys(safeUpdateData).join(", ")}]${emailSent ? ` - Notification email sent to ${updatedEmployee.email}` : ""}`,
     },
   });
 
 
   return {
     success: true,
-    message:
-      "Employee updated successfully",
-    data:
-      removeSensitiveFields(
-        updatedEmployee
-      ),
+    message: emailSent
+      ? `Employee updated successfully and email sent to ${updatedEmployee.email}`
+      : "Employee updated successfully",
+    data: removeSensitiveFields(updatedEmployee),
+    emailSent,
   };
 };
 
