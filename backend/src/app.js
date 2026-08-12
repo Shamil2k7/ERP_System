@@ -105,12 +105,9 @@ app.use("/api/suppliers", supplierRoutes);
 app.use("/api/warehouses", warehouseRoutes);
 app.use("/api/inventory", inventoryRoutes);
 app.use("/api/purchases", purchaseRoutes);
-
-// Uncomment when these modules are ready
 // app.use("/api/stock", stockRoutes);
 // app.use("/api/stock-transfers", stockTransferRoutes);
-// app.use("/api/barcodes", barcodeRoutes);
-
+app.use("/api/barcodes", barcodeRoutes);
 app.use("/api/brands", brandRoutes);
 app.use("/api/units", unitRoutes);
 
