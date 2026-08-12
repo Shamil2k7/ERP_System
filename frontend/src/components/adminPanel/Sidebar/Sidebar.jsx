@@ -437,7 +437,7 @@ export default function Sidebar({ isOpen, onClose }) {
         >
           <FiBriefcase />
           <span>Departments</span>
-        </Link> */}
+        </Link> 
 
         <Link
           href="/admin/designations"
