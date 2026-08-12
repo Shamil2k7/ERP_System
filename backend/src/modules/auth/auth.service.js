@@ -11,6 +11,7 @@ import {
   findOTPByEmail,
   markOTPAsUsed,
   updatePassword,
+  updateEmail,
 } from "./auth.repository.js";
 
 // Login
@@ -165,9 +166,44 @@ const resetPasswordService = async (
   };
 };
 
+// Change Email
+const changeEmailService = async (currentEmail, password, newEmail) => {
+  const employee = await findUserByEmail(currentEmail);
+
+  if (!employee) {
+    throw new Error("Employee not found");
+  }
+
+  const passwordMatched = await bcrypt.compare(
+    password,
+    employee.passwordHash
+  );
+
+  if (!passwordMatched) {
+    throw new Error("Password is incorrect");
+  }
+
+  const cleanNewEmail = newEmail.trim().toLowerCase();
+
+  // Check new email not already taken
+  const emailTaken = await findUserByEmail(cleanNewEmail);
+  if (emailTaken) {
+    throw new Error("This email is already in use");
+  }
+
+  await updateEmail(currentEmail, cleanNewEmail);
+
+  return {
+    success: true,
+    message: "Email updated successfully",
+    newEmail: cleanNewEmail,
+  };
+};
+
 export {
   loginService,
   changePasswordService,
+  changeEmailService,
   forgotPasswordService,
   verifyResetOTPService,
   resetPasswordService,

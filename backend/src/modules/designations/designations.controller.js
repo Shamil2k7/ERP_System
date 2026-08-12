@@ -6,56 +6,66 @@ import {
   removeDesignation,
 } from "./designations.service.js";
 
-// Get all designations
-const getDesignations = async (req, res, next) => {
+const getDesignations = async (req, res) => {
   try {
     const result = await fetchAllDesignations();
     return res.status(200).json(result);
   } catch (error) {
-    next(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-// Get designation by ID
-const getDesignation = async (req, res, next) => {
+const getDesignation = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await fetchDesignationById(id);
     return res.status(200).json(result);
   } catch (error) {
-    next(error);
+    return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-// Add designation
-const createDesignation = async (req, res, next) => {
+const createDesignation = async (req, res) => {
   try {
-    const result = await addDesignation(req.body, req);
+    const result = await addDesignation(req.body);
     return res.status(201).json(result);
   } catch (error) {
-    next(error);
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-// Update designation
-const updateDesignation = async (req, res, next) => {
+const updateDesignation = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await modifyDesignation(id, req.body, req);
+    const result = await modifyDesignation(id, req.body);
     return res.status(200).json(result);
   } catch (error) {
-    next(error);
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
-// Delete designation
-const deleteDesignation = async (req, res, next) => {
+const deleteDesignation = async (req, res) => {
   try {
     const { id } = req.params;
-    const result = await removeDesignation(id, req);
+    const result = await removeDesignation(id);
     return res.status(200).json(result);
   } catch (error) {
-    next(error);
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 

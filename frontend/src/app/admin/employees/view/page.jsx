@@ -2,29 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Edit2,
-  Trash2,
-  X,
-  Users,
-  Loader2,
-  Plus,
-  Mail,
-  Phone,
-  CreditCard,
-} from "lucide-react";
+import Link from "next/link";
+import { Edit2, Trash2, X, Users, Loader2, Plus } from "lucide-react";
+import styles from "./viewEmployees.module.css";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
+import { getRoles } from "@/services/roleService";
 
 import styles from "./viewEmployees.module.css";
 
 export default function EmployeePage() {
   const router = useRouter();
 
-  // =====================================================
-  // STATES
-  // =====================================================
-
+  const [roles, setRoles] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +30,6 @@ export default function EmployeePage() {
     phone: "",
     employeeId: "",
     role: "",
-    password: "",
   });
 
   // =====================================================
@@ -49,9 +38,22 @@ export default function EmployeePage() {
 
   useEffect(() => {
     fetchEmployees();
+    fetchRoles();
   }, []);
 
+  const fetchRoles = async () => {
+    try {
+      const res = await getRoles();
+      if (res.success && Array.isArray(res.data)) {
+        setRoles(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch roles:", err);
+    }
+  };
+
   const fetchEmployees = async () => {
+
     try {
       setLoading(true);
 
@@ -105,11 +107,7 @@ export default function EmployeePage() {
       email: employee.email || "",
       phone: employee.phone || "",
       employeeId: employee.employeeId || "",
-      role:
-        typeof employee.role === "string"
-          ? employee.role
-          : employee.role?.name || "",
-      password: "",
+      role: employee.role?.name || "Admin",
     });
 
     setIsModalOpen(true);
@@ -164,22 +162,9 @@ export default function EmployeePage() {
     }
 
     try {
-      setSubmitting(true);
+      const updateData = { ...formData };
 
-      const updateData = {
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        employeeId: formData.employeeId,
-        role: formData.role,
-      };
-
-      // Only send password if user entered one
-      if (formData.password.trim()) {
-        updateData.password = formData.password;
-      }
-
-      const response = await axios.put(
+      await axios.put(
         `http://localhost:5000/api/employees/${currentEmployee.id}`,
         updateData
       );
@@ -761,7 +746,35 @@ export default function EmployeePage() {
                   }
                 >
 
-                  <div>
+              <div className={styles.formGroup}>
+                <label className={styles.label}>
+                  Role
+                </label>
+
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleInputChange}
+                  className={styles.input}
+                  required
+                >
+                  <option value="">Select Role</option>
+                  {roles.length > 0 ? (
+                    roles.map((r) => (
+                      <option key={r.id} value={r.name}>
+                        {r.name}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Admin">Admin</option>
+                      <option value="Manager">Manager</option>
+                      <option value="HR">HR</option>
+                    </>
+                  )}
+                </select>
+
+              </div>
 
                     <h2
                       className={
@@ -779,22 +792,18 @@ export default function EmployeePage() {
                       Update employee information
                     </p>
 
-                  </div>
-
-
-                  <button
-                    type="button"
-                    className={
-                      styles.closeButton
-                    }
-                    onClick={closeModal}
-                    disabled={submitting}
-                    aria-label="Close"
+              <div className={styles.formGroup}>
+                <p style={{ fontSize: "0.85rem", color: "#64748b", margin: 0, padding: "10px 0" }}>
+                  To change the employee&apos;s password, direct them to their{" "}
+                  <Link
+                    href="/settings/profile"
+                    style={{ color: "#6366f1", fontWeight: 600, textDecoration: "underline" }}
                   >
-                    <X size={20} />
-                  </button>
-
-                </div>
+                    Profile Page
+                  </Link>
+                  .
+                </p>
+              </div>
 
 
                 {/* =================================================

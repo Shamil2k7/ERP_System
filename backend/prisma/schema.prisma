@@ -40,23 +40,20 @@ model Department {
 // DESIGNATION
 
 model Designation {
-  id           String     @id @default(uuid())
-  name         String     @unique @db.VarChar(150)
-  code         String     @unique @db.VarChar(50)
-  departmentId String     @map("department_id")
-  employees    Int        @default(0)
-  status       Status     @default(ACTIVE)
+  id          String   @id @default(uuid())
+  code        String   @unique @db.VarChar(50)
+  designation String   @db.VarChar(150)
+  department  String   @db.VarChar(150)
+  status      Status   @default(ACTIVE)
 
-  department   Department @relation(fields: [departmentId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-
-  @@index([name])
-  @@index([code])
-  @@index([departmentId])
+  @@index([designation])
+  @@index([department])
   @@map("designations")
 }
+
 
 model User {
   id String @id @default(uuid())
@@ -254,6 +251,12 @@ model Product {
   discountType ProductDiscountType?
 
   discountValue Decimal? @db.Decimal(18, 2)
+
+  image String?
+
+   description String?
+
+  status ProductStatus @default(ACTIVE)
 
   unit Unit @relation(fields: [unitId], references: [id])
 
@@ -877,6 +880,9 @@ model AuditLog {
   @@index([entity])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ==============================
 // System Settings Model
 // ==============================
 

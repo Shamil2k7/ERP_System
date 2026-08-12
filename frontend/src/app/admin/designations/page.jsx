@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import axios from "axios";
+import { toast, Toaster } from "react-hot-toast";
 import {
   FiPlus,
   FiPrinter,
@@ -13,171 +15,249 @@ import {
   FiX,
   FiSave,
   FiArrowDown,
+  FiUsers,
+  FiBriefcase,
 } from "react-icons/fi";
 
 import styles from "./designations.module.css";
-import axios from "axios";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import {
+  getDesignations,
+  createDesignation,
+  updateDesignation,
+  deleteDesignation,
+} from "@/services/designationService";
+
+import {
+  getRoles,
+  createRole,
+  updateRole,
+  deleteRole,
+} from "@/services/roleService";
 
 export default function DesignationsPage() {
+  const [activeTab, setActiveTab] = useState("designations"); // "designations" | "roles"
+
+  // Data states
   const [designations, setDesignations] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Filter & Search states
   const [search, setSearch] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [openMenu, setOpenMenu] = useState(null);
   const [sortAsc, setSortAsc] = useState(true);
   const [filterStatus, setFilterStatus] = useState("All");
 
-  const [editingId, setEditingId] = useState(null);
-
-  const [formData, setFormData] = useState({
+  // Form states
+  const [designationForm, setDesignationForm] = useState({
     designation: "",
     department: "",
     status: "ACTIVE",
+    code: "",
   });
 
-  const fetchData = async () => {
+  const [roleForm, setRoleForm] = useState({
+    name: "",
+  });
+
+  // Load all initial data
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const [designationsRes, departmentsRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/designations"),
+      const [desigRes, rolesRes, deptRes] = await Promise.allSettled([
+        getDesignations(),
+        getRoles(),
         axios.get("http://localhost:5000/api/departments"),
       ]);
 
-      const fetchedDesignations = designationsRes.data.data.map((d) => ({
-        _id: d.id,
-        id: d.code,
-        designation: d.name,
-        department: d.department?.name || "",
-        employees: d.employees || 0,
-        createdOn: new Date(d.createdAt).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        }),
-        status: d.status,
-      }));
+      if (desigRes.status === "fulfilled" && desigRes.value.success) {
+        setDesignations(desigRes.value.data || []);
+      }
 
-      setDesignations(fetchedDesignations);
-      setDepartments(departmentsRes.data.data.map((dep) => dep.name));
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      toast.error("Failed to fetch data");
+      if (rolesRes.status === "fulfilled" && rolesRes.value.success) {
+        setRoles(rolesRes.value.data || []);
+      }
+
+      if (deptRes.status === "fulfilled" && deptRes.value.data) {
+        const depts = deptRes.value.data.data || deptRes.value.data;
+        if (Array.isArray(depts)) {
+          setDepartments(depts.map((d) => (typeof d === "object" ? d.name : d)));
+        }
+      }
+    } catch (err) {
+      console.error("Error loading designations/roles data:", err);
+      toast.error("Failed to load data from server");
     } finally {
       setLoading(false);
     }
   };
 
-  import("react").then((react) => {
-    react.useEffect(() => {
-      fetchData();
-    }, []);
-  });
-
+  // Filtered Designations
   const filteredDesignations = useMemo(() => {
     let result = designations.filter((item) => {
       const value = search.toLowerCase();
+      const nameMatch = item.designation?.toLowerCase().includes(value);
+      const codeMatch = item.code?.toLowerCase().includes(value);
+      const deptMatch = item.department?.toLowerCase().includes(value);
 
-      const matchesSearch =
-        item.id.toLowerCase().includes(value) ||
-        item.designation.toLowerCase().includes(value) ||
-        item.department.toLowerCase().includes(value);
-
+      const matchesSearch = nameMatch || codeMatch || deptMatch;
       const matchesStatus =
-        filterStatus === "All" || item.status === filterStatus;
+        filterStatus === "All" ||
+        item.status === filterStatus ||
+        (filterStatus === "Active" && item.status === "ACTIVE") ||
+        (filterStatus === "Inactive" && item.status === "INACTIVE");
 
       return matchesSearch && matchesStatus;
     });
 
     result.sort((a, b) => {
       return sortAsc
-        ? a.designation.localeCompare(b.designation)
-        : b.designation.localeCompare(a.designation);
+        ? (a.designation || "").localeCompare(b.designation || "")
+        : (b.designation || "").localeCompare(a.designation || "");
     });
 
     return result;
   }, [designations, search, filterStatus, sortAsc]);
 
+  // Filtered Roles
+  const filteredRoles = useMemo(() => {
+    let result = roles.filter((r) => {
+      const value = search.toLowerCase();
+      return r.name?.toLowerCase().includes(value);
+    });
+
+    result.sort((a, b) => {
+      return sortAsc
+        ? (a.name || "").localeCompare(b.name || "")
+        : (b.name || "").localeCompare(a.name || "");
+    });
+
+    return result;
+  }, [roles, search, sortAsc]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (activeTab === "designations") {
+      setDesignationForm((prev) => ({ ...prev, [name]: value }));
+    } else {
+      setRoleForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
-  const handleAddDesignation = async (e) => {
+  // Submit Designation (Add or Edit)
+  const handleSubmitDesignation = async (e) => {
     e.preventDefault();
 
-    if (!formData.designation.trim() || !formData.department) {
-      toast.warn("Please enter designation and select department.");
+    if (!designationForm.designation.trim() || !designationForm.department) {
+      toast.error("Please enter designation name and select department.");
       return;
     }
 
     try {
-      if (editingId) {
-        await axios.put(`http://localhost:5000/api/designations/${editingId}`, {
-          name: formData.designation.trim(),
-          department: formData.department,
-          status: formData.status,
-        });
-        toast.success("Designation updated successfully");
+      if (editingItem) {
+        const res = await updateDesignation(editingItem.id, designationForm);
+        if (res.success) {
+          toast.success("Designation updated successfully");
+          setDesignations((prev) =>
+            prev.map((d) => (d.id === editingItem.id ? res.data : d))
+          );
+        }
       } else {
-        await axios.post("http://localhost:5000/api/designations", {
-          name: formData.designation.trim(),
-          department: formData.department,
-          status: formData.status,
-        });
-        toast.success("Designation created successfully");
+        const res = await createDesignation(designationForm);
+        if (res.success) {
+          toast.success("Designation created successfully");
+          setDesignations((prev) => [res.data, ...prev]);
+        }
       }
 
-      setFormData({
-        designation: "",
-        department: "",
-        status: "ACTIVE",
-      });
-      setEditingId(null);
+      setDesignationForm({ designation: "", department: "", status: "ACTIVE", code: "" });
+      setEditingItem(null);
       setShowAddForm(false);
-      fetchData();
     } catch (error) {
-      console.error("Error saving designation:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to save designation"
-      );
+      toast.error(error.response?.data?.message || "Failed to save designation");
     }
   };
 
-  const handleDelete = async (id, realId) => {
+  // Submit Role (Add or Edit)
+  const handleSubmitRole = async (e) => {
+    e.preventDefault();
+
+    if (!roleForm.name.trim()) {
+      toast.error("Please enter role name.");
+      return;
+    }
+
+    try {
+      if (editingItem) {
+        const res = await updateRole(editingItem.id, roleForm);
+        if (res.success) {
+          toast.success("Role updated successfully");
+          setRoles((prev) => prev.map((r) => (r.id === editingItem.id ? res.data : r)));
+        }
+      } else {
+        const res = await createRole(roleForm);
+        if (res.success) {
+          toast.success("Role created successfully");
+          setRoles((prev) => [res.data, ...prev]);
+        }
+      }
+
+      setRoleForm({ name: "" });
+      setEditingItem(null);
+      setShowAddForm(false);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to save role");
+    }
+  };
+
+  // Delete Handler
+  const handleDelete = async (id) => {
+    const isDesig = activeTab === "designations";
     const confirmed = window.confirm(
-      "Are you sure you want to delete this designation?"
+      `Are you sure you want to delete this ${isDesig ? "designation" : "role"}?`
     );
 
     if (!confirmed) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/designations/${realId}`);
-      toast.success("Designation deleted successfully");
-      fetchData();
+      if (isDesig) {
+        await deleteDesignation(id);
+        setDesignations((prev) => prev.filter((item) => item.id !== id));
+        toast.success("Designation deleted successfully");
+      } else {
+        await deleteRole(id);
+        setRoles((prev) => prev.filter((r) => r.id !== id));
+        toast.success("Role deleted successfully");
+      }
     } catch (error) {
-      console.error("Error deleting designation:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to delete designation"
-      );
+      toast.error(error.response?.data?.message || "Failed to delete item");
+    } finally {
+      setOpenMenu(null);
     }
-
-    setOpenMenu(null);
   };
 
+  // Edit Trigger
   const handleEdit = (item) => {
-    setFormData({
-      designation: item.designation,
-      department: item.department,
-      status: item.status,
-    });
+    setEditingItem(item);
+    if (activeTab === "designations") {
+      setDesignationForm({
+        designation: item.designation,
+        department: item.department,
+        status: item.status || "ACTIVE",
+        code: item.code || "",
+      });
+    } else {
+      setRoleForm({
+        name: item.name,
+      });
+    }
 
     setEditingId(item._id);
     setShowAddForm(true);
@@ -189,40 +269,38 @@ export default function DesignationsPage() {
   };
 
   const handleExport = () => {
-    const headers = [
-      "ID",
-      "Designation",
-      "Department",
-      "Employees",
-      "Created On",
-      "Status",
-    ];
+    if (activeTab === "designations") {
+      const headers = ["ID", "Code", "Designation", "Department", "Created On", "Status"];
+      const rows = designations.map((item) => [
+        item.id,
+        item.code,
+        item.designation,
+        item.department,
+        new Date(item.createdAt).toLocaleDateString(),
+        item.status,
+      ]);
+      const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+      downloadCSV(csv, "designations.csv");
+    } else {
+      const headers = ["ID", "Role Name", "Employees Count", "Created On"];
+      const rows = roles.map((item) => [
+        item.id,
+        item.name,
+        item._count?.users || 0,
+        new Date(item.createdAt).toLocaleDateString(),
+      ]);
+      const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+      downloadCSV(csv, "roles.csv");
+    }
+  };
 
-    const rows = designations.map((item) => [
-      item.id,
-      item.designation,
-      item.department,
-      item.employees,
-      item.createdOn,
-      item.status,
-    ]);
-
-    const csv = [
-      headers.join(","),
-      ...rows.map((row) => row.join(",")),
-    ].join("\n");
-
-    const blob = new Blob([csv], {
-      type: "text/csv;charset=utf-8;",
-    });
-
+  const downloadCSV = (csvContent, fileName) => {
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-
     link.href = url;
-    link.download = "designations.csv";
+    link.download = fileName;
     link.click();
-
     URL.revokeObjectURL(url);
   };
 
@@ -234,242 +312,257 @@ export default function DesignationsPage() {
     setSearch("");
     setFilterStatus("All");
     setSortAsc(true);
+    loadData();
+  };
+
+  const openNewForm = () => {
+    setEditingItem(null);
+    setDesignationForm({ designation: "", department: "", status: "ACTIVE", code: "" });
+    setRoleForm({ name: "" });
+    setShowAddForm((prev) => !prev);
+    setOpenMenu(null);
   };
 
   return (
     <div className={styles.page}>
-      <ToastContainer position="top-right" autoClose={3000} />
-      {/* =========================
-          HEADER
-      ========================= */}
+      <Toaster position="top-right" />
 
+      {/* HEADER */}
       <header className={styles.header}>
         <div>
-          <h1>Designations</h1>
+          <h1>Designations & Roles Management</h1>
         </div>
 
         <div className={styles.headerActions}>
-          <button
-            className={styles.secondaryButton}
-            onClick={handlePrint}
-          >
+          <button className={styles.secondaryButton} onClick={handlePrint}>
             <FiPrinter size={15} />
             Print
           </button>
 
-          <button
-            className={styles.secondaryButton}
-            onClick={handleExport}
-          >
+          <button className={styles.secondaryButton} onClick={handleExport}>
             <FiDownload size={15} />
             Export
             <FiChevronDown size={14} />
           </button>
 
-          <button
-            className={styles.addButton}
-            onClick={() => {
-              setShowAddForm((prev) => !prev);
-              setOpenMenu(null);
-            }}
-          >
-            {showAddForm ? (
-              <FiX size={17} />
-            ) : (
-              <FiPlus size={17} />
-            )}
-
-            {showAddForm ? "Close" : "Add New"}
+          <button className={styles.addButton} onClick={openNewForm}>
+            {showAddForm ? <FiX size={17} /> : <FiPlus size={17} />}
+            {showAddForm
+              ? "Close"
+              : activeTab === "designations"
+              ? "Add Designation"
+              : "Add Role"}
           </button>
         </div>
       </header>
 
-      {/* =========================
-          ADD DESIGNATION FORM
-      ========================= */}
+      {/* TABS CONTAINER */}
+      <div className={styles.tabsContainer}>
+        <button
+          className={`${styles.tabButton} ${
+            activeTab === "designations" ? styles.activeTab : ""
+          }`}
+          onClick={() => {
+            setActiveTab("designations");
+            setShowAddForm(false);
+            setEditingItem(null);
+          }}
+        >
+          <FiBriefcase style={{ marginRight: 6 }} /> Designations
+        </button>
 
+        <button
+          className={`${styles.tabButton} ${
+            activeTab === "roles" ? styles.activeTab : ""
+          }`}
+          onClick={() => {
+            setActiveTab("roles");
+            setShowAddForm(false);
+            setEditingItem(null);
+          }}
+        >
+          <FiUsers style={{ marginRight: 6 }} /> Roles
+        </button>
+      </div>
+
+      {/* ADD / EDIT FORM CARD */}
       {showAddForm && (
         <section className={styles.addCard}>
           <div className={styles.addCardHeader}>
             <div>
-              <h2>{editingId ? "Edit Designation" : "Add New Designation"}</h2>
-              <p>{editingId ? "Update existing designation details." : "Create a new employee designation."}</p>
+              <h2>
+                {editingItem ? "Edit" : "Add New"}{" "}
+                {activeTab === "designations" ? "Designation" : "Role"}
+              </h2>
+              <p>
+                {activeTab === "designations"
+                  ? "Manage employee designation title and department assignment."
+                  : "Manage user system role permissions for employees."}
+              </p>
             </div>
 
-            <button
-              className={styles.closeButton}
-              onClick={() => {
-                setShowAddForm(false);
-                setEditingId(null);
-                setFormData({
-                  designation: "",
-                  department: "",
-                  status: "ACTIVE",
-                });
-              }}
-            >
+            <button className={styles.closeButton} onClick={() => setShowAddForm(false)}>
               <FiX size={18} />
             </button>
           </div>
 
-          <form
-            className={styles.form}
-            onSubmit={handleAddDesignation}
-          >
-            <div className={styles.formGroup}>
-              <label htmlFor="designation">
-                Designation <span>*</span>
-              </label>
+          {activeTab === "designations" ? (
+            <form className={styles.form} onSubmit={handleSubmitDesignation}>
+              <div className={styles.formGroup}>
+                <label htmlFor="designation">
+                  Designation Title <span>*</span>
+                </label>
+                <input
+                  id="designation"
+                  name="designation"
+                  type="text"
+                  placeholder="e.g. Senior Software Engineer"
+                  value={designationForm.designation}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
-              <input
-                id="designation"
-                name="designation"
-                type="text"
-                placeholder="Enter designation"
-                value={formData.designation}
-                onChange={handleInputChange}
-              />
-            </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="department">
+                  Department <span>*</span>
+                </label>
+                <select
+                  id="department"
+                  name="department"
+                  value={designationForm.department}
+                  onChange={handleInputChange}
+                  required
+                >
+                  <option value="">Select department</option>
+                  {departments.length > 0 ? (
+                    departments.map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))
+                  ) : (
+                    <>
+                      <option value="Engineering">Engineering</option>
+                      <option value="Design">Design</option>
+                      <option value="HR">HR</option>
+                      <option value="Finance">Finance</option>
+                      <option value="Sales">Sales</option>
+                      <option value="Marketing">Marketing</option>
+                    </>
+                  )}
+                </select>
+              </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="department">
-                Department <span>*</span>
-              </label>
+              <div className={styles.formGroup}>
+                <label htmlFor="status">Status</label>
+                <select
+                  id="status"
+                  name="status"
+                  value={designationForm.status}
+                  onChange={handleInputChange}
+                >
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                </select>
+              </div>
 
-              <select
-                id="department"
-                name="department"
-                value={formData.department}
-                onChange={handleInputChange}
-              >
-                <option value="">
-                  Select department
-                </option>
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setShowAddForm(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className={styles.saveButton}>
+                  <FiSave size={16} />
+                  {editingItem ? "Update Designation" : "Save Designation"}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form className={styles.form} onSubmit={handleSubmitRole}>
+              <div className={styles.formGroup}>
+                <label htmlFor="name">
+                  Role Name <span>*</span>
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="e.g. Admin, Manager, HR"
+                  value={roleForm.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
-                {departments.map((department) => (
-                  <option
-                    key={department}
-                    value={department}
-                  >
-                    {department}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="status">
-                Status
-              </label>
-
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-              >
-                <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
-              </select>
-            </div>
-
-            <div className={styles.formActions}>
-              <button
-                type="button"
-                className={styles.cancelButton}
-                onClick={() => {
-                  setShowAddForm(false);
-                  setEditingId(null);
-                  setFormData({
-                    designation: "",
-                    department: "",
-                    status: "ACTIVE",
-                  });
-                }}
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                className={styles.saveButton}
-              >
-                <FiSave size={16} />
-                {editingId ? "Update Designation" : "Save Designation"}
-              </button>
-            </div>
-          </form>
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={() => setShowAddForm(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className={styles.saveButton}>
+                  <FiSave size={16} />
+                  {editingItem ? "Update Role" : "Save Role"}
+                </button>
+              </div>
+            </form>
+          )}
         </section>
       )}
 
-      {/* =========================
-          TABLE CARD
-      ========================= */}
-
+      {/* TABLE CARD */}
       <section className={styles.tableCard}>
         {/* TOOLBAR */}
-
         <div className={styles.toolbar}>
           <div className={styles.searchBox}>
             <FiSearch size={18} />
-
             <input
               type="text"
-              placeholder="Search"
+              placeholder={`Search ${activeTab}...`}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
 
           <div className={styles.toolbarRight}>
-            {/* FILTER */}
+            {activeTab === "designations" && (
+              <div className={styles.filterWrapper}>
+                <button
+                  className={styles.toolbarButton}
+                  onClick={() =>
+                    setFilterStatus(
+                      filterStatus === "All"
+                        ? "Active"
+                        : filterStatus === "Active"
+                        ? "Inactive"
+                        : "All"
+                    )
+                  }
+                >
+                  <FiFilter size={16} />
+                  Filter
+                  <FiChevronDown size={14} />
+                </button>
+                {filterStatus !== "All" && (
+                  <span className={styles.filterBadge}>{filterStatus}</span>
+                )}
+              </div>
+            )}
 
-            <div className={styles.filterWrapper}>
-              <button
-                className={styles.toolbarButton}
-                onClick={() =>
-                  setFilterStatus(
-                    filterStatus === "All"
-                      ? "ACTIVE"
-                      : filterStatus === "ACTIVE"
-                      ? "INACTIVE"
-                      : "All"
-                  )
-                }
-              >
-                <FiFilter size={16} />
-                Filter
-                <FiChevronDown size={14} />
-              </button>
-
-              {filterStatus !== "All" && (
-                <span className={styles.filterBadge}>
-                  {filterStatus}
-                </span>
-              )}
-            </div>
-
-            {/* SORT */}
-
-            <button
-              className={styles.toolbarButton}
-              onClick={handleSort}
-            >
+            <button className={styles.toolbarButton} onClick={handleSort}>
               <FiArrowDown
                 size={16}
-                className={
-                  sortAsc
-                    ? styles.arrowUp
-                    : styles.arrowDown
-                }
+                className={sortAsc ? styles.arrowUp : styles.arrowDown}
               />
-
               Sort By
-
               <FiChevronDown size={14} />
             </button>
-
-            {/* REFRESH */}
 
             <button
               className={styles.iconButton}
@@ -482,110 +575,148 @@ export default function DesignationsPage() {
         </div>
 
         {/* TABLE */}
-
         <div className={styles.tableWrapper}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Designation</th>
-                <th>Department</th>
-                <th>Employees</th>
-                <th>Created On</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredDesignations.length > 0 ? (
-                filteredDesignations.map((item) => (
-                  <tr key={item.id}>
-                    <td className={styles.id}>
-                      {item.id}
-                    </td>
-
-                    <td>
-                      <strong>
-                        {item.designation}
-                      </strong>
-                    </td>
-
-                    <td className={styles.text}>
-                      {item.department}
-                    </td>
-
-                    <td className={styles.text}>
-                      {item.employees}
-                    </td>
-
-                    <td className={styles.text}>
-                      {item.createdOn}
-                    </td>
-
-                    <td>
-                      <span
-                        className={`${styles.status} ${
-                          item.status === "ACTIVE"
-                            ? styles.active
-                            : styles.inactive
-                        }`}
-                      >
-                        {item.status === "ACTIVE" ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className={styles.actionWrapper}>
-                        <button
-                          className={styles.actionButton}
-                          onClick={() =>
-                            setOpenMenu(
-                              openMenu === item.id
-                                ? null
-                                : item.id
-                            )
-                          }
+          {loading ? (
+            <div style={{ padding: 40, textAlign: "center", color: "#64748b" }}>
+              Loading data...
+            </div>
+          ) : activeTab === "designations" ? (
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Designation</th>
+                  <th>Department</th>
+                  <th>Created On</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredDesignations.length > 0 ? (
+                  filteredDesignations.map((item) => (
+                    <tr key={item.id}>
+                      <td className={styles.id}>{item.code}</td>
+                      <td>
+                        <strong>{item.designation}</strong>
+                      </td>
+                      <td className={styles.text}>{item.department}</td>
+                      <td className={styles.text}>
+                        {item.createdAt
+                          ? new Date(item.createdAt).toLocaleDateString()
+                          : "N/A"}
+                      </td>
+                      <td>
+                        <span
+                          className={`${styles.status} ${
+                            item.status === "ACTIVE" || item.status === "Active"
+                              ? styles.active
+                              : styles.inactive
+                          }`}
                         >
-                          <FiMoreVertical size={17} />
-                        </button>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div className={styles.actionWrapper}>
+                          <button
+                            className={styles.actionButton}
+                            onClick={() =>
+                              setOpenMenu(openMenu === item.id ? null : item.id)
+                            }
+                          >
+                            <FiMoreVertical size={17} />
+                          </button>
 
-                        {openMenu === item.id && (
-                          <div className={styles.actionMenu}>
-                            <button
-                              onClick={() =>
-                                handleEdit(item)
-                              }
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              className={styles.deleteItem}
-                              onClick={() =>
-                                handleDelete(item.id, item._id)
-                              }
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                          {openMenu === item.id && (
+                            <div className={styles.actionMenu}>
+                              <button onClick={() => handleEdit(item)}>Edit</button>
+                              <button
+                                className={styles.deleteItem}
+                                onClick={() => handleDelete(item.id)}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className={styles.empty}>
+                      No designations found
                     </td>
                   </tr>
-                ))
-              ) : (
+                )}
+              </tbody>
+            </table>
+          ) : (
+            <table className={styles.table}>
+              <thead>
                 <tr>
-                  <td
-                    colSpan="7"
-                    className={styles.empty}
-                  >
-                    No designations found
-                  </td>
+                  <th>ID</th>
+                  <th>Role Name</th>
+                  <th>Users Count</th>
+                  <th>Created On</th>
+                  <th>Action</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredRoles.length > 0 ? (
+                  filteredRoles.map((item) => (
+                    <tr key={item.id}>
+                      <td className={styles.id}>
+                        #{item.id?.substring(0, 8)}
+                      </td>
+                      <td>
+                        <strong>{item.name}</strong>
+                      </td>
+                      <td className={styles.text}>
+                        {item._count?.users || 0} user(s)
+                      </td>
+                      <td className={styles.text}>
+                        {item.createdAt
+                          ? new Date(item.createdAt).toLocaleDateString()
+                          : "N/A"}
+                      </td>
+                      <td>
+                        <div className={styles.actionWrapper}>
+                          <button
+                            className={styles.actionButton}
+                            onClick={() =>
+                              setOpenMenu(openMenu === item.id ? null : item.id)
+                            }
+                          >
+                            <FiMoreVertical size={17} />
+                          </button>
+
+                          {openMenu === item.id && (
+                            <div className={styles.actionMenu}>
+                              <button onClick={() => handleEdit(item)}>Edit</button>
+                              <button
+                                className={styles.deleteItem}
+                                onClick={() => handleDelete(item.id)}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className={styles.empty}>
+                      No roles found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </section>
     </div>

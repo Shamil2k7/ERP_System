@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, User, Loader2 } from 'lucide-react';
 import styles from './addEmployee.module.css';
@@ -8,12 +8,14 @@ import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
 import Sidebar from '@/components/adminPanel/Sidebar/Sidebar';
 import Header from '@/components/adminPanel/Header/Header';
+import { getRoles } from '@/services/roleService';
 
 export default function AddEmployeePage() {
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = () => setSidebarOpen(prev => !prev);
 
+  const [roles, setRoles] = useState([]);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -22,6 +24,22 @@ export default function AddEmployeePage() {
     role: '',
     password: ''
   });
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  const fetchRoles = async () => {
+    try {
+      const res = await getRoles();
+      if (res.success && Array.isArray(res.data)) {
+        setRoles(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch roles:", err);
+    }
+  };
+
   const [submitting, setSubmitting] = useState(false);
 
   const handleInputChange = (e) => {
@@ -149,15 +167,29 @@ export default function AddEmployeePage() {
                   <div className={styles.formRow}>
                     <div className={styles.formGroup}>
                       <label className={styles.label}>Role <span className={styles.required}>*</span></label>
-                      <input
-                        type="text"
+                      <select
                         name="role"
                         value={formData.role}
                         onChange={handleInputChange}
                         className={styles.input}
                         required
-                        placeholder="Admin"
-                      />
+                      >
+                        <option value="">Select Role</option>
+                        {roles.length > 0 ? (
+                          roles.map((r) => (
+                            <option key={r.id} value={r.name}>
+                              {r.name}
+                            </option>
+                          ))
+                        ) : (
+                          <>
+                            <option value="Admin">Admin</option>
+                            <option value="Manager">Manager</option>
+                            <option value="HR">HR</option>
+                          </>
+                        )}
+                      </select>
+
                     </div>
                     <div className={styles.formGroup}>
                       <label className={styles.label}>Password <span className={styles.required}>*</span></label>
