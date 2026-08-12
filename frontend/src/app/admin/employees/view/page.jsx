@@ -52,6 +52,11 @@ export default function EmployeePage() {
     }
   };
 
+  const getAuthHeaders = () => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+  };
+
   const fetchEmployees = async () => {
 
     try {
@@ -166,7 +171,8 @@ export default function EmployeePage() {
 
       await axios.put(
         `http://localhost:5000/api/employees/${currentEmployee.id}`,
-        updateData
+        updateData,
+        getAuthHeaders()
       );
 
       toast.success(

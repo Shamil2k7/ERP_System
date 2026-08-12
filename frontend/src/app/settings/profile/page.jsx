@@ -4,14 +4,13 @@ import { useState } from "react";
 import axios from "axios";
 import {
   KeyRound,
-  Mail,
   Lock,
   Eye,
   EyeOff,
   CheckCircle,
   AlertCircle,
+  Mail,
   User,
-  Loader2,
 } from "lucide-react";
 import styles from "./profile.module.css";
 
@@ -211,160 +210,6 @@ function ChangePasswordCard() {
   );
 }
 
-/* ─── Change Email Card ─── */
-function ChangeEmailCard() {
-  const [form, setForm] = useState({
-    currentEmail: "",
-    password: "",
-    newEmail: "",
-    confirmEmail: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState({ type: null, msg: "" });
-
-  const handle = (e) =>
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setStatus({ type: null, msg: "" });
-
-    if (form.newEmail.trim().toLowerCase() === form.currentEmail.trim().toLowerCase()) {
-      setStatus({ type: "error", msg: "New email must be different from current email." });
-      return;
-    }
-    if (form.newEmail.trim().toLowerCase() !== form.confirmEmail.trim().toLowerCase()) {
-      setStatus({ type: "error", msg: "New email addresses do not match." });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await axios.post(`${API}/change-email`, {
-        currentEmail: form.currentEmail.trim().toLowerCase(),
-        password: form.password,
-        newEmail: form.newEmail.trim().toLowerCase(),
-      });
-      setStatus({ type: "success", msg: res.data.message || "Email updated successfully!" });
-      setForm({ currentEmail: "", password: "", newEmail: "", confirmEmail: "" });
-    } catch (err) {
-      setStatus({
-        type: "error",
-        msg: err.response?.data?.message || "Failed to update email. Please try again.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className={styles.card}>
-      <div className={styles.cardHeader}>
-        <div className={`${styles.cardIcon} ${styles.blue}`}>
-          <Mail size={18} />
-        </div>
-        <div>
-          <p className={styles.cardTitle}>Change Email</p>
-          <p className={styles.cardDesc}>Update the email linked to your account</p>
-        </div>
-      </div>
-
-      <Alert type={status.type} msg={status.msg} />
-
-      <form onSubmit={submit}>
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="ce-current">
-            Current Email Address
-          </label>
-          <div className={styles.inputWrapper}>
-            <Mail size={15} className={styles.inputIcon} />
-            <input
-              id="ce-current"
-              type="email"
-              name="currentEmail"
-              value={form.currentEmail}
-              onChange={handle}
-              placeholder="current@example.com"
-              className={styles.input}
-              required
-            />
-          </div>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="ce-password">
-            Confirm with Password
-          </label>
-          <PasswordInput
-            id="ce-password"
-            name="password"
-            value={form.password}
-            onChange={handle}
-            placeholder="Enter your current password"
-          />
-        </div>
-
-        <div className={styles.divider} />
-
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="ce-new">
-            New Email Address
-          </label>
-          <div className={styles.inputWrapper}>
-            <Mail size={15} className={styles.inputIcon} />
-            <input
-              id="ce-new"
-              type="email"
-              name="newEmail"
-              value={form.newEmail}
-              onChange={handle}
-              placeholder="new@example.com"
-              className={styles.input}
-              required
-            />
-          </div>
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label} htmlFor="ce-confirm">
-            Confirm New Email
-          </label>
-          <div className={styles.inputWrapper}>
-            <Mail size={15} className={styles.inputIcon} />
-            <input
-              id="ce-confirm"
-              type="email"
-              name="confirmEmail"
-              value={form.confirmEmail}
-              onChange={handle}
-              placeholder="Repeat new email"
-              className={styles.input}
-              required
-            />
-          </div>
-        </div>
-
-        <button
-          type="submit"
-          className={`${styles.submitBtn} ${styles.blue}`}
-          disabled={loading}
-        >
-          {loading ? (
-            <>
-              <div className={styles.spinner} />
-              Saving…
-            </>
-          ) : (
-            <>
-              <Mail size={15} />
-              Update Email
-            </>
-          )}
-        </button>
-      </form>
-    </div>
-  );
-}
 
 /* ─── Page ─── */
 export default function ProfilePage() {
@@ -378,13 +223,12 @@ export default function ProfilePage() {
           <h1 className={styles.title}>My Profile</h1>
         </div>
         <p className={styles.subtitle}>
-          Manage your account credentials — change your password or update your email address.
+          Manage your account credentials — change your password below.
         </p>
       </div>
 
       <div className={styles.grid}>
         <ChangePasswordCard />
-        <ChangeEmailCard />
       </div>
     </div>
   );
