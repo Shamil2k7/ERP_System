@@ -501,7 +501,7 @@ export default function ProductsPage() {
                   return (
                   <tr 
                     key={product.id}
-                    onClick={() => window.location.href = `/admin/products/view/${product.id}`}
+                    onClick={() => window.location.href = `/admin/products/details/${product.id}`}
                     style={{ cursor: 'pointer' }}
                   >
 
@@ -519,7 +519,7 @@ export default function ProductsPage() {
                           className={`${styles.productIcon} ${styles[product.iconType || 'default']}`}
                         >
                           {product.image ? (
-                             <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', borderRadius: '4px' }} />
+                             <img src={product.image.startsWith('http') ? product.image : `http://localhost:5000${product.image.startsWith('/') ? '' : '/'}${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
                           ) : product.icon || <FiBox />}
                         </div>
 
@@ -603,7 +603,7 @@ export default function ProductsPage() {
                               styles.actionMenu
                             }
                           >
-                            <button onClick={(e) => { e.stopPropagation(); window.location.href = `/admin/products/view/${product.id}`; }}>
+                            <button onClick={(e) => { e.stopPropagation(); window.location.href = `/admin/products/details/${product.id}`; }}>
                               View
                             </button>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, use } from "react";
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
@@ -9,15 +9,16 @@ import {
   FiSave,
   FiPackage,
   FiX,
+  FiArrowLeft,
 } from "react-icons/fi";
+import { Loader2 } from 'lucide-react';
 
-import styles from "./addProducts.module.css";
+import styles from "../../add/addProducts.module.css";
 
 const initialProduct = {
   name: "",
   code: "",
   sku: "",
-  // barcode: "",
   categoryId: "",
   brandId: "",
   baseUnitId: "",
@@ -27,19 +28,18 @@ const initialProduct = {
   tax: "",
   discountValue: "",
   discountType: "PERCENT",
-  stock: "",
-  lowStock: "",
-  warehouse: "",
   status: "ACTIVE",
 };
 
-export default function AddProductPage() {
+export default function EditProductPage({ params }) {
+  const { id } = use(params);
   const router = useRouter();
   const [product, setProduct] = useState(initialProduct);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [units, setUnits] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
@@ -47,50 +47,63 @@ export default function AddProductPage() {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    fetchCategories();
-    fetchBrands();
-    fetchUnits();
+    fetchFormData();
+    fetchProduct();
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchFormData = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/categories');
-      if (res.data && res.data.data) {
-        setCategories(res.data.data);
-      }
+      const [catRes, brandRes, unitRes] = await Promise.all([
+        axios.get('http://localhost:5000/api/categories'),
+        axios.get('http://localhost:5000/api/brands'),
+        axios.get('http://localhost:5000/api/units')
+      ]);
+      if (catRes.data?.data) setCategories(catRes.data.data);
+      if (brandRes.data?.data) setBrands(brandRes.data.data);
+      if (unitRes.data?.data) setUnits(unitRes.data.data);
     } catch (error) {
-      console.error('Failed to fetch categories', error);
-      toast.error('Failed to load categories');
+      console.error('Failed to fetch form data', error);
+      toast.error('Failed to load form data');
     }
   };
 
-  const fetchBrands = async () => {
+  const fetchProduct = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/brands');
-      if (res.data && res.data.data) {
-        setBrands(res.data.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch brands', error);
-      toast.error('Failed to load brands');
-    }
-  };
+      const res = await axios.get(`http://localhost:5000/api/products/${id}`);
+      if (res.data?.data) {
+        const p = res.data.data;
+        setProduct({
+          name: p.name || "",
+          code: p.code || "",
+          sku: p.sku || "",
+          categoryId: p.categoryId || "",
+          brandId: p.brandId || "",
+          baseUnitId: p.unitId || "", // Schema uses unitId
+          description: p.description || "",
+          costPrice: p.costPrice || "",
+          sellingPrice: p.sellingPrice || "",
+          tax: p.tax || "",
+          discountValue: p.discountValue || "",
+          discountType: p.discountType || "PERCENT",
+          status: p.status || "ACTIVE",
+        });
 
-  const fetchUnits = async () => {
-    try {
-      const res = await axios.get('http://localhost:5000/api/units');
-      if (res.data && res.data.data) {
-        setUnits(res.data.data);
+        if (p.image) {
+           setImagePreview(p.image.startsWith('http') ? p.image : `http://localhost:5000${p.image.startsWith('/') ? '' : '/'}${p.image}`);
+        }
+      } else {
+        toast.error("Product not found");
       }
     } catch (error) {
-      console.error('Failed to fetch units', error);
-      toast.error('Failed to load units');
+      console.error('Failed to fetch product', error);
+      toast.error('Failed to load product details');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setProduct((prev) => ({
       ...prev,
       [name]: value,
@@ -125,13 +138,7 @@ export default function AddProductPage() {
       return;
     }
 
-    // Remove previous preview URL
-    if (imagePreview) {
-      URL.revokeObjectURL(imagePreview);
-    }
-
     const previewUrl = URL.createObjectURL(file);
-
     setImage(file);
     setImagePreview(previewUrl);
   };
@@ -141,7 +148,7 @@ export default function AddProductPage() {
   ========================= */
 
   const handleRemoveImage = () => {
-    if (imagePreview) {
+    if (imagePreview && imagePreview.startsWith("blob:")) {
       URL.revokeObjectURL(imagePreview);
     }
 
@@ -161,8 +168,6 @@ export default function AddProductPage() {
     e.preventDefault();
     setSubmitting(true);
     
-    // We will ignore stock, lowStock, and warehouse for now 
-    // since the API expects product model fields.
     const formData = new FormData();
     formData.append("name", product.name);
     formData.append("sku", product.sku);
@@ -184,21 +189,29 @@ export default function AddProductPage() {
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/api/products', formData, {
+      await axios.put(`http://localhost:5000/api/products/${id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      toast.success('Product added successfully!');
+      toast.success('Product updated successfully!');
       setTimeout(() => {
-        router.push('/admin/products/view');
+        router.push(`/admin/products/details/${id}`);
       }, 1500);
     } catch (error) {
       console.error(error);
-      const msg = error.response?.data?.message || 'Failed to create product';
+      const msg = error.response?.data?.message || 'Failed to update product';
       toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (loading) {
+     return (
+       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+         <Loader2 className={styles.spinner} style={{ animation: 'spin 1s linear infinite' }} size={40} />
+       </div>
+     );
+  }
 
   return (
     <div className={styles.layout}>
@@ -213,22 +226,33 @@ export default function AddProductPage() {
           <div className={styles.header}>
             <div className={styles.headerLeft}>
               <div>
-                <h1>Add Product</h1>
+                <h1>Edit Product</h1>
                 <p>
-                  Create a new product for inventory
+                  Update existing product details
                 </p>
               </div>
             </div>
 
-            <button
-              type="submit"
-              form="add-product-form"
-              className={styles.saveBtn}
-              disabled={submitting}
-            >
-              <FiSave />
-              {submitting ? 'Saving...' : 'Save Product'}
-            </button>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={() => router.push('/admin/products/view')}
+                style={{ padding: '0 20px', borderRadius: '8px', border: '1px solid #ddd', background: 'white', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+              >
+                <FiArrowLeft />
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="edit-product-form"
+                className={styles.saveBtn}
+                disabled={submitting}
+              >
+                <FiSave />
+                {submitting ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
           </div>
 
           {/* =========================
@@ -236,7 +260,7 @@ export default function AddProductPage() {
           ========================= */}
 
           <form
-            id="add-product-form"
+            id="edit-product-form"
             className={styles.form}
             onSubmit={handleSubmit}
           >
@@ -278,7 +302,7 @@ export default function AddProductPage() {
 
                   <div>
                     <label htmlFor="code">
-                      Product Code
+                      Product Code (Read Only)
                     </label>
 
                     <input
@@ -287,6 +311,8 @@ export default function AddProductPage() {
                       value={product.code}
                       onChange={handleChange}
                       placeholder="PRD001"
+                      disabled
+                      style={{ background: '#f5f5f5' }}
                     />
                   </div>
 
@@ -306,22 +332,6 @@ export default function AddProductPage() {
                       required
                     />
                   </div>
-
-                  {/* Barcode */}
-
-                  {/* <div>
-                    <label htmlFor="barcode">
-                      Barcode
-                    </label>
-
-                    <input
-                      id="barcode"
-                      name="barcode"
-                      value={product.barcode}
-                      onChange={handleChange}
-                      placeholder="123456789"
-                    />
-                  </div> */}
 
                   {/* Category */}
 
@@ -529,68 +539,6 @@ export default function AddProductPage() {
                 </div>
               </div>
 
-              {/* =========================
-                  INVENTORY
-              ========================= */}
-
-              <div className={styles.card}>
-                <h2>Inventory</h2>
-                <p style={{ fontSize: '12px', color: '#666', marginBottom: '15px' }}>
-                  Note: Inventory counts are managed via Purchases and Stock Adjustments. 
-                </p>
-
-                <div className={styles.grid}>
-
-                  <div>
-                    <label htmlFor="stock">
-                      Opening Stock (Read-only)
-                    </label>
-
-                    <input
-                      id="stock"
-                      name="stock"
-                      type="number"
-                      min="0"
-                      value={product.stock}
-                      onChange={handleChange}
-                      placeholder="0"
-                      disabled
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="lowStock">
-                      Low Stock Alert
-                    </label>
-
-                    <input
-                      id="lowStock"
-                      name="lowStock"
-                      type="number"
-                      min="0"
-                      value={product.lowStock}
-                      onChange={handleChange}
-                      placeholder="10"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="warehouse">
-                      Warehouse
-                    </label>
-
-                    <input
-                      id="warehouse"
-                      name="warehouse"
-                      value={product.warehouse}
-                      onChange={handleChange}
-                      placeholder="Main Warehouse"
-                    />
-                  </div>
-
-                </div>
-              </div>
-
             </div>
 
             {/* =========================
@@ -618,7 +566,7 @@ export default function AddProductPage() {
                       />
 
                       <p className={styles.fileName}>
-                        {image?.name}
+                        {image ? image.name : "Current Image"}
                       </p>
 
                       <button
@@ -676,19 +624,13 @@ export default function AddProductPage() {
 
                 <ul className={styles.tips}>
                   <li>
-                    Use a unique SKU.
+                    Ensure the SKU remains unique.
                   </li>
-
                   <li>
-                    Upload a high-quality product image.
+                    Check pricing carefully before updating.
                   </li>
-
                   <li>
-                    Set low stock alerts.
-                  </li>
-
-                  <li>
-                    Verify pricing before saving.
+                    Updating product images replaces the old image entirely.
                   </li>
                 </ul>
               </div>
