@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import Barcode from "react-barcode";
 import { toast, Toaster } from "react-hot-toast";
 import { useSettings } from "@/context/SettingsContext";
+import axios from "axios";
 import {
   FiPrinter,
   FiSearch,
