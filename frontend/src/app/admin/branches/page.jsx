@@ -29,11 +29,13 @@ import {
 } from "@/services/branchService";
 
 import styles from "./branches.module.css";
+import { useAlert } from "@/context/AlertContext";
 
 export default function BranchesPage() {
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { showSuccess, showError, showConfirm } = useAlert();
 
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
@@ -226,18 +228,24 @@ export default function BranchesPage() {
     setOpenMenu(null);
   };
 
-  const handleDeleteItem = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this branch?")) return;
-
-    try {
-      await deleteBranch(id);
-      toast.success("Branch deleted successfully");
-      fetchBranchesData();
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Failed to delete branch");
-    }
+  const handleDeleteItem = (id) => {
     setOpenMenu(null);
+    showConfirm({
+      title: "Delete Branch",
+      message: "Are you sure you want to delete this store branch location? This action cannot be undone.",
+      confirmText: "Delete Branch",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteBranch(id);
+          showSuccess("Product updated", "Branch deleted successfully");
+          fetchBranchesData();
+        } catch (err) {
+          console.error(err);
+          showError("Product couldn't be deleted", err.response?.data?.message || "Failed to delete branch");
+        }
+      },
+    });
   };
 
   const handleCancel = () => {

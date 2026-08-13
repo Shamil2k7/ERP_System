@@ -8,8 +8,10 @@ import CategoryTabs from "./components/CategoryTabs";
 import ProductGrid from "./components/ProductGrid";
 import OrderPanel from "./components/OrderPanel";
 import API_URL from "@/config/api";
+import { useAlert } from "@/context/AlertContext";
 
 export default function POSPage() {
+  const { showSuccess, showWarning, showError } = useAlert();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -182,19 +184,19 @@ export default function POSPage() {
       if (res.success) {
         setCustomers((prev) => [...prev, res.data]);
         setCustomer(res.data.id);
-        alert(`Customer ${name} added successfully!`);
+        showSuccess("Employee added", `Customer ${name} added successfully.`);
       } else {
-        alert(res.message || "Failed to add customer");
+        showError("Invalid form data", res.message || "Failed to add customer");
       }
     } catch (err) {
       console.error("Error adding customer:", err);
-      alert("Error adding customer: " + err.message);
+      showError("API/server failure", "Error adding customer: " + err.message);
     }
   };
 
   const handleCompleteSale = async () => {
     if (cart.length === 0) {
-      alert("Cart is empty!");
+      showWarning("Low stock", "Cart is currently empty. Please add items to proceed.");
       return;
     }
 
@@ -226,17 +228,17 @@ export default function POSPage() {
       }).then((r) => r.json());
 
       if (res.success) {
-        alert("Sale Completed and Saved Successfully!");
+        showSuccess("Payment recorded", "Sale Completed and Payment Recorded Successfully.");
         clearCart();
         setDiscountValue(0);
         setAmountReceived(0);
         setCustomer("");
       } else {
-        alert(res.message || "Failed to save sale");
+        showError("Payment failed", res.message || "Failed to save sale transaction.");
       }
     } catch (err) {
       console.error("Error completing sale:", err);
-      alert("Error completing sale: " + err.message);
+      showError("API/server failure", "Error completing sale: " + err.message);
     }
   };
 
@@ -246,7 +248,7 @@ export default function POSPage() {
 
   const handleSaveDraft = async (customMessage) => {
     if (cart.length === 0) {
-      alert("Cart is empty!");
+      showWarning("Low stock", "Cart is empty!");
       return;
     }
 
@@ -278,17 +280,17 @@ export default function POSPage() {
       }).then((r) => r.json());
 
       if (res.success) {
-        alert(customMessage || "Draft saved!");
+        showSuccess("Invoice generated", customMessage || "Draft sale order saved!");
         clearCart();
         setDiscountValue(0);
         setAmountReceived(0);
         setCustomer("");
       } else {
-        alert(res.message || "Failed to save draft");
+        showError("Database error", res.message || "Failed to save draft order");
       }
     } catch (err) {
       console.error("Error saving draft:", err);
-      alert("Error saving draft: " + err.message);
+      showError("API/server failure", "Error saving draft: " + err.message);
     }
   };
 

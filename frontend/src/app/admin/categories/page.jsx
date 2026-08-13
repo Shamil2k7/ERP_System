@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 
 import styles from "./viewCategories.module.css";
+import { useAlert } from "@/context/AlertContext";
 
 const initialForm = {
   name: "",
@@ -41,6 +42,8 @@ export default function CategoriesPage() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { showSuccess, showError, showConfirm } = useAlert();
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -51,7 +54,7 @@ export default function CategoriesPage() {
       const response = await axios.get("http://localhost:5000/api/categories");
       setCategories(response.data.data || []);
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to fetch categories");
+      showError("Error", error.response?.data?.message || "Failed to fetch categories");
     } finally {
       setIsLoading(false);
     }
@@ -150,18 +153,23 @@ export default function CategoriesPage() {
     setOpenMenu(null);
   };
 
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm("Are you sure you want to delete this category?");
-    if (!confirmed) return;
-
-    try {
-      await axios.delete(`http://localhost:5000/api/categories/${id}`);
-      toast.success("Category deleted successfully");
-      fetchCategories();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete category");
-    }
+  const handleDelete = (id) => {
     setOpenMenu(null);
+    showConfirm({
+      title: "Delete Category",
+      message: "Are you sure you want to delete this product category? Products in this category may be affected.",
+      confirmText: "Delete Category",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`http://localhost:5000/api/categories/${id}`);
+          showSuccess("Product updated", "Category deleted successfully");
+          fetchCategories();
+        } catch (error) {
+          showError("Product couldn't be deleted", error.response?.data?.message || "Failed to delete category");
+        }
+      },
+    });
   };
 
   const handleRefresh = () => {

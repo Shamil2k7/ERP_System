@@ -6,7 +6,6 @@ import {
   createSupplier,
   updateSupplier,
   deleteSupplier,
-  searchSuppliers,
 } from "@/services/supplierService";
 
 import {
@@ -24,15 +23,9 @@ import {
   FiEdit2,
   FiTrash2,
   FiPackage,
-  FiHeadphones,
-  FiShoppingBag,
-  FiWatch,
-  FiTool,
-  FiSmartphone,
-  FiBriefcase,
-  FiUserCheck,
 } from "react-icons/fi";
 
+import { useAlert } from "@/context/AlertContext";
 import styles from "./viewSuppliers.module.css";
 
 const emptyForm = {
@@ -52,8 +45,6 @@ export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
 
   const [search, setSearch] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -63,10 +54,11 @@ export default function SuppliersPage() {
   const [sortOrder, setSortOrder] = useState("default");
   const [filterStatus, setFilterStatus] = useState("All");
 
+  const { showSuccess, showWarning, showError, showConfirm } = useAlert();
+
   const fetchSupplierData = async () => {
     try {
       setLoading(true);
-      setErrorMsg("");
       const response = await getSuppliers();
       if (response && response.data) {
         setSuppliers(response.data);
@@ -75,7 +67,7 @@ export default function SuppliersPage() {
       }
     } catch (err) {
       console.error("Failed to fetch suppliers:", err);
-      setErrorMsg(err.response?.data?.message || err.message || "Failed to load suppliers.");
+      showError("API/server failure", err.response?.data?.message || err.message || "Failed to load suppliers.");
     } finally {
       setLoading(false);
     }
@@ -98,32 +90,29 @@ export default function SuppliersPage() {
     setForm(emptyForm);
     setShowAddForm(true);
     setOpenMenu(null);
-    setErrorMsg("");
   };
 
   const handleCancel = () => {
     setShowAddForm(false);
     setEditingId(null);
     setForm(emptyForm);
-    setErrorMsg("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.companyName.trim()) {
-      alert("Company Name is required.");
+      showWarning("Invalid form data", "Company Name is required.");
       return;
     }
 
     if (!form.phone.trim()) {
-      alert("Phone number is required.");
+      showWarning("Invalid form data", "Phone number is required.");
       return;
     }
 
     try {
       setSubmitting(true);
-      setErrorMsg("");
 
       const payload = {
         companyName: form.companyName.trim(),
@@ -140,18 +129,17 @@ export default function SuppliersPage() {
 
       if (editingId) {
         const res = await updateSupplier(editingId, payload);
-        setSuccessMsg(res.message || "Supplier updated successfully");
+        showSuccess("Product updated", res.message || "Supplier details updated successfully.");
       } else {
         const res = await createSupplier(payload);
-        setSuccessMsg(res.message || "Supplier created successfully");
+        showSuccess("Product created", res.message || "New supplier recorded successfully.");
       }
 
       await fetchSupplierData();
       handleCancel();
-      setTimeout(() => setSuccessMsg(""), 4000);
     } catch (err) {
       console.error("Supplier save error:", err);
-      setErrorMsg(err.response?.data?.message || err.message || "Failed to save supplier.");
+      showError("Database error", err.response?.data?.message || err.message || "Failed to save supplier.");
     } finally {
       setSubmitting(false);
     }
@@ -182,23 +170,24 @@ export default function SuppliersPage() {
     });
   };
 
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this supplier?"
-    );
-
-    if (!confirmed) return;
-
-    try {
-      setOpenMenu(null);
-      const res = await deleteSupplier(id);
-      setSuccessMsg(res.message || "Supplier deleted successfully.");
-      await fetchSupplierData();
-      setTimeout(() => setSuccessMsg(""), 4000);
-    } catch (err) {
-      console.error("Supplier delete error:", err);
-      setErrorMsg(err.response?.data?.message || err.message || "Failed to delete supplier.");
-    }
+  const handleDelete = (id) => {
+    setOpenMenu(null);
+    showConfirm({
+      title: "Delete Supplier",
+      message: "Are you sure you want to delete this supplier profile? This action cannot be undone.",
+      confirmText: "Delete Supplier",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          const res = await deleteSupplier(id);
+          showSuccess("Product updated", res.message || "Supplier deleted successfully.");
+          await fetchSupplierData();
+        } catch (err) {
+          console.error("Supplier delete error:", err);
+          showError("Product couldn't be deleted", err.response?.data?.message || err.message || "Failed to delete supplier.");
+        }
+      },
+    });
   };
 
   const handleSort = () => {
@@ -305,28 +294,12 @@ export default function SuppliersPage() {
 
   return (
     <div className={styles.page}>
-
-      {/* ================= NOTIFICATIONS ================= */}
-      {errorMsg && (
-        <div style={{ padding: "12px 16px", backgroundColor: "#fef2f2", color: "#dc2626", borderRadius: "8px", border: "1px solid #fecaca", marginBottom: "16px" }}>
-          {errorMsg}
-        </div>
-      )}
-
-      {successMsg && (
-        <div style={{ padding: "12px 16px", backgroundColor: "#f0fdf4", color: "#16a34a", borderRadius: "8px", border: "1px solid #bbf7d0", marginBottom: "16px" }}>
-          {successMsg}
-        </div>
-      )}
-
       {/* ================= HEADER ================= */}
 
       <div className={styles.header}>
-
         <h1>Suppliers</h1>
 
         <div className={styles.headerActions}>
-
           <button
             type="button"
             className={styles.secondaryButton}
@@ -354,23 +327,16 @@ export default function SuppliersPage() {
             <FiPlus size={17} />
             Add New
           </button>
-
         </div>
-
       </div>
 
       {/* ================= ADD / EDIT SUPPLIER FORM ================= */}
 
       {showAddForm && (
         <div className={styles.addCard}>
-
           <div className={styles.addHeader}>
-
             <div>
-              <h2>
-                {editingId ? "Edit Supplier" : "Add Supplier"}
-              </h2>
-
+              <h2>{editingId ? "Edit Supplier" : "Add Supplier"}</h2>
               <p>
                 {editingId
                   ? "Update supplier information"
@@ -385,18 +351,11 @@ export default function SuppliersPage() {
             >
               <FiX size={18} />
             </button>
-
           </div>
 
-          <form
-            className={styles.supplierForm}
-            onSubmit={handleSubmit}
-          >
-
+          <form className={styles.supplierForm} onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
-              <label htmlFor="companyName">
-                Company Name *
-              </label>
+              <label htmlFor="companyName">Company Name *</label>
               <input
                 id="companyName"
                 name="companyName"
@@ -408,9 +367,7 @@ export default function SuppliersPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="contactPerson">
-                Contact Person
-              </label>
+              <label htmlFor="contactPerson">Contact Person</label>
               <input
                 id="contactPerson"
                 name="contactPerson"
@@ -421,9 +378,7 @@ export default function SuppliersPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="email">
-                Email
-              </label>
+              <label htmlFor="email">Email</label>
               <input
                 id="email"
                 name="email"
@@ -435,9 +390,7 @@ export default function SuppliersPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="phone">
-                Phone *
-              </label>
+              <label htmlFor="phone">Phone *</label>
               <input
                 id="phone"
                 name="phone"
@@ -449,9 +402,7 @@ export default function SuppliersPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="country">
-                Country
-              </label>
+              <label htmlFor="country">Country</label>
               <input
                 id="country"
                 name="country"
@@ -462,9 +413,7 @@ export default function SuppliersPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="taxNumber">
-                Tax / GST Number
-              </label>
+              <label htmlFor="taxNumber">Tax / GST Number</label>
               <input
                 id="taxNumber"
                 name="taxNumber"
@@ -475,9 +424,7 @@ export default function SuppliersPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label htmlFor="status">
-                Status
-              </label>
+              <label htmlFor="status">Status</label>
               <select
                 id="status"
                 name="status"
@@ -490,7 +437,6 @@ export default function SuppliersPage() {
             </div>
 
             <div className={styles.formActions}>
-
               <button
                 type="button"
                 className={styles.cancelButton}
@@ -512,22 +458,17 @@ export default function SuppliersPage() {
                   ? "Update Supplier"
                   : "Save Supplier"}
               </button>
-
             </div>
-
           </form>
-
         </div>
       )}
 
       {/* ================= TABLE CARD ================= */}
 
       <div className={styles.tableCard}>
-
         {/* TOOLBAR */}
 
         <div className={styles.toolbar}>
-
           <div className={styles.searchBox}>
             <FiSearch size={18} />
             <input
@@ -539,7 +480,6 @@ export default function SuppliersPage() {
           </div>
 
           <div className={styles.toolbarRight}>
-
             {/* FILTER */}
             <div className={styles.dropdownWrapper}>
               <button
@@ -581,19 +521,14 @@ export default function SuppliersPage() {
             >
               <FiRefreshCw size={17} className={loading ? "animate-spin" : ""} />
             </button>
-
           </div>
-
         </div>
 
         {/* ================= TABLE ================= */}
 
         <div className={styles.tableWrapper}>
-
           <table className={styles.table}>
-
             <thead>
-
               <tr>
                 <th>ID</th>
                 <th>Supplier Company</th>
@@ -604,11 +539,9 @@ export default function SuppliersPage() {
                 <th>Status</th>
                 <th>Action</th>
               </tr>
-
             </thead>
 
             <tbody>
-
               {loading ? (
                 <tr>
                   <td colSpan="8" className={styles.empty}>
@@ -625,7 +558,6 @@ export default function SuppliersPage() {
 
                   return (
                     <tr key={supplier.id}>
-
                       <td className={styles.id}>
                         {supplier.id.substring(0, 8)}...
                       </td>
@@ -639,21 +571,10 @@ export default function SuppliersPage() {
                         </div>
                       </td>
 
-                      <td>
-                        {supplier.contactPerson || "—"}
-                      </td>
-
-                      <td>
-                        {supplier.email || "—"}
-                      </td>
-
-                      <td>
-                        {supplier.phone || "—"}
-                      </td>
-
-                      <td>
-                        {supplier.country || "—"}
-                      </td>
+                      <td>{supplier.contactPerson || "—"}</td>
+                      <td>{supplier.email || "—"}</td>
+                      <td>{supplier.phone || "—"}</td>
+                      <td>{supplier.country || "—"}</td>
 
                       <td>
                         <span
@@ -668,9 +589,7 @@ export default function SuppliersPage() {
                       </td>
 
                       <td>
-
                         <div className={styles.actionWrapper}>
-
                           <button
                             type="button"
                             className={styles.actionButton}
@@ -684,9 +603,7 @@ export default function SuppliersPage() {
                           </button>
 
                           {openMenu === supplier.id && (
-
                             <div className={styles.actionMenu}>
-
                               <button
                                 type="button"
                                 onClick={() => handleEdit(supplier)}
@@ -703,36 +620,24 @@ export default function SuppliersPage() {
                                 <FiTrash2 size={14} />
                                 Delete
                               </button>
-
                             </div>
-
                           )}
-
                         </div>
-
                       </td>
-
                     </tr>
                   );
                 })
               ) : (
-
                 <tr>
                   <td colSpan="8" className={styles.empty}>
                     No suppliers found
                   </td>
                 </tr>
-
               )}
-
             </tbody>
-
           </table>
-
         </div>
-
       </div>
-
     </div>
   );
 }

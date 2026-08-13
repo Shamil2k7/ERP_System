@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import StockTable from "../components/StockTable";
+import { useAlert } from "@/context/AlertContext";
 import "../warehouse.css";
 
 const stockData = [
@@ -72,6 +73,7 @@ const stockData = [
 ];
 
 export default function WarehouseStockPage() {
+  const { showWarning } = useAlert();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -120,7 +122,7 @@ export default function WarehouseStockPage() {
       <main className="warehouse-main-content">
         {/* Action Toolbar */}
         <div className="warehouse-toolbar">
-          <button className="btn-add-action" onClick={() => alert("Add New Stock Item Modal")}>
+          <button className="btn-add-action" onClick={() => showWarning("Unsaved changes", "Add New Stock Item form module opening...")}>
             Add New Product <span>+</span>
           </button>
 

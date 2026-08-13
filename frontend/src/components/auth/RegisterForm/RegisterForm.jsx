@@ -11,9 +11,13 @@ import {
   FiPhone,
   FiBriefcase,
 } from "react-icons/fi";
+import { useSettings } from "@/context/SettingsContext";
+import { useAlert } from "@/context/AlertContext";
 import styles from "./RegisterForm.module.css";
 
 export default function RegisterForm() {
+  const { settings, logoUrl } = useSettings();
+  const { showSuccess } = useAlert();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
@@ -100,7 +104,7 @@ export default function RegisterForm() {
 
       if (!signupRes.ok) throw new Error(signupData.message || "Signup failed");
 
-      alert("Registration Successful!");
+      showSuccess("Employee added", "Account created successfully! Redirecting to login...");
       window.location.href = "/auth/login";
     } catch (err) {
       setError(err.message);

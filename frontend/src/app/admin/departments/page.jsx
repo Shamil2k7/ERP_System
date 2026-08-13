@@ -19,6 +19,7 @@ import {
 } from "react-icons/fi";
 
 import styles from "./departments.module.css";
+import { useAlert } from "@/context/AlertContext";
 
 export default function DepartmentsPage() {
   const [departments, setDepartments] = useState([]);
@@ -28,6 +29,7 @@ export default function DepartmentsPage() {
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
+  const { showSuccess, showWarning, showError, showConfirm } = useAlert();
   const [editingId, setEditingId] = useState(null);
 
   const [sortOrder, setSortOrder] = useState("default");
@@ -113,12 +115,12 @@ export default function DepartmentsPage() {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert("Please enter department name");
+      showWarning("Invalid form data", "Please enter department name");
       return;
     }
 
     if (!formData.code.trim()) {
-      alert("Please enter department code");
+      showWarning("Invalid form data", "Please enter department code");
       return;
     }
 
@@ -133,8 +135,10 @@ export default function DepartmentsPage() {
     try {
       if (editingId) {
         await axios.put(`http://localhost:5000/api/departments/${editingId}`, payload);
+        showSuccess("Product updated", "Department updated successfully");
       } else {
         await axios.post("http://localhost:5000/api/departments", payload);
+        showSuccess("Product created", "Department created successfully");
       }
 
       fetchDepartments();
@@ -150,7 +154,7 @@ export default function DepartmentsPage() {
       setShowAdd(false);
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Something went wrong");
+      showError("Invalid form data", err.response?.data?.message || "Failed to save department");
     }
   };
 
@@ -158,18 +162,24 @@ export default function DepartmentsPage() {
      DELETE
   ========================= */
 
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm("Are you sure you want to delete this department?");
-    if (!confirmed) return;
-
-    try {
-      await axios.delete(`http://localhost:5000/api/departments/${id}`);
-      fetchDepartments();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete department");
-    }
+  const handleDelete = (id) => {
     setOpenMenu(null);
+    showConfirm({
+      title: "Delete Department",
+      message: "Are you sure you want to delete this department? Employees assigned to this department may be affected.",
+      confirmText: "Delete Department",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`http://localhost:5000/api/departments/${id}`);
+          showSuccess("Product updated", "Department deleted successfully");
+          fetchDepartments();
+        } catch (err) {
+          console.error(err);
+          showError("Product couldn't be deleted", err.response?.data?.message || "Failed to delete department");
+        }
+      },
+    });
   };
 
   /* =========================

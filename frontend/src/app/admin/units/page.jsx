@@ -16,10 +16,10 @@ import {
   FiTrash2,
 } from "react-icons/fi";
 import { Loader2 } from "lucide-react";
-import toast from "react-hot-toast";
 import axios from "axios";
 
 import styles from "./viewUnits.module.css";
+import { useAlert } from "@/context/AlertContext";
 
 const emptyForm = {
   name: "",
@@ -29,31 +29,35 @@ const emptyForm = {
 
 export default function UnitsPage() {
   const [units, setUnits] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [search, setSearch] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [formData, setFormData] = useState(emptyForm);
+  const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [openMenu, setOpenMenu] = useState(null);
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOrder, setSortOrder] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [itemsPerPage] = useState(10);
+
+  const { showSuccess, showError, showConfirm } = useAlert();
 
   useEffect(() => {
     fetchUnits();
   }, []);
 
   const fetchUnits = async () => {
-    setIsLoading(true);
     try {
-      const response = await axios.get("http://localhost:5000/api/units");
-      setUnits(response.data.data || []);
+      setLoading(true);
+      const res = await axios.get("http://localhost:5000/api/units");
+      if (res.data && res.data.data) {
+        setUnits(res.data.data);
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to fetch units");
+      console.error("Error fetching units:", error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -81,7 +85,7 @@ export default function UnitsPage() {
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setForm((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -89,66 +93,71 @@ export default function UnitsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.code.trim()) return;
+    if (!form.name.trim() || !form.code.trim()) return;
 
-    setIsSubmitting(true);
+    setSubmitting(true);
     try {
       const payload = {
-        name: formData.name.trim(),
-        code: formData.code.trim(),
-        status: formData.status.toUpperCase(),
+        name: form.name.trim(),
+        code: form.code.trim(),
+        status: form.status.toUpperCase(),
       };
 
       if (editingId) {
         await axios.put(`http://localhost:5000/api/units/${editingId}`, payload);
-        toast.success("Unit updated successfully");
+        showSuccess("Product updated", "Unit updated successfully");
       } else {
         await axios.post("http://localhost:5000/api/units", payload);
-        toast.success("Unit created successfully");
+        showSuccess("Product created", "Unit created successfully");
       }
       fetchUnits();
       handleCancel();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to save unit");
+      showError("Invalid form data", error.response?.data?.message || "Failed to save unit");
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
   const handleAddNew = () => {
-    setFormData(emptyForm);
+    setForm(emptyForm);
     setEditingId(null);
     setShowAddForm(true);
     setOpenMenu(null);
   };
 
   const handleEdit = (unit) => {
-    setFormData({
-      name: unit.name,
-      code: unit.code,
-      status: unit.status,
+    setForm({
+      name: unit.name || "",
+      code: unit.code || "",
+      status: unit.status || "ACTIVE",
     });
     setEditingId(unit.id);
     setShowAddForm(true);
     setOpenMenu(null);
   };
 
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm("Are you sure you want to delete this unit?");
-    if (!confirmed) return;
-
-    try {
-      await axios.delete(`http://localhost:5000/api/units/${id}`);
-      toast.success("Unit deleted successfully");
-      fetchUnits();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete unit");
-    }
+  const handleDelete = (id) => {
     setOpenMenu(null);
+    showConfirm({
+      title: "Delete Unit",
+      message: "Are you sure you want to delete this measurement unit?",
+      confirmText: "Delete Unit",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`http://localhost:5000/api/units/${id}`);
+          showSuccess("Product updated", "Unit deleted successfully");
+          fetchUnits();
+        } catch (error) {
+          showError("Product couldn't be deleted", error.response?.data?.message || "Failed to delete unit");
+        }
+      },
+    });
   };
 
   const handleCancel = () => {
-    setFormData(emptyForm);
+    setForm(emptyForm);
     setEditingId(null);
     setShowAddForm(false);
   };
@@ -158,10 +167,6 @@ export default function UnitsPage() {
   };
 
   const handleRefresh = () => {
-    setSearch("");
-    setCurrentPage(1);
-    setSortOrder("asc");
-    setOpenMenu(null);
     fetchUnits();
   };
 
@@ -170,43 +175,35 @@ export default function UnitsPage() {
   };
 
   const handleExport = () => {
-    const headers = ["Unit", "Short Name", "No of Products", "Status"];
-    const rows = units.map((unit) => [
-      unit.name,
-      unit.code,
-      unit.products?.length || 0,
-      unit.status,
-    ]);
-    const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      ["Unit Name,Short Name,Products Count,Status"]
+        .concat(
+          filteredUnits.map(
+            (u) =>
+              `"${u.name}","${u.code}","${u.products?.length || 0}","${u.status}"`
+          )
+        )
+        .join("\n");
+    const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
-    link.href = url;
-    link.download = "units.csv";
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "units_export.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  const handlePageChange = (page) => {
-    if (page < 1 || page > totalPages) return;
-    setCurrentPage(page);
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <div>
-          <h1>Units</h1>
-        </div>
+        <h1>Units</h1>
         <div className={styles.headerActions}>
           <button type="button" className={styles.secondaryButton} onClick={handlePrint}>
             <FiPrinter size={15} /> Print
           </button>
           <button type="button" className={styles.secondaryButton} onClick={handleExport}>
-            <FiDownload size={15} /> Export
-            <FiChevronDown size={14} />
+            <FiDownload size={15} /> Export <FiChevronDown size={14} />
           </button>
           <button type="button" className={styles.addButton} onClick={handleAddNew}>
             <FiPlus size={17} /> Add New
@@ -218,8 +215,8 @@ export default function UnitsPage() {
         <div className={styles.addCard}>
           <div className={styles.addHeader}>
             <div>
-              <h2>{editingId ? "Edit Unit" : "Add New Unit"}</h2>
-              <p>{editingId ? "Update unit information" : "Create a new unit for your products"}</p>
+              <h2>{editingId ? "Edit Unit" : "Add Unit"}</h2>
+              <p>{editingId ? "Update existing unit information" : "Create a new measurement unit"}</p>
             </div>
             <button type="button" className={styles.closeButton} onClick={handleCancel}>
               <FiX size={18} />
@@ -227,11 +224,11 @@ export default function UnitsPage() {
           </div>
           <form className={styles.unitForm} onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
-              <label htmlFor="name">Unit Name <span>*</span></label>
+              <label htmlFor="unitName">Unit Name <span>*</span></label>
               <input
-                id="name"
+                id="unitName"
                 name="name"
-                value={formData.name}
+                value={form.name}
                 onChange={handleFormChange}
                 placeholder="Example: Kilogram"
                 required
@@ -242,7 +239,7 @@ export default function UnitsPage() {
               <input
                 id="code"
                 name="code"
-                value={formData.code}
+                value={form.code}
                 onChange={handleFormChange}
                 placeholder="Example: kg"
                 required
@@ -250,15 +247,15 @@ export default function UnitsPage() {
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="status">Status</label>
-              <select id="status" name="status" value={formData.status} onChange={handleFormChange}>
+              <select id="status" name="status" value={form.status} onChange={handleFormChange}>
                 <option value="ACTIVE">Active</option>
                 <option value="INACTIVE">Inactive</option>
               </select>
             </div>
             <div className={styles.formActions}>
               <button type="button" className={styles.cancelButton} onClick={handleCancel}>Cancel</button>
-              <button type="submit" className={styles.saveButton} disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 size={16} className={styles.spinner} /> : <FiSave size={16} />}
+              <button type="submit" className={styles.saveButton} disabled={submitting}>
+                {submitting ? <Loader2 size={16} className={styles.spinner} /> : <FiSave size={16} />}
                 {editingId ? "Update Unit" : "Save Unit"}
               </button>
             </div>
@@ -302,7 +299,7 @@ export default function UnitsPage() {
               </tr>
             </thead>
             <tbody>
-              {isLoading ? (
+              {loading ? (
                 <tr>
                   <td colSpan="5" className={styles.empty}>
                     <Loader2 size={24} className={styles.spinner} />
@@ -344,47 +341,46 @@ export default function UnitsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className={styles.empty}>No units found.</td>
+                  <td colSpan="5" className={styles.empty}>
+                    No units found
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
 
-        <div className={styles.pagination}>
-          <div className={styles.showing}>
-            Showing
-            <select
-              value={itemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-            / Pages
-          </div>
-          <div className={styles.pages}>
-            <button type="button" disabled={currentPage === 1} onClick={() => handlePageChange(currentPage - 1)}>‹</button>
-            {Array.from({ length: totalPages || 1 }, (_, index) => index + 1)
-              .slice(0, 5)
-              .map((page) => (
+        {totalPages > 1 && (
+          <div className={styles.pagination}>
+            <span>Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredUnits.length)} of {filteredUnits.length} entries</span>
+            <div className={styles.paginationButtons}>
+              <button
+                type="button"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              >
+                Previous
+              </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                 <button
-                  type="button"
                   key={page}
+                  type="button"
                   className={currentPage === page ? styles.activePage : ""}
-                  onClick={() => handlePageChange(page)}
+                  onClick={() => setCurrentPage(page)}
                 >
                   {page}
                 </button>
               ))}
-            <button type="button" disabled={currentPage === totalPages || totalPages === 0} onClick={() => handlePageChange(currentPage + 1)}>›</button>
+              <button
+                type="button"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              >
+                Next
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -22,6 +22,7 @@ import {
 } from "react-icons/fi";
 
 import styles from "./products.module.css";
+import { useAlert } from "@/context/AlertContext";
 
 export default function ProductsPage() {
   const [productsData, setProductsData] = useState([]);
@@ -31,6 +32,7 @@ export default function ProductsPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [sortBy, setSortBy] = useState("Latest");
   const [openMenu, setOpenMenu] = useState(null);
+  const { showSuccess, showError, showConfirm } = useAlert();
 
   useEffect(() => {
     fetchProducts();
@@ -44,25 +46,30 @@ export default function ProductsPage() {
         setProductsData(res.data.data);
       }
     } catch (error) {
-      toast.error('Failed to fetch products');
-      console.error(error);
+      console.error('Error fetching products:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
-    
-    try {
-      await axios.delete(`http://localhost:5000/api/products/${id}`);
-      toast.success('Product deleted successfully');
-      setOpenMenu(null);
-      fetchProducts();
-    } catch (error) {
-      toast.error('Failed to delete product');
-      console.error(error);
-    }
+  const handleDelete = (id) => {
+    setOpenMenu(null);
+    showConfirm({
+      title: "Delete Product",
+      message: "Are you sure you want to delete this product from stock inventory? This action cannot be undone.",
+      confirmText: "Delete Product",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`http://localhost:5000/api/products/${id}`);
+          showSuccess("Product updated", "Product deleted successfully");
+          fetchProducts();
+        } catch (error) {
+          showError("Product couldn't be deleted", "Failed to delete product. Active dependency exists.");
+          console.error(error);
+        }
+      },
+    });
   };
 
   const filteredProducts = useMemo(() => {

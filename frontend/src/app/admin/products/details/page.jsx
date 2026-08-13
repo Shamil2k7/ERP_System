@@ -19,8 +19,10 @@ import {
 } from "react-icons/fi";
 
 import styles from "./details.module.css";
+import { useAlert } from "@/context/AlertContext";
 
 export default function ProductDetailsPage({ params }) {
+  const { showSuccess, showConfirm } = useAlert();
   const [product] = useState({
     id: params.id,
     name: "Samsung Galaxy S24 Ultra",
@@ -116,13 +118,15 @@ export default function ProductDetailsPage({ params }) {
     (product.currentStock / product.maximumStock) * 100;
 
   const handleDelete = () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
-
-    if (confirmed) {
-      console.log("Delete product:", product.id);
-    }
+    showConfirm({
+      title: "Delete Product",
+      message: `Are you sure you want to delete product "${product.name}"? This action cannot be undone.`,
+      confirmText: "Delete Product",
+      type: "danger",
+      onConfirm: async () => {
+        showSuccess("Product updated", "Product record deleted successfully");
+      },
+    });
   };
 
   const handlePrint = () => {

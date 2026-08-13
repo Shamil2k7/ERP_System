@@ -2,118 +2,103 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
+import Link from "next/link";
+import { FiArrowLeft, FiX, FiRefreshCw } from "react-icons/fi";
 import CustomerForm from "../../components/CustomerForm";
+import { getCustomerById, updateCustomer } from "@/services/customerService";
+import { useAlert } from "@/context/AlertContext";
+import styles from "../../customers.module.css";
 
 export default function EditCustomerPage() {
-
   const { id } = useParams();
-
   const router = useRouter();
+  const { showSuccess, showError } = useAlert();
 
   const [loading, setLoading] = useState(true);
-
   const [customer, setCustomer] = useState(null);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-
-    // Replace this with your API call later
-    // GET /api/customers/:id
-
-    const dummyCustomer = {
-
-      id,
-
-      firstName: "Rahul",
-
-      lastName: "Kumar",
-
-      email: "rahul@gmail.com",
-
-      phone: "9876543210",
-
-      gender: "Male",
-
-      dob: "1998-06-12",
-
-      city: "Kochi",
-
-      state: "Kerala",
-
-      country: "India",
-
-      address: "MG Road",
-
-      zipCode: "682001",
-
-      customerType: "Regular",
-
-      gstNumber: "32ABCDE1234F1Z5",
-
-      status: "Active"
-
-    };
-
-    setCustomer(dummyCustomer);
-
-    setLoading(false);
-
+    async function loadCustomer() {
+      if (!id) return;
+      try {
+        setLoading(true);
+        setErrorMsg("");
+        const res = await getCustomerById(id);
+        if (res && res.data) {
+          setCustomer(res.data);
+        } else if (res) {
+          setCustomer(res);
+        }
+      } catch (err) {
+        console.error("Failed to load customer for editing:", err);
+        setErrorMsg(err.response?.data?.message || err.message || "Failed to load customer details.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadCustomer();
   }, [id]);
 
-
-
-  const handleUpdate = (updatedCustomer) => {
-
-    console.log("Updated Customer");
-
-    console.log(updatedCustomer);
-
-    // PUT /api/customers/:id
-
-    alert("Customer Updated Successfully");
-
-    router.push("/customers");
-
+  const handleUpdate = async (updatedData) => {
+    try {
+      setErrorMsg("");
+      const res = await updateCustomer(id, updatedData);
+      showSuccess("Product updated", res.message || "Customer details updated successfully.");
+      router.push("/customers");
+    } catch (err) {
+      console.error("Update customer error:", err);
+      showError("Invalid form data", err.response?.data?.message || err.message || "Failed to update customer.");
+    }
   };
 
-
-
   if (loading) {
-
     return (
-
-      <div className="p-8">
-
-        Loading...
-
+      <div className={styles.page}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "300px", gap: "10px", color: "#64748b" }}>
+          <FiRefreshCw className="animate-spin" size={20} />
+          <span>Loading customer details...</span>
+        </div>
       </div>
-
     );
-
   }
 
-
-
   return (
+    <div className={styles.page}>
+      {errorMsg && (
+        <div style={{ padding: "12px 16px", backgroundColor: "#fef2f2", color: "#dc2626", borderRadius: "8px", border: "1px solid #fecaca", marginBottom: "16px" }}>
+          {errorMsg}
+        </div>
+      )}
 
-    <div className="max-w-5xl mx-auto p-6">
+      <div className={styles.addCard} style={{ maxWidth: "1000px", margin: "0 auto" }}>
+        <div className={styles.addHeader}>
+          <div style={{ display: "flex", items: "center", gap: "12px" }}>
+            <Link href="/customers" className={styles.closeButton} title="Back to Customers">
+              <FiArrowLeft size={16} />
+            </Link>
+            <div>
+              <h2>Edit Customer</h2>
+              <p>Update customer details for #{id.substring(0, 8)}...</p>
+            </div>
+          </div>
 
-      <h1 className="text-3xl font-bold mb-6">
+          <button
+            type="button"
+            className={styles.closeButton}
+            onClick={() => router.push("/customers")}
+            title="Cancel"
+          >
+            <FiX size={18} />
+          </button>
+        </div>
 
-        Edit Customer
-
-      </h1>
-
-      <CustomerForm
-
-        initialData={customer}
-
-        onSubmit={handleUpdate}
-
-      />
-
+        <CustomerForm
+          initialData={customer}
+          onSubmit={handleUpdate}
+          onCancel={() => router.push("/customers")}
+        />
+      </div>
     </div>
-
   );
-
 }

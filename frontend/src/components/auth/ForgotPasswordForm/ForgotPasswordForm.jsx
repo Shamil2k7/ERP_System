@@ -4,8 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import styles from "./ForgotPasswordForm.module.css";
+import { useAlert } from "@/context/AlertContext";
 
 export default function ForgotPasswordForm() {
+  const { showSuccess } = useAlert();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -87,7 +89,7 @@ export default function ForgotPasswordForm() {
       
       if (!response.ok) throw new Error(data.message || "Failed to reset password");
 
-      alert("Password reset successfully!");
+      showSuccess("Employee added", "Password reset successfully! Redirecting to login...");
       window.location.href = "/auth/login";
     } catch (err) {
       setError(err.message);

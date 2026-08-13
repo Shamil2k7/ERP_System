@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 
 import styles from "./viewBrand.module.css";
+import { useAlert } from "@/context/AlertContext";
 
 const API_URL = "http://localhost:5000/api/brands";
 
@@ -42,7 +43,11 @@ export default function BrandsPage() {
 
   const [openMenu, setOpenMenu] = useState(null);
 
+  const [filterStatus, setFilterStatus] = useState("All");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { showSuccess, showError, showConfirm } = useAlert();
 
   // ==============================
   // FETCH BRANDS
@@ -205,30 +210,24 @@ export default function BrandsPage() {
   // DELETE
   // ==============================
 
-  const handleDelete = async (id) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this brand?"
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await axios.delete(`${API_URL}/${id}`);
-
-      toast.success("Brand deleted successfully");
-
-      await fetchBrands();
-    } catch (error) {
-      console.error("Delete brand error:", error);
-
-      toast.error(
-        error.response?.data?.message || "Failed to delete brand"
-      );
-    } finally {
-      setOpenMenu(null);
-    }
+  const handleDelete = (id) => {
+    setOpenMenu(null);
+    showConfirm({
+      title: "Delete Brand",
+      message: "Are you sure you want to delete this brand? Products linked to this brand may be unassigned.",
+      confirmText: "Delete Brand",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`${API_URL}/${id}`);
+          showSuccess("Product updated", "Brand deleted successfully");
+          await fetchBrands();
+        } catch (error) {
+          console.error("Delete brand error:", error);
+          showError("Product couldn't be deleted", error.response?.data?.message || "Failed to delete brand");
+        }
+      },
+    });
   };
 
   // ==============================

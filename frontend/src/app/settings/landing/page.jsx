@@ -8,9 +8,11 @@ import {
 } from "@/services/landingAdmin.service";
 
 import styles from "./landing.module.css";
+import { useAlert } from "@/context/AlertContext";
 
 export default function LandingAdminPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const { showSuccess, showError } = useAlert();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -262,8 +264,7 @@ export default function LandingAdminPage() {
       // ============================
 
       await updateLandingPage(formData);
-
-      alert("Landing page updated successfully.");
+      showSuccess("Product updated", "Landing page settings updated successfully.");
 
       // Reload latest database data
       await loadLanding();
@@ -279,8 +280,7 @@ export default function LandingAdminPage() {
       });
     } catch (error) {
       console.error("Update landing error:", error);
-
-      alert(error.message || "Update failed.");
+      showError("Invalid form data", error.message || "Landing page update failed.");
     } finally {
       setSaving(false);
     }
