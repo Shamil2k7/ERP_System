@@ -6,7 +6,7 @@ import prisma from "../../config/prisma.js";
 const getAllEmployees = async () => {
   return await prisma.user.findMany({
     include: {
-      role: true,
+      roleRef: true,
       branch: true,
     },
     orderBy: {
@@ -24,7 +24,7 @@ const getEmployeeById = async (id) => {
       id,
     },
     include: {
-      role: true,
+      roleRef: true,
       branch: true,
     },
   });
@@ -98,7 +98,7 @@ const createEmployee = async (data) => {
   return await prisma.user.create({
     data,
     include: {
-      role: true,
+      roleRef: true,
       branch: true,
     },
   });
@@ -114,7 +114,7 @@ const updateEmployee = async (id, data) => {
     },
     data,
     include: {
-      role: true,
+      roleRef: true,
       branch: true,
     },
   });
@@ -131,6 +131,17 @@ const deleteEmployee = async (id) => {
   });
 };
 
+/**
+ * Create role in database
+ */
+const createRoleInRepo = async (roleName) => {
+  return await prisma.role.create({
+    data: {
+      name: roleName.trim(),
+    },
+  });
+};
+
 export {
   getAllEmployees,
   getEmployeeById,
@@ -139,7 +150,8 @@ export {
   findEmployeeByPhone,
   findRoleById,
   findRoleByName,
+  createRoleInRepo,
   createEmployee,
   updateEmployee,
   deleteEmployee,
-};
+};

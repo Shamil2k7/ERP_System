@@ -78,9 +78,11 @@ model User {
   verificationToken   String?
   verificationExpires DateTime?
 
+  role String?
+
   roleId String?
 
-  role Role? @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  roleRef Role? @relation(fields: [roleId], references: [id], onDelete: SetNull)
 
   branchId String?
 
