@@ -19,7 +19,11 @@ export const getAllProducts = async () => {
       brand: true,
       unit: true,
       barcodes: true,
-      inventories: true,
+      inventories: {
+        include: {
+          warehouse: true,
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -37,7 +41,11 @@ export const getProductById = async (id) => {
       brand: true,
      unit: true,
       barcodes: true,
-      inventories: true,
+      inventories: {
+        include: {
+          warehouse: true,
+        },
+      },
     },
   });
 };

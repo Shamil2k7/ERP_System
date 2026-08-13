@@ -184,7 +184,7 @@ export default function ProductsPage() {
       product.sku || 'N/A',
       product.category?.name || 'N/A',
       product.brand?.name || 'N/A',
-      product.baseUnit || 'N/A',
+      product.unit?.name || 'N/A',
       product.inventories?.[0]?.quantity || 0,
       getProductStatus(product),
       product.sellingPrice || 0,
@@ -549,7 +549,7 @@ export default function ProductsPage() {
                     </td>
 
                     <td>
-                      {product.baseUnit || 'PCS'}
+                      {product.unit?.name || 'N/A'}
                     </td>
 
                     <td>
