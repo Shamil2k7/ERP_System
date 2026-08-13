@@ -20,6 +20,7 @@ import {
 } from "react-icons/fi";
 
 import styles from "./designations.module.css";
+import { useAlert } from "@/context/AlertContext";
 import {
   getDesignations,
   createDesignation,
@@ -50,6 +51,8 @@ export default function DesignationsPage() {
   const [openMenu, setOpenMenu] = useState(null);
   const [sortAsc, setSortAsc] = useState(true);
   const [filterStatus, setFilterStatus] = useState("All");
+
+  const { showSuccess, showError, showConfirm } = useAlert();
 
   // Form states
   const [designationForm, setDesignationForm] = useState({
@@ -218,29 +221,30 @@ export default function DesignationsPage() {
   };
 
   // Delete Handler
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
     const isDesig = activeTab === "designations";
-    const confirmed = window.confirm(
-      `Are you sure you want to delete this ${isDesig ? "designation" : "role"}?`
-    );
-
-    if (!confirmed) return;
-
-    try {
-      if (isDesig) {
-        await deleteDesignation(id);
-        setDesignations((prev) => prev.filter((item) => item.id !== id));
-        toast.success("Designation deleted successfully");
-      } else {
-        await deleteRole(id);
-        setRoles((prev) => prev.filter((r) => r.id !== id));
-        toast.success("Role deleted successfully");
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to delete item");
-    } finally {
-      setOpenMenu(null);
-    }
+    setOpenMenu(null);
+    showConfirm({
+      title: `Delete ${isDesig ? "Designation" : "Role"}`,
+      message: `Are you sure you want to delete this ${isDesig ? "designation" : "role"}? This action cannot be undone.`,
+      confirmText: `Delete ${isDesig ? "Designation" : "Role"}`,
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          if (isDesig) {
+            await deleteDesignation(id);
+            setDesignations((prev) => prev.filter((item) => item.id !== id));
+            showSuccess("Product updated", "Designation deleted successfully");
+          } else {
+            await deleteRole(id);
+            setRoles((prev) => prev.filter((r) => r.id !== id));
+            showSuccess("Product updated", "Role deleted successfully");
+          }
+        } catch (error) {
+          showError("Product couldn't be deleted", error.response?.data?.message || "Failed to delete item");
+        }
+      },
+    });
   };
 
   // Edit Trigger

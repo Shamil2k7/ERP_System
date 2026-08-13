@@ -1,137 +1,109 @@
 "use client";
 
 import Link from "next/link";
+import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
+import styles from "../customers.module.css";
 
-export default function CustomerTable({ customers = [] }) {
+export default function CustomerTable({ customers = [], onDelete, onEdit }) {
   if (!customers.length) {
     return (
-      <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
-        No customers found.
+      <div className={styles.tableWrapper}>
+        <table className={styles.table}>
+          <tbody>
+            <tr>
+              <td colSpan="8" className={styles.empty}>
+                No customers found.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto bg-white rounded-lg shadow">
-
-      <table className="min-w-full">
-
-        <thead className="bg-gray-100 border-b">
-
+    <div className={styles.tableWrapper}>
+      <table className={styles.table}>
+        <thead>
           <tr>
-
-            <th className="px-4 py-3 text-left">#</th>
-
-            <th className="px-4 py-3 text-left">
-              Customer Name
-            </th>
-
-            <th className="px-4 py-3 text-left">
-              Phone
-            </th>
-
-            <th className="px-4 py-3 text-left">
-              Email
-            </th>
-
-            <th className="px-4 py-3 text-left">
-              Loyalty ID
-            </th>
-
-            <th className="px-4 py-3 text-right">
-              Credit Limit
-            </th>
-
-            <th className="px-4 py-3 text-right">
-              Current Balance
-            </th>
-
-            <th className="px-4 py-3 text-center">
-              Actions
-            </th>
-
+            <th>#</th>
+            <th>Customer Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Loyalty ID</th>
+            <th style={{ textAlign: "right" }}>Credit Limit</th>
+            <th style={{ textAlign: "right" }}>Balance</th>
+            <th style={{ textAlign: "center" }}>Actions</th>
           </tr>
-
         </thead>
-
         <tbody>
+          {customers.map((customer, index) => {
+            const customerName =
+              customer.name ||
+              `${customer.firstName || ""} ${customer.lastName || ""}`.trim() ||
+              "Customer";
+            const initials = customerName.substring(0, 2).toUpperCase();
 
-          {customers.map((customer, index) => (
+            return (
+              <tr key={customer.id}>
+                <td className={styles.id}>{index + 1}</td>
+                <td>
+                  <div className={styles.customerCell}>
+                    <div className={styles.customerAvatar}>{initials}</div>
+                    <strong>{customerName}</strong>
+                  </div>
+                </td>
+                <td>{customer.phone || "—"}</td>
+                <td>{customer.email || "—"}</td>
+                <td>
+                  {customer.loyaltyId ? (
+                    <span className={styles.loyaltyBadge}>{customer.loyaltyId}</span>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td style={{ textAlign: "right" }}>
+                  ${Number(customer.creditLimit || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </td>
+                <td style={{ textAlign: "right", fontWeight: 700, color: "#17304b" }}>
+                  ${Number(customer.currentBalance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </td>
+                <td>
+                  <div className={styles.actionWrapper}>
+                    <div className={styles.actionGroup}>
+                      <Link
+                        href={`/customers/${customer.id}`}
+                        className={`${styles.actionBtn} ${styles.viewBtn}`}
+                        title="View Details"
+                      >
+                        <FiEye size={15} />
+                      </Link>
 
-            <tr
-              key={customer.id}
-              className="border-b hover:bg-gray-50"
-            >
+                      <button
+                        type="button"
+                        className={`${styles.actionBtn} ${styles.editBtn}`}
+                        onClick={() => onEdit && onEdit(customer)}
+                        title="Edit Customer"
+                      >
+                        <FiEdit2 size={15} />
+                      </button>
 
-              <td className="px-4 py-3">
-                {index + 1}
-              </td>
-
-              <td className="px-4 py-3 font-medium">
-                {customer.name}
-              </td>
-
-              <td className="px-4 py-3">
-                {customer.phone}
-              </td>
-
-              <td className="px-4 py-3">
-                {customer.email || "-"}
-              </td>
-
-              <td className="px-4 py-3">
-                {customer.loyaltyId || "-"}
-              </td>
-
-              <td className="px-4 py-3 text-right">
-                ₹{Number(customer.creditLimit || 0).toFixed(2)}
-              </td>
-
-              <td className="px-4 py-3 text-right">
-                ₹{Number(customer.currentBalance || 0).toFixed(2)}
-              </td>
-
-              <td className="px-4 py-3">
-
-                <div className="flex justify-center gap-2">
-
-                  <Link
-                    href={`/customers/${customer.id}`}
-                    className="px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
-                  >
-                    View
-                  </Link>
-
-                  <Link
-                    href={`/customers/edit/${customer.id}`}
-                    className="px-3 py-1 rounded bg-yellow-500 text-white hover:bg-yellow-600"
-                  >
-                    Edit
-                  </Link>
-
-                  <button
-                    onClick={() =>
-                      alert(
-                        `Delete customer: ${customer.name}`
-                      )
-                    }
-                    className="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-
-                </div>
-
-              </td>
-
-            </tr>
-
-          ))}
-
+                      <button
+                        type="button"
+                        className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                        onClick={() => onDelete && onDelete(customer)}
+                        title="Delete Customer"
+                      >
+                        <FiTrash2 size={15} />
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
-
       </table>
-
     </div>
   );
 }

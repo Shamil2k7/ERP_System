@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAlert } from "@/context/AlertContext";
 
 const warehouseList = [
   "Main Warehouse",
@@ -38,6 +39,7 @@ const initialHistory = [
 ];
 
 export default function TransferForm() {
+  const { showSuccess, showWarning } = useAlert();
   const [form, setForm] = useState({
     fromWarehouse: "",
     toWarehouse: "",
@@ -65,12 +67,12 @@ export default function TransferForm() {
       !form.product ||
       !form.quantity
     ) {
-      alert("Please fill all required fields.");
+      showWarning("Invalid form data", "Please fill all required stock transfer fields.");
       return;
     }
 
     if (form.fromWarehouse === form.toWarehouse) {
-      alert("From and To warehouse cannot be the same.");
+      showWarning("Invalid form data", "Source and Destination warehouse locations cannot be identical.");
       return;
     }
 
@@ -83,7 +85,7 @@ export default function TransferForm() {
 
     setHistory((prev) => [newTransfer, ...prev]);
 
-    alert("Stock transferred successfully.");
+    showSuccess("Approve stock transfer", "Stock transfer approved and executed successfully.");
 
     setForm({
       fromWarehouse: "",

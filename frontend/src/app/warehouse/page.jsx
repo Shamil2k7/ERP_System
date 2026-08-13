@@ -8,18 +8,18 @@ import {
   deleteWarehouse,
 } from "@/services/warehouseService";
 import WarehouseCard from "./components/WarehouseCard";
+import { useAlert } from "@/context/AlertContext";
 
 import "./warehouse.css";
 
 export default function WarehousePage() {
   const [warehouses, setWarehouses] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
-
   const [error, setError] = useState("");
-
   const [search, setSearch] = useState("");
+
+  const { showSuccess, showWarning, showError, showConfirm } = useAlert();
 
   // Stats computation
   const totalWarehouses = warehouses.length;
@@ -31,27 +31,11 @@ export default function WarehousePage() {
     try {
       setLoading(true);
       setError("");
-
       const response = await getWarehouses();
-
-      /*
-        Supports:
-
-        {
-          data: [...]
-        }
-
-        OR
-
-        [...]
-      */
-
       const data = response?.data || response || [];
-
       setWarehouses(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Warehouse error:", error);
-
       setError(
         error.response?.data?.message ||
           error.message ||
@@ -76,15 +60,11 @@ export default function WarehousePage() {
 
       try {
         setSearchLoading(true);
-
         const response = await searchWarehouses(search);
-
         const data = response?.data || response || [];
-
         setWarehouses(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Search error:", error);
-
         setError(
           error.response?.data?.message ||
             "Failed to search warehouses"
@@ -98,27 +78,23 @@ export default function WarehousePage() {
   }, [search]);
 
   // Delete
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this warehouse?"
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      await deleteWarehouse(id);
-
-      alert("Warehouse deleted successfully");
-
-      await loadWarehouses();
-    } catch (error) {
-      console.error("Delete error:", error);
-
-      alert(
-        error.response?.data?.message ||
-          "Failed to delete warehouse"
-      );
-    }
+  const handleDelete = (id) => {
+    showConfirm({
+      title: "Delete Warehouse",
+      message: "Are you sure you want to delete this warehouse location? This action cannot be undone.",
+      confirmText: "Delete Warehouse",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteWarehouse(id);
+          showSuccess("Product updated", "Warehouse deleted successfully.");
+          await loadWarehouses();
+        } catch (err) {
+          console.error("Delete error:", err);
+          showError("Product couldn't be deleted", err.response?.data?.message || err.message || "Failed to delete warehouse.");
+        }
+      },
+    });
   };
 
   return (
@@ -134,7 +110,10 @@ export default function WarehousePage() {
         <Link href="/warehouse/transfer" className="nav-tab-item">
           Stock Transfer
         </Link>
-        <button className="nav-tab-item" onClick={() => alert("Analytics module coming soon!")}>
+        <button
+          className="nav-tab-item"
+          onClick={() => showWarning("Unsaved changes", "Analytics & Reporting module coming soon!")}
+        >
           Reports & Analytics
         </button>
       </nav>

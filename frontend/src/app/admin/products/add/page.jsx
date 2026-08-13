@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 
 import styles from "./addProducts.module.css";
+import { useAlert } from "@/context/AlertContext";
 
 const initialProduct = {
   name: "",
@@ -35,6 +36,7 @@ const initialProduct = {
 
 export default function AddProductPage() {
   const router = useRouter();
+  const { showWarning, showSuccess, showError } = useAlert();
   const [product, setProduct] = useState(initialProduct);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -59,8 +61,7 @@ export default function AddProductPage() {
         setCategories(res.data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch categories', error);
-      toast.error('Failed to load categories');
+      console.error('Error fetching categories:', error);
     }
   };
 
@@ -71,8 +72,7 @@ export default function AddProductPage() {
         setBrands(res.data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch brands', error);
-      toast.error('Failed to load brands');
+      console.error('Error fetching brands:', error);
     }
   };
 
@@ -83,8 +83,7 @@ export default function AddProductPage() {
         setUnits(res.data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch units', error);
-      toast.error('Failed to load units');
+      console.error('Error fetching units:', error);
     }
   };
 
@@ -106,21 +105,21 @@ export default function AddProductPage() {
 
     if (!file) return;
 
-    // File type validation
+    // Image type validation
     const allowedTypes = [
       "image/png",
       "image/jpeg",
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      alert("Please upload only PNG or JPG images.");
+      showWarning("Invalid form data", "Please upload only PNG or JPG images.");
       e.target.value = "";
       return;
     }
 
     // 5MB validation
     if (file.size > 5 * 1024 * 1024) {
-      alert("Image size must be less than 5MB.");
+      showWarning("Invalid form data", "Image size must be less than 5MB.");
       e.target.value = "";
       return;
     }

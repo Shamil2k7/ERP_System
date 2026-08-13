@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createWarehouse } from "@/services/warehouseService";
+import { useAlert } from "@/context/AlertContext";
 
 export default function AddWarehousePage() {
   const router = useRouter();
+  const { showSuccess, showError } = useAlert();
 
   const [form, setForm] = useState({
     name: "",
@@ -29,19 +31,12 @@ export default function AddWarehousePage() {
 
     try {
       setLoading(true);
-
       await createWarehouse(form);
-
-      alert("Warehouse created successfully");
-
+      showSuccess("Product created", "Warehouse location created successfully.");
       router.push("/warehouse");
     } catch (error) {
       console.error(error);
-
-      alert(
-        error.response?.data?.message ||
-          "Failed to create warehouse"
-      );
+      showError("Invalid form data", error.response?.data?.message || "Failed to create warehouse.");
     } finally {
       setLoading(false);
     }

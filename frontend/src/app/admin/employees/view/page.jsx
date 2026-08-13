@@ -9,11 +9,12 @@ import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { getRoles } from "@/services/roleService";
 import { useSettings } from "@/context/SettingsContext";
+import { useAlert } from "@/context/AlertContext";
 
 export default function EmployeePage() {
   const router = useRouter();
   const { settings, logoUrl } = useSettings();
-
+  const { showSuccess, showError, showConfirm } = useAlert();
 
   const [roles, setRoles] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -167,37 +168,23 @@ export default function EmployeePage() {
   // DELETE EMPLOYEE
   // =====================================================
 
-  const handleDeleteEmployee = async (employeeId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this employee?"
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      await axios.delete(
-        `http://localhost:5000/api/employees/${employeeId}`
-      );
-
-      toast.success(
-        "Employee deleted successfully"
-      );
-
-      setEmployees((previous) =>
-        previous.filter(
-          (employee) => employee.id !== employeeId
-        )
-      );
-    } catch (error) {
-      console.error("Delete employee error:", error);
-
-      toast.error(
-        error.response?.data?.message ||
-          "Failed to delete employee"
-      );
-    }
+  const handleDeleteEmployee = (employeeId) => {
+    showConfirm({
+      title: "Delete Employee",
+      message: "Are you sure you want to delete this employee record? This action cannot be undone.",
+      confirmText: "Delete Employee",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await axios.delete(`http://localhost:5000/api/employees/${employeeId}`);
+          showSuccess("Employee added", "Employee profile deleted successfully.");
+          setEmployees((previous) => previous.filter((employee) => employee.id !== employeeId));
+        } catch (error) {
+          console.error("Delete employee error:", error);
+          showError("Product couldn't be deleted", error.response?.data?.message || "Failed to delete employee.");
+        }
+      },
+    });
   };
 
   // =====================================================

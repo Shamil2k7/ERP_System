@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Sidebar from "@/components/adminPanel/Sidebar/Sidebar";
 import Header from "@/components/adminPanel/Header/Header";
 import { SettingsProvider } from "@/context/SettingsContext";
+import { AlertProvider } from "@/context/AlertContext";
 import styles from "./AppLayout.module.css";
 
 export default function AppLayout({ children }) {
@@ -25,24 +26,29 @@ export default function AppLayout({ children }) {
     pathname.startsWith("/auth");
 
   if (isPublicPage) {
-    return <SettingsProvider>{children}</SettingsProvider>;
+    return (
+      <SettingsProvider>
+        <AlertProvider>{children}</AlertProvider>
+      </SettingsProvider>
+    );
   }
 
   return (
     <SettingsProvider>
-      <div className={styles.appWrapper}>
-        <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
+      <AlertProvider>
+        <div className={styles.appWrapper}>
+          <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
-        {sidebarOpen && (
-          <div className={styles.overlay} onClick={closeSidebar} />
-        )}
+          {sidebarOpen && (
+            <div className={styles.overlay} onClick={closeSidebar} />
+          )}
 
-        <div className={styles.mainContent}>
-          <Header toggleSidebar={toggleSidebar} />
-          <main className={styles.pageBody}>{children}</main>
+          <div className={styles.mainContent}>
+            <Header toggleSidebar={toggleSidebar} />
+            <main className={styles.pageBody}>{children}</main>
+          </div>
         </div>
-      </div>
+      </AlertProvider>
     </SettingsProvider>
   );
 }
-

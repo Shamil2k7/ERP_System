@@ -4,10 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiBriefcase } from "react-icons/fi";
 import { useSettings } from "@/context/SettingsContext";
+import { useAlert } from "@/context/AlertContext";
 import styles from "./LoginForm.module.css";
 
 export default function LoginForm() {
   const { settings, logoUrl } = useSettings();
+  const { showSuccess } = useAlert();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -53,7 +55,7 @@ export default function LoginForm() {
 
       localStorage.setItem("token", data.token);
 
-      alert("Login Successful!");
+      showSuccess("Employee added", "User logged in successfully! Redirecting...");
 
       window.location.href = "/dashboard";
     } catch (err) {

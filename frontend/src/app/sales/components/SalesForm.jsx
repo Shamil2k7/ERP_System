@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import CustomerSelect from "./CustomerSelect";
+import { useAlert } from "@/context/AlertContext";
 
 const products = [
   {
@@ -27,7 +28,7 @@ const products = [
 ];
 
 export default function SalesForm() {
-
+  const { showSuccess } = useAlert();
   const [customer, setCustomer] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [discount, setDiscount] = useState(0);
@@ -95,7 +96,7 @@ export default function SalesForm() {
 
     console.log(sale);
 
-    alert("Sale Created Successfully");
+    showSuccess("Invoice generated", "Sale order recorded and tax invoice generated successfully.");
   };
 
   return (
