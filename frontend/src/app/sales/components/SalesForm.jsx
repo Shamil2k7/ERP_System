@@ -26,12 +26,14 @@ const products = [
   },
 ];
 
-export default function SalesForm() {
+import { useEffect } from "react";
 
+export default function SalesForm({ saleId }) {
   const [customer, setCustomer] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [discount, setDiscount] = useState(0);
   const [tax, setTax] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const [items, setItems] = useState([
     {
@@ -40,6 +42,59 @@ export default function SalesForm() {
       price: 0,
     },
   ]);
+
+  useEffect(() => {
+    if (saleId) {
+      async function loadSaleData() {
+        try {
+          setLoading(true);
+          const saleRes = await fetch(`http://localhost:5000/api/sales/${saleId}`).then((r) => r.json());
+          if (saleRes && saleRes.success && saleRes.data) {
+            const data = saleRes.data;
+            setPaymentMethod(data.paymentMethod || "Cash");
+            setDiscount(Number(data.discountAmount) || 0);
+            setTax(Number(data.taxAmount) || 0);
+
+            // Fetch customer name
+            if (data.customerId) {
+              try {
+                const custRes = await fetch(`http://localhost:5000/api/customers/${data.customerId}`).then((r) => r.json());
+                if (custRes?.success && custRes?.data?.name) {
+                  setCustomer(custRes.data.name);
+                } else if (custRes?.data?.name) {
+                  setCustomer(custRes.data.name);
+                }
+              } catch (e) {
+                console.error("Failed to fetch customer", e);
+              }
+            }
+
+            // Fallback item using totalAmount/netAmount
+            if (data.items && data.items.length > 0) {
+              setItems(data.items.map((item) => ({
+                product: item.product || item.productName || "Dell Laptop",
+                qty: Number(item.quantity || item.qty) || 1,
+                price: Number(item.unitPrice || item.price) || 0
+              })));
+            } else {
+              setItems([
+                {
+                  product: "Dell Laptop",
+                  qty: 1,
+                  price: Number(data.totalAmount) || Number(data.netAmount) || 0
+                }
+              ]);
+            }
+          }
+        } catch (e) {
+          console.error("Error loading sale edit data:", e);
+        } finally {
+          setLoading(false);
+        }
+      }
+      loadSaleData();
+    }
+  }, [saleId]);
 
   const addItem = () => {
     setItems([
@@ -53,20 +108,12 @@ export default function SalesForm() {
   };
 
   const updateItem = (index, field, value) => {
-
     const updated = [...items];
-
     updated[index][field] = value;
 
     if (field === "product") {
-
-      const selected = products.find(
-        (p) => p.name === value
-      );
-
-      updated[index].price = selected
-        ? selected.price
-        : 0;
+      const selected = products.find((p) => p.name === value);
+      updated[index].price = selected ? selected.price : 0;
     }
 
     setItems(updated);
@@ -80,22 +127,64 @@ export default function SalesForm() {
   const grandTotal =
     subTotal + Number(tax) - Number(discount);
 
-  const handleSubmit = (e) => {
-
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const sale = {
-      customer,
-      paymentMethod,
-      discount,
-      tax,
-      items,
-      grandTotal,
-    };
+    try {
+      let customerId = null;
+      try {
+        const custRes = await fetch("http://localhost:5000/api/customers").then((r) => r.json());
+        const match = (custRes.data || []).find((c) => c.name === customer);
+        if (match) customerId = match.id;
+      } catch (err) {
+        console.error(err);
+      }
 
-    console.log(sale);
+      const body = {
+        branchId: "00000000-0000-0000-0000-000000000000",
+        customerId: customerId,
+        orderNumber: `SO-${Date.now()}`,
+        status: "CONFIRMED",
+        totalAmount: subTotal,
+        taxAmount: Number(tax),
+        discountAmount: Number(discount)
+      };
 
-    alert("Sale Created Successfully");
+      if (saleId) {
+        const res = await fetch(`http://localhost:5000/api/sales/${saleId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        }).then((r) => r.json());
+
+        if (res.success) {
+          alert("Sale Updated Successfully");
+          window.location.href = "/sales";
+        } else {
+          alert(`Failed to update: ${res.message}`);
+        }
+      } else {
+        const res = await fetch(`http://localhost:5000/api/sales`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        }).then((r) => r.json());
+
+        if (res.success) {
+          alert("Sale Created Successfully");
+          window.location.href = "/sales";
+        } else {
+          alert(`Failed to create: ${res.message}`);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred during submission");
+    }
   };
 
   return (

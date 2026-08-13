@@ -12,9 +12,31 @@ export default function useSales() {
     try {
       setLoading(true);
 
-      const response = await getSalesOrders();
+      const [salesRes, customersRes] = await Promise.all([
+        getSalesOrders(),
+        fetch("http://localhost:5000/api/customers").then((res) => res.json()).catch(() => ({ data: [] }))
+      ]);
 
-      setSales(response.data || []);
+      const rawSales = salesRes.data || [];
+      const customers = customersRes.data || [];
+
+      const customerMap = {};
+      customers.forEach((c) => {
+        customerMap[c.id] = c.name;
+      });
+
+      const mapped = rawSales.map((sale) => ({
+        id: sale.id,
+        invoiceNo: sale.orderNumber,
+        customer: customerMap[sale.customerId] || "Walk-in Customer",
+        cashier: sale.cashier || "Admin",
+        date: sale.orderDate ? new Date(sale.orderDate).toISOString().split("T")[0] : "",
+        paymentMethod: sale.paymentMethod || "Cash",
+        paymentStatus: sale.status === "CONFIRMED" || sale.status === "COMPLETED" ? "Paid" : "Pending",
+        total: Number(sale.netAmount) || 0
+      }));
+
+      setSales(mapped);
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -24,7 +46,17 @@ export default function useSales() {
   };
 
   useEffect(() => {
-    loadSales();
+    let mounted = true;
+    const init = async () => {
+      await Promise.resolve();
+      if (mounted) {
+        loadSales();
+      }
+    };
+    init();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return {

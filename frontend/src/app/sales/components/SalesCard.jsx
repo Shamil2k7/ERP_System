@@ -75,7 +75,7 @@ export default function SalesCard({ sale }) {
 
         <tbody>
 
-          {sale.items.map((item, index) => (
+          {(sale.items || []).map((item, index) => (
 
             <tr key={index} className="border-b">
 
