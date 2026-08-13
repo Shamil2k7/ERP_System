@@ -28,10 +28,20 @@ const getTransporter = () => {
 const sendEmployeeCredentialsEmail = async (
   email,
   employeeId,
-  password
+  password,
+  branchName = null
 ) => {
   try {
     const tx = getTransporter();
+
+    const branchHtml = branchName
+      ? `
+            <p>
+              <strong>Branch:</strong>
+              ${branchName}
+            </p>
+      `
+      : "";
 
     await tx.sendMail({
       from: `"ERP System" <${process.env.EMAIL_USER}>`,
@@ -76,6 +86,8 @@ const sendEmployeeCredentialsEmail = async (
               <strong>Email:</strong>
               ${email}
             </p>
+
+            ${branchHtml}
 
             <p>
               <strong>Temporary Password:</strong>
@@ -215,7 +227,8 @@ const sendEmployeeUpdatedEmail = async (
   email,
   employeeId,
   fullName,
-  newPassword = null
+  newPassword = null,
+  branchName = null
 ) => {
   try {
     const tx = getTransporter();
@@ -231,6 +244,15 @@ const sendEmployeeUpdatedEmail = async (
         </p>
       `;
     }
+
+    const branchHtml = branchName
+      ? `
+            <p>
+              <strong>Branch:</strong>
+              ${branchName}
+            </p>
+      `
+      : "";
 
     await tx.sendMail({
       from: `"ERP System" <${process.env.EMAIL_USER}>`,
@@ -275,6 +297,8 @@ const sendEmployeeUpdatedEmail = async (
               <strong>Updated Email Address:</strong>
               ${email}
             </p>
+
+            ${branchHtml}
 
             ${passwordHtml}
 
