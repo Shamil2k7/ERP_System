@@ -250,7 +250,7 @@ export default function PosToolbar({
         ================================= */}
 
         <div className="pos-nav-tabs">
-          {["Products", "Recent", "Favourites"].map((tab) => (
+          {["Products", "Recent", "Favourites", "Drafts & Holds"].map((tab) => (
             <button
               key={tab}
               type="button"
