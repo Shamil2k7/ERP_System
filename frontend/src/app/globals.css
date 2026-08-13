@@ -147,3 +147,73 @@ tr:hover {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* =========================
+   GLOBAL PRINT STYLES
+   Hides navigation shell, sidebars, headers, search bars, and action controls so ONLY table data prints.
+========================= */
+@media print {
+  /* Hide navigation shell and UI controls */
+  aside,
+  header,
+  nav,
+  button,
+  input,
+  select,
+  .no-print,
+  [class*="sidebar"],
+  [class*="header"],
+  [class*="toolbar"],
+  [class*="headerActions"],
+  [class*="actionWrapper"],
+  [class*="actionMenu"],
+  [class*="addCard"],
+  [class*="closeButton"],
+  [class*="overlay"] {
+    display: none !important;
+  }
+
+  /* Reset body and page wrappers */
+  body,
+  html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  [class*="mainContent"],
+  [class*="pageBody"],
+  [class*="appWrapper"],
+  [class*="page"],
+  [class*="container"] {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  /* Format data tables for clean physical/PDF printing */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 10px !important;
+  }
+
+  th,
+  td {
+    padding: 8px 12px !important;
+    border: 1px solid #d1d5db !important;
+    color: #000000 !important;
+    font-size: 12px !important;
+  }
+
+  /* Hide the Action column (last column) in printed tables */
+  th:last-child,
+  td:last-child {
+    display: none !important;
+  }
+}
