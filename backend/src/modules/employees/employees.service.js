@@ -16,6 +16,7 @@ import {
   findEmployeeByPhone,
   findRoleById,
   findRoleByName,
+  createRoleInRepo,
   createEmployee,
   updateEmployee,
   deleteEmployee,
@@ -128,12 +129,15 @@ const addEmployee = async (
   }
 
 
-  // Check role
-  const employeeRole =
-    await findRoleByName(cleanRole);
+  // Check role: lookup by ID, then by Name. If missing, create role in DB!
+  let employeeRole = await findRoleById(cleanRole);
 
   if (!employeeRole) {
-    throw new Error(`Role "${cleanRole}" not found`);
+    employeeRole = await findRoleByName(cleanRole);
+  }
+
+  if (!employeeRole) {
+    employeeRole = await createRoleInRepo(cleanRole);
   }
 
 
@@ -156,6 +160,7 @@ const addEmployee = async (
     // Employee must change password on first login
     firstLogin: true,
 
+    role: employeeRole.name,
     roleId: employeeRole.id,
 
     // Required branch assignment
@@ -299,21 +304,25 @@ const modifyEmployee = async (
 
   // Role handling (by roleId or role name string)
   if (updateData.roleId) {
-    const roleExists = await findRoleById(updateData.roleId);
-
-    if (!roleExists) {
-      throw new Error(`Role ID "${updateData.roleId}" not found`);
-    }
-
-    safeUpdateData.roleId = updateData.roleId;
-  } else if (updateData.role) {
-    const roleObj = await findRoleByName(updateData.role);
-
+    let roleObj = await findRoleById(updateData.roleId);
     if (!roleObj) {
-      throw new Error(`Role "${updateData.role}" not found`);
+      roleObj = await findRoleByName(updateData.roleId);
     }
-
+    if (!roleObj) {
+      roleObj = await createRoleInRepo(updateData.roleId);
+    }
     safeUpdateData.roleId = roleObj.id;
+    safeUpdateData.role = roleObj.name;
+  } else if (updateData.role) {
+    let roleObj = await findRoleById(updateData.role);
+    if (!roleObj) {
+      roleObj = await findRoleByName(updateData.role);
+    }
+    if (!roleObj) {
+      roleObj = await createRoleInRepo(updateData.role);
+    }
+    safeUpdateData.roleId = roleObj.id;
+    safeUpdateData.role = roleObj.name;
   }
 
 
