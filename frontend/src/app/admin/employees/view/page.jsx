@@ -3,11 +3,12 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Edit2, Trash2, X, Users, Loader2, Plus, CreditCard, Mail, Phone } from "lucide-react";
+import { Edit2, Trash2, X, Users, Loader2, Plus, CreditCard, Mail, Phone, Building2 } from "lucide-react";
 import styles from "./viewEmployees.module.css";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { getRoles } from "@/services/roleService";
+import { getBranches } from "@/services/branchService";
 import { useSettings } from "@/context/SettingsContext";
 import { useAlert } from "@/context/AlertContext";
 
@@ -17,6 +18,7 @@ export default function EmployeePage() {
   const { showSuccess, showError, showConfirm } = useAlert();
 
   const [roles, setRoles] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
@@ -33,6 +35,7 @@ export default function EmployeePage() {
     phone: "",
     employeeId: "",
     role: "",
+    branchId: "",
   });
 
   const validateEditEmployeeForm = () => {
@@ -81,6 +84,7 @@ export default function EmployeePage() {
   useEffect(() => {
     fetchEmployees();
     fetchRoles();
+    fetchBranches();
   }, []);
 
   const fetchRoles = async () => {
@@ -91,6 +95,17 @@ export default function EmployeePage() {
       }
     } catch (err) {
       console.error("Failed to fetch roles:", err);
+    }
+  };
+
+  const fetchBranches = async () => {
+    try {
+      const res = await getBranches();
+      if (res.success && Array.isArray(res.data)) {
+        setBranches(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch branches:", err);
     }
   };
 
@@ -159,6 +174,7 @@ export default function EmployeePage() {
       phone: employee.phone || "",
       employeeId: employee.employeeId || "",
       role: employee.role?.name || "Admin",
+      branchId: employee.branchId || employee.branch?.id || "",
     });
 
     setIsModalOpen(true);
@@ -260,6 +276,7 @@ export default function EmployeePage() {
       phone: "",
       employeeId: "",
       role: "",
+      branchId: "",
     });
   };
 
@@ -676,6 +693,37 @@ export default function EmployeePage() {
 
                         </div>
 
+
+                        {/* ===============================
+                            BRANCH
+                        =============================== */}
+
+                        <div
+                          className={
+                            styles.infoRow
+                          }
+                        >
+
+                          <div
+                            className={
+                              styles.infoLabel
+                            }
+                          >
+
+                            <Building2 size={13} />
+
+                            <span>
+                              Branch
+                            </span>
+
+                          </div>
+
+                          <strong>
+                            {employee.branch?.name || "N/A"}
+                          </strong>
+
+                        </div>
+
                       </div>
 
 
@@ -958,6 +1006,53 @@ export default function EmployeePage() {
                     {errors.role && (
                       <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
                         {errors.role}
+                      </span>
+                    )}
+
+                  </div>
+
+
+                  {/* BRANCH */}
+
+                  <div
+                    className={
+                      styles.formGroup
+                    }
+                  >
+
+                    <label
+                      className={
+                        styles.label
+                      }
+                      htmlFor="branchId"
+                    >
+                      Branch
+                    </label>
+
+                    <select
+                      id="branchId"
+                      name="branchId"
+                      value={formData.branchId}
+                      onChange={handleInputChange}
+                      className={styles.input}
+                      style={errors.branchId ? { borderColor: "#ef4444" } : {}}
+                    >
+                      <option value="">Select Branch</option>
+                      {branches.length > 0 ? (
+                        branches.map((b) => (
+                          <option key={b.id} value={b.id}>
+                            {b.name} {b.code ? `(${b.code})` : ""}
+                          </option>
+                        ))
+                      ) : (
+                        <option value="" disabled>
+                          No branches available
+                        </option>
+                      )}
+                    </select>
+                    {errors.branchId && (
+                      <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                        {errors.branchId}
                       </span>
                     )}
 

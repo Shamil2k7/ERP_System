@@ -7,6 +7,7 @@ const getAllEmployees = async () => {
   return await prisma.user.findMany({
     include: {
       role: true,
+      branch: true,
     },
     orderBy: {
       createdAt: "desc",
@@ -24,6 +25,7 @@ const getEmployeeById = async (id) => {
     },
     include: {
       role: true,
+      branch: true,
     },
   });
 };
@@ -97,6 +99,7 @@ const createEmployee = async (data) => {
     data,
     include: {
       role: true,
+      branch: true,
     },
   });
 };
@@ -112,6 +115,7 @@ const updateEmployee = async (id, data) => {
     data,
     include: {
       role: true,
+      branch: true,
     },
   });
 };

@@ -75,6 +75,7 @@ const addEmployee = async (
     phone,
     role,
     password,
+    branchId,
   },
   req
 ) => {
@@ -86,7 +87,8 @@ const addEmployee = async (
     !email ||
     !phone ||
     !role ||
-    !password
+    !password ||
+    !branchId
   ) {
     throw new Error("All employee fields are required");
   }
@@ -155,6 +157,9 @@ const addEmployee = async (
     firstLogin: true,
 
     roleId: employeeRole.id,
+
+    // Required branch assignment
+    branchId,
   });
 
 
@@ -165,7 +170,8 @@ const addEmployee = async (
     await sendEmployeeCredentialsEmail(
       cleanEmail,
       cleanEmployeeId,
-      password
+      password,
+      employee.branch?.name
     );
 
     emailSent = true;
@@ -192,6 +198,7 @@ const addEmployee = async (
       email: cleanEmail,
       phone: cleanPhone,
       role: cleanRole,
+      branch: employee.branch?.name || null,
       description: `Employee registered`,
     },
   });
@@ -310,6 +317,12 @@ const modifyEmployee = async (
   }
 
 
+  // Branch handling — allow assigning or clearing the branch
+  if (updateData.branchId !== undefined) {
+    safeUpdateData.branchId = updateData.branchId || null;
+  }
+
+
   // Password update — if admin provides a new password, save it (hashed + plain)
   // and email the plain text to the employee.
   let plainPasswordToSend = null;
@@ -355,7 +368,8 @@ const modifyEmployee = async (
       targetEmail,
       updatedEmployee.employeeId,
       updatedEmployee.fullName,
-      plainPasswordToSend
+      plainPasswordToSend,
+      updatedEmployee.branch?.name
     );
 
     emailSent = true;

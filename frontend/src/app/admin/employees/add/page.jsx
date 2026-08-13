@@ -7,11 +7,13 @@ import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import styles from "./addEmployees.module.css";
 import { getRoles } from "@/services/roleService";
+import { getBranches } from "@/services/branchService";
 
 export default function AddEmployeePage() {
   const router = useRouter();
 
   const [roles, setRoles] = useState([]);
+  const [branches, setBranches] = useState([]);
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     fullName: "",
@@ -19,6 +21,7 @@ export default function AddEmployeePage() {
     phone: "",
     employeeId: "",
     role: "",
+    branchId: "",
     password: "",
   });
 
@@ -57,6 +60,10 @@ export default function AddEmployeePage() {
       newErrors.role = "Role is required";
     }
 
+    if (!formData.branchId) {
+      newErrors.branchId = "Branch is required";
+    }
+
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
@@ -69,6 +76,7 @@ export default function AddEmployeePage() {
 
   useEffect(() => {
     fetchRoles();
+    fetchBranches();
   }, []);
 
   const fetchRoles = async () => {
@@ -79,6 +87,17 @@ export default function AddEmployeePage() {
       }
     } catch (err) {
       console.error("Failed to fetch roles:", err);
+    }
+  };
+
+  const fetchBranches = async () => {
+    try {
+      const res = await getBranches();
+      if (res.success && Array.isArray(res.data)) {
+        setBranches(res.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch branches:", err);
     }
   };
 
@@ -351,7 +370,7 @@ export default function AddEmployeePage() {
                   </div>
 
 
-                  {/* Role + Password */}
+                  {/* Role + Branch */}
                   <div className={styles.formRow}>
 
                     <div className={styles.formGroup}>
@@ -393,6 +412,49 @@ export default function AddEmployeePage() {
 
                     </div>
 
+
+                    <div className={styles.formGroup}>
+
+                      <label className={styles.label}>
+                        Branch{" "}
+                        <span className={styles.required}>
+                          *
+                        </span>
+                      </label>
+
+                      <select
+                        name="branchId"
+                        value={formData.branchId}
+                        onChange={handleInputChange}
+                        className={styles.input}
+                        style={errors.branchId ? { borderColor: "#ef4444" } : {}}
+                      >
+                        <option value="">Select Branch</option>
+                        {branches.length > 0 ? (
+                          branches.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {b.name} {b.code ? `(${b.code})` : ""}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="" disabled>
+                            No branches available
+                          </option>
+                        )}
+                      </select>
+                      {errors.branchId && (
+                        <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                          {errors.branchId}
+                        </span>
+                      )}
+
+                    </div>
+
+                  </div>
+
+
+                  {/* Password */}
+                  <div className={styles.formRow}>
 
                     <div className={styles.formGroup}>
 
@@ -458,6 +520,11 @@ export default function AddEmployeePage() {
                       {formData.role || "Role not set"}
                     </div>
 
+                    {formData.branchId && branches.length > 0 && (
+                      <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "4px" }}>
+                        📍 {branches.find((b) => b.id === formData.branchId)?.name || ""}
+                      </div>
+                    )}
 
                     {formData.employeeId && (
                       <span

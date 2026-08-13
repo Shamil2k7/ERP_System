@@ -51,12 +51,20 @@ const addEmployeeSchema = Joi.object({
       "any.required": "Role is required",
     }),
 
+  branchId: Joi.string()
+    .trim()
+    .required()
+    .messages({
+      "string.empty": "Branch is required",
+      "any.required": "Branch is required",
+    }),
+
   password: Joi.string()
-    .min(8)
+    .min(6)
     .max(20)
     .required()
     .messages({
-      "string.min": "Password must be at least 8 characters",
+      "string.min": "Password must be at least 6 characters",
       "string.max": "Password cannot exceed 20 characters",
       "string.empty": "Temporary password is required",
       "any.required": "Temporary password is required",
