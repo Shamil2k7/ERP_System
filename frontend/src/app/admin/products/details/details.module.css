@@ -498,12 +498,12 @@
   overflow-x: auto;
 }
 
-table {
+:global(table) {
   width: 100%;
   border-collapse: collapse;
 }
 
-th {
+:global(th) {
   text-align: left;
   background: #fafbfc;
   color: #8992a2;
@@ -514,7 +514,7 @@ th {
   border-bottom: 1px solid #edf0f4;
 }
 
-td {
+:global(td) {
   padding: 16px 22px;
   border-bottom: 1px solid #f0f2f5;
   color: #596273;
