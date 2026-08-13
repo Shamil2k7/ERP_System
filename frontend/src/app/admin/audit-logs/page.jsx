@@ -38,12 +38,15 @@ export default function AuditLogsPage() {
   const [entityFilter, setEntityFilter] = useState("");
   const [page, setPage] = useState(1);
 
+  // Force-refetch trigger (incremented by reset)
+  const [fetchTrigger, setFetchTrigger] = useState(0);
+
   // Modal State
   const [selectedLog, setSelectedLog] = useState(null);
 
   useEffect(() => {
     fetchLogs();
-  }, [page, actionFilter, entityFilter]);
+  }, [page, actionFilter, entityFilter, fetchTrigger]);
 
   const fetchLogs = async () => {
     try {
@@ -81,6 +84,8 @@ export default function AuditLogsPage() {
     setActionFilter("");
     setEntityFilter("");
     setPage(1);
+    // Increment trigger so useEffect fires even if values didn't change
+    setFetchTrigger((t) => t + 1);
   };
 
   const handleRefresh = () => {
