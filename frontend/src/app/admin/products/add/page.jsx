@@ -17,7 +17,7 @@ const initialProduct = {
   name: "",
   code: "",
   sku: "",
-  barcode: "",
+  // barcode: "",
   categoryId: "",
   brandId: "",
   baseUnitId: "",
@@ -304,7 +304,7 @@ export default function AddProductPage() {
 
                   {/* Barcode */}
 
-                  <div>
+                  {/* <div>
                     <label htmlFor="barcode">
                       Barcode
                     </label>
@@ -316,7 +316,7 @@ export default function AddProductPage() {
                       onChange={handleChange}
                       placeholder="123456789"
                     />
-                  </div>
+                  </div> */}
 
                   {/* Category */}
 
