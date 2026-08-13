@@ -16,11 +16,13 @@ import {
   FiImage,
 } from "react-icons/fi";
 import { getSettings, updateSettings, resetSettings } from "@/services/settingsService";
+import { useSettings } from "@/context/SettingsContext";
 import styles from "./settings.module.css";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function SettingsPage() {
+  const { refreshSettings } = useSettings();
   const [activeTab, setActiveTab] = useState("business");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -178,6 +180,7 @@ export default function SettingsPage() {
         setLogoPreview(`${API_URL}/uploads/${res.data.companyLogo}`);
       }
       setLogoFile(null);
+      await refreshSettings();
     } catch (error) {
       showToast("error", error.message || "Failed to save settings.");
     } finally {
@@ -192,6 +195,7 @@ export default function SettingsPage() {
       showToast("success", res.message || "Settings reset to default successfully.");
       setShowResetModal(false);
       await fetchSettingsData();
+      await refreshSettings();
     } catch (error) {
       showToast("error", error.message || "Failed to reset settings.");
     } finally {

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Barcode from "react-barcode";
 import { toast, Toaster } from "react-hot-toast";
+import { useSettings } from "@/context/SettingsContext";
 import {
   FiPrinter,
   FiSearch,
@@ -24,59 +25,49 @@ import styles from "./barcodePrint.module.css";
 // Sample initial products for interactive barcode generator UI
 const initialProductsList = [
   {
-    id: "PROD-001",
+    id: "1",
     name: "Wireless Ergonomic Mouse",
-    sku: "MS-WRL-001",
-    code: "8901234567890",
-    category: "Electronics",
-    price: 29.99,
-    qty: 2,
-    selected: true,
-  },
-  {
-    id: "PROD-002",
-    name: "Mechanical Gaming Keyboard RGB",
-    sku: "KB-RGB-002",
+    sku: "WEM-001",
     code: "8901234567891",
-    category: "Electronics",
-    price: 89.99,
-    qty: 2,
+    category: "Accessories",
+    price: 29.99,
+    qty: 5,
     selected: true,
   },
   {
-    id: "PROD-003",
-    name: "Ultra Wide HD Monitor 27-inch",
-    sku: "MON-UW-003",
+    id: "2",
+    name: "Mechanical Gaming Keyboard RGB",
+    sku: "MGK-002",
     code: "8901234567892",
-    category: "Electronics",
-    price: 249.50,
-    qty: 1,
+    category: "Accessories",
+    price: 89.99,
+    qty: 3,
     selected: true,
   },
   {
-    id: "PROD-004",
-    name: "Premium Cotton Oxford Shirt (Blue)",
-    sku: "APP-SHIRT-004",
+    id: "3",
+    name: '27" 4K UHD Monitor HDR',
+    sku: "MON-003",
     code: "8901234567893",
-    category: "Apparel",
-    price: 45.00,
-    qty: 3,
+    category: "Monitors",
+    price: 349.99,
+    qty: 1,
     selected: false,
   },
   {
-    id: "PROD-005",
-    name: "Stainless Steel Insulated Water Bottle",
-    sku: "HOME-BTL-005",
+    id: "4",
+    name: "USB-C Multiport Adapter Hub",
+    sku: "HUB-004",
     code: "8901234567894",
-    category: "Home & Goods",
-    price: 18.75,
-    qty: 4,
+    category: "Accessories",
+    price: 45.0,
+    qty: 10,
     selected: true,
   },
   {
-    id: "PROD-006",
-    name: "Noise-Canceling Over-Ear Headphones",
-    sku: "AUD-HD-006",
+    id: "5",
+    name: "Noise Cancelling Headphones",
+    sku: "NCH-005",
     code: "8901234567895",
     category: "Electronics",
     price: 129.99,
@@ -86,18 +77,27 @@ const initialProductsList = [
 ];
 
 export default function BarcodePrintPage() {
+  const { settings } = useSettings();
   const [products, setProducts] = useState(initialProductsList);
   const [activeTab, setActiveTab] = useState("products"); // "products" | "preview"
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   // Customization Settings
-  const [storeName, setStoreName] = useState("ERP Enterprise Store");
+  const [storeName, setStoreName] = useState(settings?.companyName || "ERP Enterprise Store");
+
+  useEffect(() => {
+    if (settings?.companyName) {
+      setStoreName(settings.companyName);
+    }
+  }, [settings?.companyName]);
+
   const [paperFormat, setPaperFormat] = useState("grid40"); // grid40 | grid30 | grid24 | gridSingle | gridRoll
   const [barcodeFormat, setBarcodeFormat] = useState("CODE128");
   const [barcodeHeight, setBarcodeHeight] = useState(38);
   const [barcodeWidth, setBarcodeWidth] = useState(1.2);
   const [fontSize, setFontSize] = useState(11);
+
 
   // Toggles
   const [showStoreName, setShowStoreName] = useState(true);

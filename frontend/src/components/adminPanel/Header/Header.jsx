@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   FiMenu,
   FiSearch,
@@ -10,10 +11,13 @@ import {
   FiChevronDown,
   FiUser,
 } from "react-icons/fi";
+import { useSettings } from "@/context/SettingsContext";
 
 import styles from "./Header.module.css";
 
 export default function Header({ toggleSidebar }) {
+  const { settings } = useSettings();
+
   return (
     <header className={styles.header}>
 
@@ -32,7 +36,7 @@ export default function Header({ toggleSidebar }) {
           <FiSearch />
           <input
             type="text"
-            placeholder="Search..."
+            placeholder={`Search ${settings?.companyName ? settings.companyName + "..." : "..."}`}
           />
         </div>
 
@@ -42,27 +46,27 @@ export default function Header({ toggleSidebar }) {
 
       <div className={styles.right}>
 
-        <button className={styles.iconBtn}>
+        <button className={styles.iconBtn} title="Language">
           <FiGlobe />
         </button>
 
-        <button className={styles.iconBtn}>
+        <button className={styles.iconBtn} title="Theme">
           <FiMoon />
         </button>
 
-        <button className={styles.iconBtn}>
+        <button className={styles.iconBtn} title="Notifications">
           <FiBell />
           <span className={styles.badge}>5</span>
         </button>
 
-        <button className={styles.iconBtn}>
+        <Link href="/admin/settings" className={styles.iconBtn} title="Settings">
           <FiSettings />
-        </button>
+        </Link>
 
         <div className={styles.profile}>
 
           <img
-            src="https://i.pravata"
+            src="https://i.pravatar.cc/150?img=68"
             alt="profile"
           />
 
@@ -79,4 +83,4 @@ export default function Header({ toggleSidebar }) {
 
     </header>
   );
-}
+}
