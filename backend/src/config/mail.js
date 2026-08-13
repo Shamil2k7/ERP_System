@@ -118,67 +118,67 @@ const sendEmployeeCredentialsEmail = async (
 };
 
 
-// Email Verification Link
-const sendVerificationEmail = async (email, token) => {
-  try {
-    const tx = getTransporter();
+// // Email Verification Link
+// const sendVerificationEmail = async (email, token) => {
+//   try {
+//     const tx = getTransporter();
 
-    const verifyLink =
-      `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+//     const verifyLink =
+//       `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
-    const info = await tx.sendMail({
-      from: `"ERP System" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Verify Your ERP Account",
+//     const info = await tx.sendMail({
+//       from: `"ERP System" <${process.env.EMAIL_USER}>`,
+//       to: email,
+//       subject: "Verify Your ERP Account",
 
-      html: `
-        <div style="font-family: Arial; padding:20px;">
+//       html: `
+//         <div style="font-family: Arial; padding:20px;">
 
-          <h2>Welcome to ERP System</h2>
+//           <h2>Welcome to ERP System</h2>
 
-          <p>
-            Your employee account has been created by the administrator.
-          </p>
+//           <p>
+//             Your employee account has been created by the administrator.
+//           </p>
 
-          <p>
-            Please click the button below to verify your email address.
-          </p>
+//           <p>
+//             Please click the button below to verify your email address.
+//           </p>
 
-          <a
-            href="${verifyLink}"
-            style="
-              background:#2563eb;
-              color:white;
-              padding:12px 20px;
-              text-decoration:none;
-              border-radius:5px;
-              display:inline-block;
-            "
-          >
-            Verify Email
-          </a>
+//           <a
+//             href="${verifyLink}"
+//             style="
+//               background:#2563eb;
+//               color:white;
+//               padding:12px 20px;
+//               text-decoration:none;
+//               border-radius:5px;
+//               display:inline-block;
+//             "
+//           >
+//             Verify Email
+//           </a>
 
-          <p style="margin-top:20px;">
-            This verification link will expire in 30 minutes.
-          </p>
+//           <p style="margin-top:20px;">
+//             This verification link will expire in 30 minutes.
+//           </p>
 
-          <p>
-            If you didn't expect this email, you can safely ignore it.
-          </p>
+//           <p>
+//             If you didn't expect this email, you can safely ignore it.
+//           </p>
 
-        </div>
-      `,
-    });
+//         </div>
+//       `,
+//     });
 
-    console.log("Verification Email Sent");
-    console.log(info.messageId);
-  } catch (error) {
-    console.error("Failed to send verification email");
-    console.error(error);
+//     console.log("Verification Email Sent");
+//     console.log(info.messageId);
+//   } catch (error) {
+//     console.error("Failed to send verification email");
+//     console.error(error);
 
-    throw error;
-  }
-};
+//     throw error;
+//   }
+// };
 
 
 // Forgot Password OTP
@@ -307,7 +307,7 @@ const sendEmployeeUpdatedEmail = async (
 
 export {
   sendEmployeeCredentialsEmail,
-  sendVerificationEmail,
+  // sendVerificationEmail,
   sendOTPEmail,
   sendEmployeeUpdatedEmail,
 };

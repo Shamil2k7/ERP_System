@@ -192,7 +192,7 @@ const addEmployee = async (
       email: cleanEmail,
       phone: cleanPhone,
       role: cleanRole,
-      description: `Created new employee "${cleanFullName}" (ID: ${cleanEmployeeId}) with role "${cleanRole}"`,
+      description: `Employee registered`,
     },
   });
 
@@ -379,7 +379,7 @@ const modifyEmployee = async (
       email: updatedEmployee.email || existingEmployee.email,
       updatedFields: Object.keys(safeUpdateData),
       emailSent,
-      description: `Updated employee "${updatedEmployee.fullName || existingEmployee.fullName}" (ID: ${updatedEmployee.employeeId || existingEmployee.employeeId}) [Modified: ${Object.keys(safeUpdateData).join(", ")}]${emailSent ? ` - Notification email sent to ${updatedEmployee.email}` : ""}`,
+      description: `Employee updated`,
     },
   });
 
@@ -424,7 +424,7 @@ const removeEmployee = async (
       fullName: existingEmployee.fullName,
       employeeId: existingEmployee.employeeId,
       email: existingEmployee.email,
-      description: `Deleted employee "${existingEmployee.fullName}" (ID: ${existingEmployee.employeeId})`,
+      description: `Employee deleted`,
     },
   });
 
