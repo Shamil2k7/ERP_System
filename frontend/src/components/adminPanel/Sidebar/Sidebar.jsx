@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSettings } from "@/context/SettingsContext";
 
 import {
   FiGrid,
@@ -33,25 +34,23 @@ import {
   FiX,
   FiClock,
   FiMapPin,
+  FiShield,
+  FiSliders,
+  FiUserPlus,
+  FiMaximize,
+  FiBook,
+  FiPercent,
+  FiSliders as FiTune,
 } from "react-icons/fi";
 
 import styles from "./Sidebar.module.css";
 
 export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname();
+  const { settings, logoUrl } = useSettings();
 
   const isActivePath = (href) => {
-    if (!pathname) return false;
-    if (href === "/dashboard") {
-      return (
-        pathname === "/dashboard" ||
-        pathname === "/admin/adminPanel" ||
-        pathname === "/"
-      );
-    }
-
-    // Special exact matches for nested section roots
-    if (href === "/warehouse" && pathname !== "/warehouse") {
+    if (!href) {
       return false;
     }
 
@@ -67,7 +66,17 @@ export default function Sidebar({ isOpen, onClose }) {
   return (
     <aside className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}>
       <div className={styles.logo}>
-        <h2>ERP</h2>
+        <div className={styles.logoBrand}>
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={settings?.companyName || "Company Logo"}
+              className={styles.logoImg}
+            />
+          ) : (
+            <h2>{settings?.companyName || "ERP"}</h2>
+          )}
+        </div>
         {onClose && (
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close menu">
             <FiX size={20} />

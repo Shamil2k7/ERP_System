@@ -8,9 +8,12 @@ import styles from "./viewEmployees.module.css";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { getRoles } from "@/services/roleService";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function EmployeePage() {
   const router = useRouter();
+  const { settings, logoUrl } = useSettings();
+
 
   const [roles, setRoles] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -447,7 +450,15 @@ export default function EmployeePage() {
                             styles.companyLogo
                           }
                         >
-                          LE
+                          {logoUrl ? (
+                            <img
+                              src={logoUrl}
+                              alt={settings?.companyName || "Company Logo"}
+                              style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+                            />
+                          ) : (
+                            (settings?.companyName || "ERP").substring(0, 2).toUpperCase()
+                          )}
                         </div>
 
                         <span

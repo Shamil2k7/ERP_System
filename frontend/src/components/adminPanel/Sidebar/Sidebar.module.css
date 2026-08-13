@@ -33,12 +33,31 @@
   background: #f0f7ff;
 }
 
+.logoBrand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 180px;
+  overflow: hidden;
+}
+
+.logoImg {
+  max-height: 44px;
+  max-width: 160px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
 .logo h2 {
   color: #1e3a8a;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
+
 
 .closeBtn {
   display: none;
