@@ -16,15 +16,23 @@ const login = async (req, res) => {
     const result = await loginService(login, password);
 
     if (result.success && result.user) {
+      const timeStr = new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      });
+
       recordAuditLog(req, {
         action: "LOGIN",
-        entity: "Auth",
+        entity: "Employee",
         entityId: result.user.id,
         user: result.user,
         details: {
+          fullName: result.user.fullName,
           email: result.user.email,
+          employeeId: result.user.employeeId,
           role: result.user.role,
-          description: `User "${result.user.fullName || result.user.email}" logged in successfully`,
+          description: `Employee logged in at ${timeStr}`,
         },
       });
     }
@@ -48,6 +56,16 @@ const changePassword = async (req, res) => {
       currentPassword,
       newPassword
     );
+
+    recordAuditLog(req, {
+      action: "UPDATE",
+      entity: "Employee",
+      user: req.user || { email },
+      details: {
+        email,
+        description: `Employee changed password`,
+      },
+    });
 
     return res.status(200).json(result);
   } catch (error) {
@@ -97,6 +115,16 @@ const resetPassword = async (req, res) => {
 
     const result = await resetPasswordService(email, password);
 
+    recordAuditLog(req, {
+      action: "UPDATE",
+      entity: "Employee",
+      user: req.user || { email },
+      details: {
+        email,
+        description: `Employee reset password`,
+      },
+    });
+
     return res.status(200).json(result);
   } catch (error) {
     return res.status(400).json({
@@ -116,6 +144,17 @@ const changeEmail = async (req, res) => {
       password,
       newEmail
     );
+
+    recordAuditLog(req, {
+      action: "UPDATE",
+      entity: "Employee",
+      user: req.user || { email: currentEmail },
+      details: {
+        currentEmail,
+        newEmail,
+        description: `Employee changed email`,
+      },
+    });
 
     return res.status(200).json(result);
   } catch (error) {
