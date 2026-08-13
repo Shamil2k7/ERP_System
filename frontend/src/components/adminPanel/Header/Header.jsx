@@ -32,13 +32,7 @@ export default function Header({ toggleSidebar }) {
           <FiMenu />
         </button>
 
-        <div className={styles.searchBox}>
-          <FiSearch />
-          <input
-            type="text"
-            placeholder={`Search ${settings?.companyName ? settings.companyName + "..." : "..."}`}
-          />
-        </div>
+       
 
       </div>
 
@@ -46,13 +40,11 @@ export default function Header({ toggleSidebar }) {
 
       <div className={styles.right}>
 
-        <button className={styles.iconBtn} title="Language">
-          <FiGlobe />
-        </button>
+        
 
-        <button className={styles.iconBtn} title="Theme">
+        {/* <button className={styles.iconBtn} title="Theme">
           <FiMoon />
-        </button>
+        </button> */}
 
         <button className={styles.iconBtn} title="Notifications">
           <FiBell />
@@ -83,4 +75,4 @@ export default function Header({ toggleSidebar }) {
 
     </header>
   );
-}
+}
