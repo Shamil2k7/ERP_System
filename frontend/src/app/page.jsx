@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import styles from "./landing.module.css";
 import { getLandingPage } from "@/services/landing.service";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [landing, setLanding] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   useEffect(() => {
@@ -114,9 +115,16 @@ export default function Home() {
           <span>{landing.logoHighlight}</span>
         </div>
 
-        <button className={styles.loginBtn}>
+        <button
+          className={styles.loginBtn}
+          onClick={() => router.push("/auth/login")}
+        >
           {landing.loginText}
         </button>
+
+        {/* <button className={styles.loginBtn}>
+          {landing.loginText}
+        </button> */}
       </nav>
 
       {/* =========================
@@ -303,9 +311,12 @@ export default function Home() {
             <div>✓ Cloud Based System</div>
           </div>
 
-          <button className={styles.learnBtn}>
+          <p
+            className={styles.learn}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          >
             Learn More →
-          </button>
+          </p>
         </div>
       </section>
 
