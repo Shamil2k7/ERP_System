@@ -30,13 +30,15 @@ export const createProductValidation = [
     .notEmpty()
     .withMessage("Cost price is required")
     .isFloat({ min: 0 })
-    .withMessage("Cost price must be greater than or equal to 0"),
+    .withMessage("Cost price must be greater than or equal to 0")
+    .toFloat(),
 
   body("sellingPrice")
     .notEmpty()
     .withMessage("Selling price is required")
     .isFloat({ min: 0 })
-    .withMessage("Selling price must be greater than or equal to 0"),
+    .withMessage("Selling price must be greater than or equal to 0")
+    .toFloat(),
 
  body("discountType")
   .optional()
@@ -46,7 +48,8 @@ export const createProductValidation = [
 body("discountValue")
   .optional()
   .isFloat({ min: 0 })
-  .withMessage("Discount value must be greater than or equal to 0"),
+  .withMessage("Discount value must be greater than or equal to 0")
+  .toFloat(),
 
  body("unitId")
   .notEmpty()
@@ -112,12 +115,14 @@ export const updateProductValidation = [
   body("costPrice")
     .optional()
     .isFloat({ min: 0 })
-    .withMessage("Cost price must be greater than or equal to 0"),
+    .withMessage("Cost price must be greater than or equal to 0")
+    .toFloat(),
 
   body("sellingPrice")
     .optional()
     .isFloat({ min: 0 })
-    .withMessage("Selling price must be greater than or equal to 0"),
+    .withMessage("Selling price must be greater than or equal to 0")
+    .toFloat(),
 
     body("discountType")
   .optional()
@@ -127,7 +132,8 @@ export const updateProductValidation = [
 body("discountValue")
   .optional()
   .isFloat({ min: 0 })
-  .withMessage("Discount value must be greater than or equal to 0"),
+  .withMessage("Discount value must be greater than or equal to 0")
+  .toFloat(),
 
 body("unitId")
   .optional()
