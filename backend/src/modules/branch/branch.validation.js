@@ -43,10 +43,10 @@ const branchSchema = Joi.object({
 
   phone: Joi.string()
     .trim()
-    .pattern(/^[6-9]\d{9}$/)
+    .pattern(/^[\+\d\s\-\(\)]{7,20}$/)
     .allow("", null)
     .messages({
-      "string.pattern.base": "Enter a valid 10 digit phone number",
+      "string.pattern.base": "Enter a valid phone number",
     }),
 
   email: Joi.string()
@@ -98,10 +98,10 @@ const updateBranchSchema = Joi.object({
 
   phone: Joi.string()
     .trim()
-    .pattern(/^[6-9]\d{9}$/)
+    .pattern(/^[\+\d\s\-\(\)]{7,20}$/)
     .allow("", null)
     .messages({
-      "string.pattern.base": "Enter a valid 10 digit phone number",
+      "string.pattern.base": "Enter a valid phone number",
     }),
 
   email: Joi.string()
