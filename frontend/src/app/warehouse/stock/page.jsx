@@ -1,86 +1,91 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import StockTable from "../components/StockTable";
+import StockModal from "../components/StockModal";
 import { useAlert } from "@/context/AlertContext";
+import { getInventories, deleteInventory } from "@/services/inventoryService";
+import { getProducts } from "@/services/productService";
+import { getCategories } from "@/services/categoryService";
+import { getWarehouses } from "@/services/warehouseService";
 import "../warehouse.css";
 
-const stockData = [
-  {
-    id: 1,
-    sku: "PRD-001",
-    product: "Dell Inspiron 15 3000",
-    category: "Laptops",
-    warehouse: "Main Warehouse",
-    quantity: 40,
-    reorder: 10,
-  },
-  {
-    id: 2,
-    sku: "PRD-002",
-    product: "HP Laserjet Pro Printer",
-    category: "Printers",
-    warehouse: "Main Warehouse",
-    quantity: 6,
-    reorder: 8,
-  },
-  {
-    id: 3,
-    sku: "PRD-003",
-    product: "Logitech MX Master 3S",
-    category: "Accessories",
-    warehouse: "Branch Warehouse",
-    quantity: 120,
-    reorder: 20,
-  },
-  {
-    id: 4,
-    sku: "PRD-004",
-    product: "Keychron K2 Mechanical Keyboard",
-    category: "Accessories",
-    warehouse: "Backup Warehouse",
-    quantity: 15,
-    reorder: 15,
-  },
-  {
-    id: 5,
-    sku: "PRD-005",
-    product: 'Samsung Odyssey 27" Monitor',
-    category: "Monitors",
-    warehouse: "Branch Warehouse",
-    quantity: 4,
-    reorder: 8,
-  },
-  {
-    id: 6,
-    sku: "PRD-006",
-    product: "Apple MacBook Pro 14",
-    category: "Laptops",
-    warehouse: "Main Warehouse",
-    quantity: 0,
-    reorder: 5,
-  },
-  {
-    id: 7,
-    sku: "PRD-007",
-    product: "Anker USB-C Multi Hub",
-    category: "Accessories",
-    warehouse: "Backup Warehouse",
-    quantity: 85,
-    reorder: 15,
-  },
-];
+const ITEMS_PER_PAGE = 8;
 
 export default function WarehouseStockPage() {
-  const { showWarning } = useAlert();
+  const { showSuccess, showError, showConfirm } = useAlert();
+  const [inventories, setInventories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Search, Filter & Pagination states
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Modal states
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+
+  // Load all dynamic data
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const [invRes, prodRes, whRes, catRes] = await Promise.all([
+        getInventories(),
+        getProducts(),
+        getWarehouses(),
+        getCategories(),
+      ]);
+
+      setInventories(invRes?.data || invRes || []);
+      setProducts(prodRes?.data || prodRes || []);
+      setWarehouses(whRes?.data || whRes || []);
+      setCategories(catRes?.data || catRes || []);
+    } catch (err) {
+      console.error("Load stock inventory error:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to load inventory records. Please check backend connection."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  // Map backend model shape to table-friendly shape
+  const mappedStock = useMemo(() => {
+    return inventories.map((item) => ({
+      id: item.id,
+      sku: item.product?.sku || "N/A",
+      product: item.product?.name || "Unknown Product",
+      category: item.product?.category?.name || "Uncategorized",
+      warehouse: item.warehouse?.name || "Unknown Warehouse",
+      quantity: item.quantity ?? 0,
+      reorder: item.reorderLevel ?? item.minimumStock ?? 10,
+      // Original fields for edit form prefilling
+      productId: item.productId,
+      warehouseId: item.warehouseId,
+      minimumStock: item.minimumStock,
+      maximumStock: item.maximumStock,
+      reorderLevel: item.reorderLevel,
+    }));
+  }, [inventories]);
+
+  // Apply filters and searches
   const filteredStock = useMemo(() => {
-    return stockData.filter((item) => {
+    return mappedStock.filter((item) => {
       const matchesSearch =
         item.product.toLowerCase().includes(search.toLowerCase()) ||
         item.sku.toLowerCase().includes(search.toLowerCase()) ||
@@ -98,7 +103,49 @@ export default function WarehouseStockPage() {
 
       return matchesSearch && matchesCategory && matchesStatus;
     });
+  }, [mappedStock, search, categoryFilter, statusFilter]);
+
+  // Reset page to 1 on filters change
+  useEffect(() => {
+    setCurrentPage(1);
   }, [search, categoryFilter, statusFilter]);
+
+  // Paginated data slice
+  const paginatedStock = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredStock.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredStock, currentPage]);
+
+  const totalPages = Math.ceil(filteredStock.length / ITEMS_PER_PAGE) || 1;
+
+  // Edit stock level click handler
+  const handleEdit = (item) => {
+    setEditingItem(item);
+    setModalOpen(true);
+  };
+
+  // Delete stock level click handler
+  const handleDelete = (item) => {
+    showConfirm({
+      title: "Delete Stock Record",
+      message: `Are you sure you want to remove ${item.product} stock mapping for ${item.warehouse}? This deletes the inventory record.`,
+      confirmText: "Delete Record",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteInventory(item.id);
+          showSuccess("Stock Deleted", "Inventory mapping deleted successfully.");
+          await loadData();
+        } catch (err) {
+          console.error("Delete inventory error:", err);
+          showError(
+            "Delete Failed",
+            err.response?.data?.message || err.message || "Failed to delete inventory record."
+          );
+        }
+      },
+    });
+  };
 
   return (
     <div className="warehouse-page-wrapper">
@@ -122,8 +169,14 @@ export default function WarehouseStockPage() {
       <main className="warehouse-main-content">
         {/* Action Toolbar */}
         <div className="warehouse-toolbar">
-          <button className="btn-add-action" onClick={() => showWarning("Unsaved changes", "Add New Stock Item form module opening...")}>
-            Add New Product <span>+</span>
+          <button
+            className="btn-add-action"
+            onClick={() => {
+              setEditingItem(null);
+              setModalOpen(true);
+            }}
+          >
+            Add Stock Record <span>+</span>
           </button>
 
           <div className="toolbar-controls">
@@ -146,10 +199,11 @@ export default function WarehouseStockPage() {
               className="status-dropdown-pill"
             >
               <option value="All">All Categories</option>
-              <option value="Laptops">Laptops</option>
-              <option value="Printers">Printers</option>
-              <option value="Monitors">Monitors</option>
-              <option value="Accessories">Accessories</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
             </select>
             <select
               value={statusFilter}
@@ -164,36 +218,88 @@ export default function WarehouseStockPage() {
           </div>
         </div>
 
-        {/* Stock Table */}
-        <StockTable stock={filteredStock} />
+        {/* Errors & Notices */}
+        {error && (
+          <div
+            className="warehouse-error"
+            style={{
+              color: "var(--status-out-text)",
+              backgroundColor: "var(--status-out-bg)",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              marginBottom: "20px",
+              border: "1px solid #fecaca",
+              fontWeight: 500,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        {/* Loading Spinner or Stock Table */}
+        {loading ? (
+          <div
+            className="warehouse-loading"
+            style={{
+              textAlign: "center",
+              padding: "60px",
+              color: "var(--text-muted)",
+              fontSize: "16px",
+            }}
+          >
+            Loading stock inventory...
+          </div>
+        ) : (
+          <StockTable
+            stock={paginatedStock}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
 
         {/* Bottom Floating Pagination */}
-        <div className="warehouse-pagination-wrapper">
-          <div className="warehouse-pagination-pill">
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            >
-              &lt;
-            </button>
-            {[1, 2, 3, 4, 5].map((num) => (
+        {!loading && totalPages > 1 && (
+          <div className="warehouse-pagination-wrapper">
+            <div className="warehouse-pagination-pill">
               <button
-                key={num}
-                className={`page-btn ${currentPage === num ? "active" : ""}`}
-                onClick={() => setCurrentPage(num)}
+                className="page-btn"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                style={{ opacity: currentPage === 1 ? 0.4 : 1 }}
               >
-                {num}
+                &lt;
               </button>
-            ))}
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => Math.min(5, p + 1))}
-            >
-              &gt;
-            </button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+                <button
+                  key={num}
+                  className={`page-btn ${currentPage === num ? "active" : ""}`}
+                  onClick={() => setCurrentPage(num)}
+                >
+                  {num}
+                </button>
+              ))}
+              <button
+                className="page-btn"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                style={{ opacity: currentPage === totalPages ? 0.4 : 1 }}
+              >
+                &gt;
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </main>
+
+      {/* Add / Edit Inventory Modal */}
+      <StockModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={loadData}
+        item={editingItem}
+        products={products}
+        warehouses={warehouses}
+      />
     </div>
   );
 }

@@ -4,7 +4,11 @@ export const createInventory = async (data) => {
   return await prisma.inventory.create({
     data,
     include: {
-      product: true,
+      product: {
+        include: {
+          category: true,
+        },
+      },
       warehouse: true,
     },
   });
@@ -13,7 +17,11 @@ export const createInventory = async (data) => {
 export const getAllInventories = async () => {
   return await prisma.inventory.findMany({
     include: {
-      product: true,
+      product: {
+        include: {
+          category: true,
+        },
+      },
       warehouse: true,
     },
     orderBy: {
@@ -26,7 +34,11 @@ export const getInventoryById = async (id) => {
   return await prisma.inventory.findUnique({
     where: { id },
     include: {
-      product: true,
+      product: {
+        include: {
+          category: true,
+        },
+      },
       warehouse: true,
     },
   });
@@ -67,7 +79,11 @@ export const updateInventory = async (id, data) => {
     where: { id },
     data,
     include: {
-      product: true,
+      product: {
+        include: {
+          category: true,
+        },
+      },
       warehouse: true,
     },
   });
