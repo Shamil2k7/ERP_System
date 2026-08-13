@@ -12,13 +12,13 @@ import Swal from "sweetalert2";
 import axios from "axios";
 
 export default function POSPage() {
-  const { showSuccess, showWarning, showError } = useAlert();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [taxes, setTaxes] = useState([]);
   const [discounts, setDiscounts] = useState([]);
+
 
   const [activeTab, setActiveTab] = useState("Products");
   const [activeCategory, setActiveCategory] = useState("All");
