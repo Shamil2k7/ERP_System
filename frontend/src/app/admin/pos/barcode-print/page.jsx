@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import React, { useState, useMemo, useEffect } from "react";
 import Barcode from "react-barcode";
 import { toast, Toaster } from "react-hot-toast";
-
+import { useSettings } from "@/context/SettingsContext";
 import {
   FiPrinter,
   FiSearch,

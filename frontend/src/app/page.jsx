@@ -315,7 +315,7 @@ export default function Home() {
             className={styles.learn}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
-            Learn More →
+            Explore ERPCloud →
           </p>
         </div>
       </section>

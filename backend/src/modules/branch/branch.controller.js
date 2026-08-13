@@ -19,10 +19,11 @@ const addBranch = async (req, res) => {
     });
 
     if (error) {
+      const errorMessages = error.details.map((item) => item.message);
       return res.status(400).json({
         success: false,
-        message: "Validation failed",
-        errors: error.details.map((item) => item.message),
+        message: errorMessages.join(", "),
+        errors: errorMessages,
       });
     }
 
@@ -83,10 +84,11 @@ const editBranch = async (req, res) => {
     });
 
     if (error) {
+      const errorMessages = error.details.map((item) => item.message);
       return res.status(400).json({
         success: false,
-        message: "Validation failed",
-        errors: error.details.map((item) => item.message),
+        message: errorMessages.join(", "),
+        errors: errorMessages,
       });
     }
 
