@@ -15,7 +15,7 @@ export const createSupplierValidation = [
     .withMessage("Contact person cannot exceed 100 characters"),
 
   body("email")
-    .optional({ nullable: true })
+    .optional({ checkFalsy: true })
     .trim()
     .isEmail()
     .withMessage("Invalid email address"),
@@ -67,7 +67,7 @@ export const updateSupplierValidation = [
     .withMessage("Contact person cannot exceed 100 characters"),
 
   body("email")
-    .optional({ nullable: true })
+    .optional({ checkFalsy: true })
     .trim()
     .isEmail()
     .withMessage("Invalid email address"),

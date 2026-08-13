@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FiMail, FiLock, FiEye, FiEyeOff, FiBriefcase, } from "react-icons/fi";
+import { FiMail, FiLock, FiEye, FiEyeOff, FiBriefcase } from "react-icons/fi";
+import { useSettings } from "@/context/SettingsContext";
 import styles from "./LoginForm.module.css";
 
 export default function LoginForm() {
+  const { settings, logoUrl } = useSettings();
   const [showPassword, setShowPassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
@@ -67,10 +67,18 @@ export default function LoginForm() {
     <div className={styles.container}>
       <div className={styles.card}>
         <div className={styles.header}>
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={settings?.companyName || "Company Logo"}
+              style={{ maxHeight: "60px", maxWidth: "200px", objectFit: "contain", marginBottom: "12px" }}
+            />
+          ) : null}
           <h1>Welcome Back</h1>
 
-          <p>Sign in to your Retail ERP account.</p>
+          <p>Sign in to your {settings?.companyName || "Retail ERP"} account.</p>
         </div>
+
 
         {error && (
           <div className={styles.errorMessage}>

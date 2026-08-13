@@ -8,13 +8,17 @@ import styles from "./viewEmployees.module.css";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { getRoles } from "@/services/roleService";
+import { useSettings } from "@/context/SettingsContext";
 
 export default function EmployeePage() {
   const router = useRouter();
+  const { settings, logoUrl } = useSettings();
+
 
   const [roles, setRoles] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [errors, setErrors] = useState({});
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -29,6 +33,45 @@ export default function EmployeePage() {
     employeeId: "",
     role: "",
   });
+
+  const validateEditEmployeeForm = () => {
+    const newErrors = {};
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    } else if (formData.fullName.trim().length < 2) {
+      newErrors.fullName = "Full name must be at least 2 characters";
+    }
+
+    if (!formData.employeeId.trim()) {
+      newErrors.employeeId = "Employee ID is required";
+    }
+
+    if (!formData.role) {
+      newErrors.role = "Role is required";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email address is required";
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        newErrors.email = "Enter a valid email address";
+      }
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else {
+      const phoneRegex = /^[\+\d\s\-\(\)]{7,20}$/;
+      if (!phoneRegex.test(formData.phone.trim())) {
+        newErrors.phone = "Enter a valid phone number (7-20 digits)";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // =====================================================
   // FETCH EMPLOYEES
@@ -88,6 +131,9 @@ export default function EmployeePage() {
       ...previous,
       [name]: value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   // =====================================================
@@ -104,6 +150,7 @@ export default function EmployeePage() {
 
   const handleEditEmployee = (employee) => {
     setCurrentEmployee(employee);
+    setErrors({});
 
     setFormData({
       fullName: employee.fullName || "",
@@ -164,6 +211,12 @@ export default function EmployeePage() {
       return;
     }
 
+    if (!validateEditEmployeeForm()) {
+      return;
+    }
+
+    setSubmitting(true);
+
     try {
       const updateData = { ...formData };
 
@@ -183,11 +236,18 @@ export default function EmployeePage() {
       fetchEmployees();
     } catch (error) {
       console.error("Update employee error:", error);
+      const serverMsg = error.response?.data?.message || "";
+      const lower = serverMsg.toLowerCase();
 
-      toast.error(
-        error.response?.data?.message ||
-          "Failed to update employee"
-      );
+      if (lower.includes("email")) {
+        setErrors((prev) => ({ ...prev, email: serverMsg }));
+      } else if (lower.includes("phone")) {
+        setErrors((prev) => ({ ...prev, phone: serverMsg }));
+      } else if (lower.includes("employee")) {
+        setErrors((prev) => ({ ...prev, employeeId: serverMsg }));
+      } else {
+        toast.error(serverMsg || "Failed to update employee");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -205,6 +265,7 @@ export default function EmployeePage() {
     setIsModalOpen(false);
 
     setCurrentEmployee(null);
+    setErrors({});
 
     setFormData({
       fullName: "",
@@ -447,7 +508,15 @@ export default function EmployeePage() {
                             styles.companyLogo
                           }
                         >
-                          LE
+                          {logoUrl ? (
+                            <img
+                              src={logoUrl}
+                              alt={settings?.companyName || "Company Logo"}
+                              style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+                            />
+                          ) : (
+                            (settings?.companyName || "ERP").substring(0, 2).toUpperCase()
+                          )}
                         </div>
 
                         <span
@@ -772,6 +841,7 @@ export default function EmployeePage() {
 
                 <form
                   onSubmit={handleSubmit}
+                  noValidate
                 >
 
                   {/* FULL NAME */}
@@ -805,8 +875,13 @@ export default function EmployeePage() {
                         styles.input
                       }
                       placeholder="Enter full name"
-                      required
+                      style={errors.fullName ? { borderColor: "#ef4444" } : {}}
                     />
+                    {errors.fullName && (
+                      <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                        {errors.fullName}
+                      </span>
+                    )}
 
                   </div>
 
@@ -842,8 +917,13 @@ export default function EmployeePage() {
                         styles.input
                       }
                       placeholder="EMP-001"
-                      required
+                      style={errors.employeeId ? { borderColor: "#ef4444" } : {}}
                     />
+                    {errors.employeeId && (
+                      <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                        {errors.employeeId}
+                      </span>
+                    )}
 
                   </div>
 
@@ -871,7 +951,7 @@ export default function EmployeePage() {
                       value={formData.role}
                       onChange={handleInputChange}
                       className={styles.input}
-                      required
+                      style={errors.role ? { borderColor: "#ef4444" } : {}}
                     >
                       <option value="">Select Role</option>
                       {roles.length > 0 ? (
@@ -888,6 +968,11 @@ export default function EmployeePage() {
                         </>
                       )}
                     </select>
+                    {errors.role && (
+                      <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                        {errors.role}
+                      </span>
+                    )}
 
                   </div>
 
@@ -923,8 +1008,13 @@ export default function EmployeePage() {
                         styles.input
                       }
                       placeholder="employee@example.com"
-                      required
+                      style={errors.email ? { borderColor: "#ef4444" } : {}}
                     />
+                    {errors.email && (
+                      <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                        {errors.email}
+                      </span>
+                    )}
 
                   </div>
 
@@ -960,8 +1050,13 @@ export default function EmployeePage() {
                         styles.input
                       }
                       placeholder="+91 9876543210"
-                      required
+                      style={errors.phone ? { borderColor: "#ef4444" } : {}}
                     />
+                    {errors.phone && (
+                      <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                        {errors.phone}
+                      </span>
+                    )}
 
                   </div>
 

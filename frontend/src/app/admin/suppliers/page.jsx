@@ -1,6 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  getSuppliers,
+  createSupplier,
+  updateSupplier,
+  deleteSupplier,
+  searchSuppliers,
+} from "@/services/supplierService";
 
 import {
   FiPlus,
@@ -23,130 +30,63 @@ import {
   FiTool,
   FiSmartphone,
   FiBriefcase,
+  FiUserCheck,
 } from "react-icons/fi";
 
 import styles from "./viewSuppliers.module.css";
-const initialSuppliers = [
-  {
-    id: "#SUP0020",
-    name: "Apex Computers",
-    email: "apexcomputers@example.com",
-    phone: "+1 (758) 364-7314",
-    country: "Germany",
-    status: "Active",
-    icon: "computer",
-  },
-  {
-    id: "#SUP0019",
-    name: "Beats Headphones",
-    email: "beatsheadphone@example.com",
-    phone: "+1 (382) 764-2864",
-    country: "Japan",
-    status: "Active",
-    icon: "headphone",
-  },
-  {
-    id: "#SUP0018",
-    name: "Dazzle Shoes",
-    email: "dazzleshoes@example.com",
-    phone: "+1 (648) 375-3145",
-    country: "USA",
-    status: "Active",
-    icon: "shoe",
-  },
-  {
-    id: "#SUP0017",
-    name: "Best Accessories",
-    email: "bestaccessories@example.com",
-    phone: "+1 (325) 874-3284",
-    country: "Austria",
-    status: "Active",
-    icon: "watch",
-  },
-  {
-    id: "#SUP0016",
-    name: "A-Z Store",
-    email: "a2zstore@example.com",
-    phone: "+1 (783) 856-6575",
-    country: "Turkey",
-    status: "Active",
-    icon: "store",
-  },
-  {
-    id: "#SUP0015",
-    name: "Hatimi Hardwares",
-    email: "hatimihardware@example.com",
-    phone: "+1 (853) 475-3248",
-    country: "Mexico",
-    status: "Active",
-    icon: "tool",
-  },
-  {
-    id: "#SUP0014",
-    name: "Aesthetic Bags",
-    email: "aestheticbags@example.com",
-    phone: "+1 (235) 745-7465",
-    country: "France",
-    status: "Active",
-    icon: "bag",
-  },
-  {
-    id: "#SUP0013",
-    name: "Alpha Mobiles",
-    email: "alphamobiles@example.com",
-    phone: "+1 (756) 352-3425",
-    country: "Greece",
-    status: "Active",
-    icon: "mobile",
-  },
-  {
-    id: "#SUP0012",
-    name: "Sigma Chairs",
-    email: "sigmachair@example.com",
-    phone: "+1 (602) 735-7453",
-    country: "Italy",
-    status: "Active",
-    icon: "chair",
-  },
-  {
-    id: "#SUP0011",
-    name: "Zenith Bags",
-    email: "zenithbags@example.com",
-    phone: "+1 (453) 345-2486",
-    country: "China",
-    status: "Active",
-    icon: "bag",
-  },
-];
 
 const emptyForm = {
-  name: "",
+  companyName: "",
+  contactPerson: "",
   email: "",
   phone: "",
+  address: "",
+  city: "",
+  state: "",
   country: "",
-  status: "Active",
+  taxNumber: "",
+  status: "ACTIVE",
 };
 
 export default function SuppliersPage() {
-  const [suppliers, setSuppliers] = useState(initialSuppliers);
+  const [suppliers, setSuppliers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const [search, setSearch] = useState("");
-
   const [showAddForm, setShowAddForm] = useState(false);
-
   const [form, setForm] = useState(emptyForm);
-
   const [editingId, setEditingId] = useState(null);
-
   const [openMenu, setOpenMenu] = useState(null);
-
   const [sortOrder, setSortOrder] = useState("default");
-
   const [filterStatus, setFilterStatus] = useState("All");
+
+  const fetchSupplierData = async () => {
+    try {
+      setLoading(true);
+      setErrorMsg("");
+      const response = await getSuppliers();
+      if (response && response.data) {
+        setSuppliers(response.data);
+      } else if (Array.isArray(response)) {
+        setSuppliers(response);
+      }
+    } catch (err) {
+      console.error("Failed to fetch suppliers:", err);
+      setErrorMsg(err.response?.data?.message || err.message || "Failed to load suppliers.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSupplierData();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -158,63 +98,79 @@ export default function SuppliersPage() {
     setForm(emptyForm);
     setShowAddForm(true);
     setOpenMenu(null);
+    setErrorMsg("");
   };
 
   const handleCancel = () => {
     setShowAddForm(false);
     setEditingId(null);
     setForm(emptyForm);
+    setErrorMsg("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.name.trim()) {
-      alert("Supplier name is required.");
+    if (!form.companyName.trim()) {
+      alert("Company Name is required.");
       return;
     }
 
-    if (editingId) {
-      setSuppliers((prev) =>
-        prev.map((supplier) =>
-          supplier.id === editingId
-            ? {
-                ...supplier,
-                name: form.name,
-                email: form.email,
-                phone: form.phone,
-                country: form.country,
-                status: form.status,
-              }
-            : supplier
-        )
-      );
-    } else {
-      const newSupplier = {
-        id: `#SUP${String(suppliers.length + 21).padStart(4, "0")}`,
-        name: form.name,
-        email: form.email,
-        phone: form.phone,
-        country: form.country,
-        status: form.status,
-        icon: "store",
-      };
-
-      setSuppliers((prev) => [newSupplier, ...prev]);
+    if (!form.phone.trim()) {
+      alert("Phone number is required.");
+      return;
     }
 
-    handleCancel();
+    try {
+      setSubmitting(true);
+      setErrorMsg("");
+
+      const payload = {
+        companyName: form.companyName.trim(),
+        contactPerson: form.contactPerson.trim() || undefined,
+        email: form.email.trim() || undefined,
+        phone: form.phone.trim(),
+        address: form.address.trim() || undefined,
+        city: form.city.trim() || undefined,
+        state: form.state.trim() || undefined,
+        country: form.country.trim() || undefined,
+        taxNumber: form.taxNumber.trim() || undefined,
+        status: form.status,
+      };
+
+      if (editingId) {
+        const res = await updateSupplier(editingId, payload);
+        setSuccessMsg(res.message || "Supplier updated successfully");
+      } else {
+        const res = await createSupplier(payload);
+        setSuccessMsg(res.message || "Supplier created successfully");
+      }
+
+      await fetchSupplierData();
+      handleCancel();
+      setTimeout(() => setSuccessMsg(""), 4000);
+    } catch (err) {
+      console.error("Supplier save error:", err);
+      setErrorMsg(err.response?.data?.message || err.message || "Failed to save supplier.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleEdit = (supplier) => {
     setEditingId(supplier.id);
 
     setForm({
-      name: supplier.name,
-      email: supplier.email,
-      phone: supplier.phone,
-      country: supplier.country,
-      status: supplier.status,
+      companyName: supplier.companyName || supplier.name || "",
+      contactPerson: supplier.contactPerson || "",
+      email: supplier.email || "",
+      phone: supplier.phone || "",
+      address: supplier.address || "",
+      city: supplier.city || "",
+      state: supplier.state || "",
+      country: supplier.country || "",
+      taxNumber: supplier.taxNumber || "",
+      status: supplier.status || "ACTIVE",
     });
 
     setShowAddForm(true);
@@ -226,18 +182,23 @@ export default function SuppliersPage() {
     });
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this supplier?"
     );
 
     if (!confirmed) return;
 
-    setSuppliers((prev) =>
-      prev.filter((supplier) => supplier.id !== id)
-    );
-
-    setOpenMenu(null);
+    try {
+      setOpenMenu(null);
+      const res = await deleteSupplier(id);
+      setSuccessMsg(res.message || "Supplier deleted successfully.");
+      await fetchSupplierData();
+      setTimeout(() => setSuccessMsg(""), 4000);
+    } catch (err) {
+      console.error("Supplier delete error:", err);
+      setErrorMsg(err.response?.data?.message || err.message || "Failed to delete supplier.");
+    }
   };
 
   const handleSort = () => {
@@ -246,11 +207,12 @@ export default function SuppliersPage() {
     );
   };
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setSearch("");
     setFilterStatus("All");
     setSortOrder("default");
     setOpenMenu(null);
+    await fetchSupplierData();
   };
 
   const handlePrint = () => {
@@ -260,20 +222,24 @@ export default function SuppliersPage() {
   const handleExport = () => {
     const headers = [
       "ID",
-      "Supplier",
+      "Company Name",
+      "Contact Person",
       "Email",
       "Phone",
       "Country",
+      "Tax Number",
       "Status",
     ];
 
     const rows = suppliers.map((supplier) => [
       supplier.id,
-      supplier.name,
-      supplier.email,
-      supplier.phone,
-      supplier.country,
-      supplier.status,
+      supplier.companyName || supplier.name || "",
+      supplier.contactPerson || "",
+      supplier.email || "",
+      supplier.phone || "",
+      supplier.country || "",
+      supplier.taxNumber || "",
+      supplier.status || "ACTIVE",
     ]);
 
     const csv = [
@@ -290,18 +256,12 @@ export default function SuppliersPage() {
     });
 
     const url = URL.createObjectURL(blob);
-
     const link = document.createElement("a");
-
     link.href = url;
     link.download = "suppliers.csv";
-
     document.body.appendChild(link);
-
     link.click();
-
     document.body.removeChild(link);
-
     URL.revokeObjectURL(url);
   };
 
@@ -310,102 +270,54 @@ export default function SuppliersPage() {
 
     if (search.trim()) {
       const query = search.toLowerCase();
-
       data = data.filter(
         (supplier) =>
-          supplier.name.toLowerCase().includes(query) ||
-          supplier.email.toLowerCase().includes(query) ||
-          supplier.phone.toLowerCase().includes(query) ||
-          supplier.country.toLowerCase().includes(query) ||
-          supplier.id.toLowerCase().includes(query)
+          (supplier.companyName || supplier.name || "").toLowerCase().includes(query) ||
+          (supplier.contactPerson || "").toLowerCase().includes(query) ||
+          (supplier.email || "").toLowerCase().includes(query) ||
+          (supplier.phone || "").toLowerCase().includes(query) ||
+          (supplier.country || "").toLowerCase().includes(query) ||
+          (supplier.id || "").toLowerCase().includes(query)
       );
     }
 
     if (filterStatus !== "All") {
       data = data.filter(
-        (supplier) => supplier.status === filterStatus
+        (supplier) =>
+          (supplier.status || "ACTIVE").toUpperCase() === filterStatus.toUpperCase()
       );
     }
 
     if (sortOrder === "az") {
       data.sort((a, b) =>
-        a.name.localeCompare(b.name)
+        (a.companyName || a.name || "").localeCompare(b.companyName || b.name || "")
       );
     }
 
     if (sortOrder === "za") {
       data.sort((a, b) =>
-        b.name.localeCompare(a.name)
+        (b.companyName || b.name || "").localeCompare(a.companyName || a.name || "")
       );
     }
 
     return data;
   }, [suppliers, search, filterStatus, sortOrder]);
 
-  const getSupplierIcon = (type) => {
-    switch (type) {
-      case "computer":
-        return <FiPackage />;
-
-      case "headphone":
-        return <FiHeadphones />;
-
-      case "shoe":
-        return <FiShoppingBag />;
-
-      case "watch":
-        return <FiWatch />;
-
-      case "tool":
-        return <FiTool />;
-
-      case "mobile":
-        return <FiSmartphone />;
-
-      case "chair":
-        return <FiBriefcase />;
-
-      case "bag":
-        return <FiShoppingBag />;
-
-      default:
-        return <FiPackage />;
-    }
-  };
-
-  const getIconClass = (type) => {
-    switch (type) {
-      case "computer":
-        return styles.computer;
-
-      case "headphone":
-        return styles.headphone;
-
-      case "shoe":
-        return styles.shoe;
-
-      case "watch":
-        return styles.watch;
-
-      case "tool":
-        return styles.tool;
-
-      case "mobile":
-        return styles.mobile;
-
-      case "chair":
-        return styles.chair;
-
-      case "bag":
-        return styles.bag;
-
-      default:
-        return styles.store;
-    }
-  };
-
   return (
     <div className={styles.page}>
+
+      {/* ================= NOTIFICATIONS ================= */}
+      {errorMsg && (
+        <div style={{ padding: "12px 16px", backgroundColor: "#fef2f2", color: "#dc2626", borderRadius: "8px", border: "1px solid #fecaca", marginBottom: "16px" }}>
+          {errorMsg}
+        </div>
+      )}
+
+      {successMsg && (
+        <div style={{ padding: "12px 16px", backgroundColor: "#f0fdf4", color: "#16a34a", borderRadius: "8px", border: "1px solid #bbf7d0", marginBottom: "16px" }}>
+          {successMsg}
+        </div>
+      )}
 
       {/* ================= HEADER ================= */}
 
@@ -431,7 +343,6 @@ export default function SuppliersPage() {
           >
             <FiDownload size={15} />
             Export
-
             <FiChevronDown size={14} />
           </button>
 
@@ -448,7 +359,7 @@ export default function SuppliersPage() {
 
       </div>
 
-      {/* ================= ADD SUPPLIER FORM ================= */}
+      {/* ================= ADD / EDIT SUPPLIER FORM ================= */}
 
       {showAddForm && (
         <div className={styles.addCard}>
@@ -457,9 +368,7 @@ export default function SuppliersPage() {
 
             <div>
               <h2>
-                {editingId
-                  ? "Edit Supplier"
-                  : "Add Supplier"}
+                {editingId ? "Edit Supplier" : "Add Supplier"}
               </h2>
 
               <p>
@@ -485,28 +394,36 @@ export default function SuppliersPage() {
           >
 
             <div className={styles.formGroup}>
-
-              <label htmlFor="name">
-                Supplier Name
+              <label htmlFor="companyName">
+                Company Name *
               </label>
-
               <input
-                id="name"
-                name="name"
-                value={form.name}
+                id="companyName"
+                name="companyName"
+                value={form.companyName}
                 onChange={handleChange}
-                placeholder="Enter supplier name"
+                placeholder="e.g. Apex Computers Ltd"
                 required
               />
-
             </div>
 
             <div className={styles.formGroup}>
+              <label htmlFor="contactPerson">
+                Contact Person
+              </label>
+              <input
+                id="contactPerson"
+                name="contactPerson"
+                value={form.contactPerson}
+                onChange={handleChange}
+                placeholder="e.g. John Doe"
+              />
+            </div>
 
+            <div className={styles.formGroup}>
               <label htmlFor="email">
                 Email
               </label>
-
               <input
                 id="email"
                 name="email"
@@ -515,76 +432,61 @@ export default function SuppliersPage() {
                 onChange={handleChange}
                 placeholder="supplier@example.com"
               />
-
             </div>
 
             <div className={styles.formGroup}>
-
               <label htmlFor="phone">
-                Phone
+                Phone *
               </label>
-
               <input
                 id="phone"
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
-                placeholder="+1 (000) 000-0000"
+                placeholder="+1 (555) 019-2834"
+                required
               />
-
             </div>
 
             <div className={styles.formGroup}>
-
               <label htmlFor="country">
                 Country
               </label>
-
-              <select
+              <input
                 id="country"
                 name="country"
                 value={form.country}
                 onChange={handleChange}
-              >
-                <option value="">
-                  Select Country
-                </option>
-
-                <option value="India">India</option>
-                <option value="USA">USA</option>
-                <option value="Germany">Germany</option>
-                <option value="Japan">Japan</option>
-                <option value="France">France</option>
-                <option value="Italy">Italy</option>
-                <option value="China">China</option>
-                <option value="Australia">Australia</option>
-                <option value="Canada">Canada</option>
-                <option value="UAE">UAE</option>
-              </select>
-
+                placeholder="e.g. United States, India, Germany"
+              />
             </div>
 
             <div className={styles.formGroup}>
+              <label htmlFor="taxNumber">
+                Tax / GST Number
+              </label>
+              <input
+                id="taxNumber"
+                name="taxNumber"
+                value={form.taxNumber}
+                onChange={handleChange}
+                placeholder="e.g. TAX-12345678"
+              />
+            </div>
 
+            <div className={styles.formGroup}>
               <label htmlFor="status">
                 Status
               </label>
-
               <select
                 id="status"
                 name="status"
                 value={form.status}
                 onChange={handleChange}
               >
-                <option value="Active">
-                  Active
-                </option>
-
-                <option value="Inactive">
-                  Inactive
-                </option>
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="INACTIVE">INACTIVE</option>
               </select>
-
             </div>
 
             <div className={styles.formActions}>
@@ -593,6 +495,7 @@ export default function SuppliersPage() {
                 type="button"
                 className={styles.cancelButton}
                 onClick={handleCancel}
+                disabled={submitting}
               >
                 Cancel
               </button>
@@ -600,10 +503,12 @@ export default function SuppliersPage() {
               <button
                 type="submit"
                 className={styles.saveButton}
+                disabled={submitting}
               >
                 <FiSave size={16} />
-
-                {editingId
+                {submitting
+                  ? "Saving..."
+                  : editingId
                   ? "Update Supplier"
                   : "Save Supplier"}
               </button>
@@ -624,86 +529,57 @@ export default function SuppliersPage() {
         <div className={styles.toolbar}>
 
           <div className={styles.searchBox}>
-
             <FiSearch size={18} />
-
             <input
               type="text"
-              placeholder="Search"
+              placeholder="Search suppliers..."
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
+              onChange={(e) => setSearch(e.target.value)}
             />
-
           </div>
 
           <div className={styles.toolbarRight}>
 
             {/* FILTER */}
-
             <div className={styles.dropdownWrapper}>
-
               <button
                 type="button"
                 className={styles.toolbarButton}
                 onClick={() =>
                   setFilterStatus((prev) =>
                     prev === "All"
-                      ? "Active"
-                      : prev === "Active"
-                      ? "Inactive"
+                      ? "ACTIVE"
+                      : prev === "ACTIVE"
+                      ? "INACTIVE"
                       : "All"
                   )
                 }
               >
                 <FiFilter size={16} />
-
-                Filter
-
+                Filter: {filterStatus}
                 <FiChevronDown size={14} />
-
               </button>
-
             </div>
 
             {/* SORT */}
-
             <button
               type="button"
               className={styles.toolbarButton}
               onClick={handleSort}
             >
               <FiArrowDown size={15} />
-
-              Sort By
-
+              Sort: {sortOrder.toUpperCase()}
               <FiChevronDown size={14} />
-
-            </button>
-
-            {/* COLUMN BUTTON */}
-
-            <button
-              type="button"
-              className={styles.iconButton}
-              title="Columns"
-            >
-              <span className={styles.columnIcon}>
-                <span></span>
-                <span></span>
-              </span>
             </button>
 
             {/* REFRESH */}
-
             <button
               type="button"
               className={styles.iconButton}
               onClick={handleRefresh}
               title="Refresh"
             >
-              <FiRefreshCw size={17} />
+              <FiRefreshCw size={17} className={loading ? "animate-spin" : ""} />
             </button>
 
           </div>
@@ -719,176 +595,132 @@ export default function SuppliersPage() {
             <thead>
 
               <tr>
-
                 <th>ID</th>
-
-                <th>Supplier</th>
-
+                <th>Supplier Company</th>
+                <th>Contact Person</th>
                 <th>Email</th>
-
                 <th>Phone</th>
-
                 <th>Country</th>
-
                 <th>Status</th>
-
                 <th>Action</th>
-
               </tr>
 
             </thead>
 
             <tbody>
 
-              {filteredSuppliers.length > 0 ? (
-                filteredSuppliers.map((supplier) => (
+              {loading ? (
+                <tr>
+                  <td colSpan="8" className={styles.empty}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "20px" }}>
+                      <FiRefreshCw className="animate-spin" size={18} />
+                      Loading suppliers from database...
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredSuppliers.length > 0 ? (
+                filteredSuppliers.map((supplier) => {
+                  const supplierName = supplier.companyName || supplier.name || "N/A";
+                  const isSupplierActive = (supplier.status || "ACTIVE").toUpperCase() === "ACTIVE";
 
-                  <tr key={supplier.id}>
+                  return (
+                    <tr key={supplier.id}>
 
-                    <td className={styles.id}>
-                      {supplier.id}
-                    </td>
+                      <td className={styles.id}>
+                        {supplier.id.substring(0, 8)}...
+                      </td>
 
-                    <td>
-
-                      <div className={styles.supplierCell}>
-
-                        <div
-                          className={`${styles.supplierIcon} ${getIconClass(
-                            supplier.icon
-                          )}`}
-                        >
-                          {getSupplierIcon(
-                            supplier.icon
-                          )}
+                      <td>
+                        <div className={styles.supplierCell}>
+                          <div className={`${styles.supplierIcon} ${styles.store}`}>
+                            <FiPackage />
+                          </div>
+                          <strong>{supplierName}</strong>
                         </div>
+                      </td>
 
-                        <strong>
-                          {supplier.name}
-                        </strong>
+                      <td>
+                        {supplier.contactPerson || "—"}
+                      </td>
 
-                      </div>
+                      <td>
+                        {supplier.email || "—"}
+                      </td>
 
-                    </td>
+                      <td>
+                        {supplier.phone || "—"}
+                      </td>
 
-                    <td>
-                      {supplier.email}
-                    </td>
+                      <td>
+                        {supplier.country || "—"}
+                      </td>
 
-                    <td>
-                      {supplier.phone}
-                    </td>
-
-                    <td>
-                      {supplier.country}
-                    </td>
-
-                    <td>
-
-                      <span
-                        className={
-                          supplier.status ===
-                          "Active"
-                            ? styles.active
-                            : styles.inactive
-                        }
-                      >
-                        {supplier.status}
-                      </span>
-
-                    </td>
-
-                    <td>
-
-                      <div
-                        className={
-                          styles.actionWrapper
-                        }
-                      >
-
-                        <button
-                          type="button"
+                      <td>
+                        <span
                           className={
-                            styles.actionButton
-                          }
-                          onClick={() =>
-                            setOpenMenu(
-                              openMenu ===
-                                supplier.id
-                                ? null
-                                : supplier.id
-                            )
+                            isSupplierActive
+                              ? styles.active
+                              : styles.inactive
                           }
                         >
-                          <FiMoreVertical
-                            size={17}
-                          />
-                        </button>
+                          {supplier.status || "ACTIVE"}
+                        </span>
+                      </td>
 
-                        {openMenu ===
-                          supplier.id && (
+                      <td>
 
-                          <div
-                            className={
-                              styles.actionMenu
+                        <div className={styles.actionWrapper}>
+
+                          <button
+                            type="button"
+                            className={styles.actionButton}
+                            onClick={() =>
+                              setOpenMenu(
+                                openMenu === supplier.id ? null : supplier.id
+                              )
                             }
                           >
+                            <FiMoreVertical size={17} />
+                          </button>
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleEdit(
-                                  supplier
-                                )
-                              }
-                            >
-                              <FiEdit2
-                                size={14}
-                              />
+                          {openMenu === supplier.id && (
 
-                              Edit
-                            </button>
+                            <div className={styles.actionMenu}>
 
-                            <button
-                              type="button"
-                              className={
-                                styles.deleteItem
-                              }
-                              onClick={() =>
-                                handleDelete(
-                                  supplier.id
-                                )
-                              }
-                            >
-                              <FiTrash2
-                                size={14}
-                              />
+                              <button
+                                type="button"
+                                onClick={() => handleEdit(supplier)}
+                              >
+                                <FiEdit2 size={14} />
+                                Edit
+                              </button>
 
-                              Delete
-                            </button>
+                              <button
+                                type="button"
+                                className={styles.deleteItem}
+                                onClick={() => handleDelete(supplier.id)}
+                              >
+                                <FiTrash2 size={14} />
+                                Delete
+                              </button>
 
-                          </div>
+                            </div>
 
-                        )}
+                          )}
 
-                      </div>
+                        </div>
 
-                    </td>
+                      </td>
 
-                  </tr>
-
-                ))
+                    </tr>
+                  );
+                })
               ) : (
 
                 <tr>
-
-                  <td
-                    colSpan="7"
-                    className={styles.empty}
-                  >
+                  <td colSpan="8" className={styles.empty}>
                     No suppliers found
                   </td>
-
                 </tr>
 
               )}

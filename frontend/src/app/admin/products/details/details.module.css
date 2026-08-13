@@ -498,12 +498,12 @@
   overflow-x: auto;
 }
 
-:global(table) {
+.tableWrapper table {
   width: 100%;
   border-collapse: collapse;
 }
 
-:global(th) {
+.tableWrapper th {
   text-align: left;
   background: #fafbfc;
   color: #8992a2;
@@ -514,14 +514,14 @@
   border-bottom: 1px solid #edf0f4;
 }
 
-:global(td) {
+.tableWrapper td {
   padding: 16px 22px;
   border-bottom: 1px solid #f0f2f5;
   color: #596273;
   font-size: 13px;
 }
 
-tbody tr:last-child td {
+.tableWrapper tbody tr:last-child td {
   border-bottom: none;
 }
 

@@ -41,6 +41,8 @@ export default function BranchesPage() {
   const [editingId, setEditingId] = useState(null);
   const [sortOrder, setSortOrder] = useState("default");
 
+  const [errors, setErrors] = useState({});
+
   const [formData, setFormData] = useState({
     name: "",
     code: "",
@@ -51,6 +53,39 @@ export default function BranchesPage() {
     email: "",
     isActive: true,
   });
+
+  const validateBranchForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Branch name is required";
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = "Branch name must be at least 2 characters";
+    }
+
+    if (!formData.code.trim()) {
+      newErrors.code = "Branch code is required";
+    } else if (formData.code.trim().length < 2) {
+      newErrors.code = "Branch code must be at least 2 characters";
+    }
+
+    if (formData.phone.trim()) {
+      const phoneRegex = /^[\+\d\s\-\(\)]{7,20}$/;
+      if (!phoneRegex.test(formData.phone.trim())) {
+        newErrors.phone = "Enter a valid phone number (7-20 digits)";
+      }
+    }
+
+    if (formData.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        newErrors.email = "Enter a valid email address";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   /* =========================
      FETCH BRANCHES
@@ -125,18 +160,15 @@ export default function BranchesPage() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleSaveBranch = async (e) => {
     e.preventDefault();
 
-    if (!formData.name.trim()) {
-      toast.error("Branch name is required");
-      return;
-    }
-
-    if (!formData.code.trim()) {
-      toast.error("Branch code is required");
+    if (!validateBranchForm()) {
       return;
     }
 
@@ -164,14 +196,22 @@ export default function BranchesPage() {
       handleCancel();
     } catch (err) {
       console.error(err);
-      toast.error(
-        err.response?.data?.message || err.message || "Failed to save branch"
-      );
+      const serverMessage = err.response?.data?.message || err.message || "";
+      if (serverMessage.toLowerCase().includes("code")) {
+        setErrors((prev) => ({ ...prev, code: serverMessage }));
+      } else {
+        const errorMessage =
+          err.response?.data?.errors?.join(", ") ||
+          serverMessage ||
+          "Failed to save branch";
+        toast.error(errorMessage);
+      }
     }
   };
 
   const handleEdit = (item) => {
     setEditingId(item.id);
+    setErrors({});
     setFormData({
       name: item.name || "",
       code: item.code || "",
@@ -202,6 +242,7 @@ export default function BranchesPage() {
 
   const handleCancel = () => {
     setEditingId(null);
+    setErrors({});
     setFormData({
       name: "",
       code: "",
@@ -284,7 +325,7 @@ export default function BranchesPage() {
             </button>
           </div>
 
-          <form className={styles.form} onSubmit={handleSaveBranch}>
+          <form className={styles.form} onSubmit={handleSaveBranch} noValidate>
             <div className={styles.formGroup}>
               <label>
                 Branch Name <span>*</span>
@@ -295,8 +336,13 @@ export default function BranchesPage() {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Main Headquarter"
-                required
+                style={errors.name ? { borderColor: "#ef4444" } : {}}
               />
+              {errors.name && (
+                <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                  {errors.name}
+                </span>
+              )}
             </div>
 
             <div className={styles.formGroup}>
@@ -309,8 +355,13 @@ export default function BranchesPage() {
                 value={formData.code}
                 onChange={handleChange}
                 placeholder="HQ-01"
-                required
+                style={errors.code ? { borderColor: "#ef4444" } : {}}
               />
+              {errors.code && (
+                <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                  {errors.code}
+                </span>
+              )}
             </div>
 
             <div className={styles.formGroup}>
@@ -321,7 +372,13 @@ export default function BranchesPage() {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="9876543210"
+                style={errors.phone ? { borderColor: "#ef4444" } : {}}
               />
+              {errors.phone && (
+                <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                  {errors.phone}
+                </span>
+              )}
             </div>
 
             <div className={styles.formGroup}>
@@ -332,7 +389,13 @@ export default function BranchesPage() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="branch@company.com"
+                style={errors.email ? { borderColor: "#ef4444" } : {}}
               />
+              {errors.email && (
+                <span style={{ color: "#ef4444", fontSize: "12px", marginTop: "4px", display: "block" }}>
+                  {errors.email}
+                </span>
+              )}
             </div>
 
             <div className={styles.formGroup}>
