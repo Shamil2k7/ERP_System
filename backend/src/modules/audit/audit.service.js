@@ -59,7 +59,12 @@ export const recordAuditLog = async (req, { action, entity, entityId, details, u
 
     const logData = {
       userId: currentUser?.id || currentUser?.userId || null,
-      userName: currentUser?.fullName || currentUser?.name || currentUser?.userName || "System / Guest",
+      userName:
+        currentUser?.fullName ||
+        currentUser?.name ||
+        currentUser?.userName ||
+        currentUser?.email ||
+        "System / Guest",
       userEmail: currentUser?.email || null,
       action: action ? String(action).toUpperCase() : "UNKNOWN",
       entity: entity ? String(entity) : "System",
