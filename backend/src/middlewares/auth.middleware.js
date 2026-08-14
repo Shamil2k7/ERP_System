@@ -26,7 +26,7 @@ export const attachUserIfAuthenticated = async (req, res, next) => {
       if (decoded && decoded.id) {
         const user = await prisma.user.findUnique({
           where: { id: decoded.id },
-          include: { role: true },
+          include: { roleRef: true, branch: true },
         });
 
         if (user) {
@@ -35,7 +35,8 @@ export const attachUserIfAuthenticated = async (req, res, next) => {
             fullName: user.fullName || user.email,
             email: user.email,
             employeeId: user.employeeId,
-            role: user.role?.name || "User",
+            role: user.roleRef?.name || user.role || "User",
+            branchId: user.branchId,
           };
         }
       }

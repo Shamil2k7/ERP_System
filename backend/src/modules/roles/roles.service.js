@@ -5,6 +5,7 @@ import {
   createRole,
   updateRole,
   deleteRole,
+  unassignUsersFromRole,
 } from "./roles.repository.js";
 
 const fetchAllRoles = async () => {
@@ -75,9 +76,8 @@ const removeRole = async (id) => {
     throw new Error("Role not found");
   }
 
-  if (existingRole._count && existingRole._count.users > 0) {
-    throw new Error("Cannot delete role assigned to active users/employees");
-  }
+  // Safely unassign any employees/users assigned to this role first
+  await unassignUsersFromRole(id);
 
   await deleteRole(id);
 

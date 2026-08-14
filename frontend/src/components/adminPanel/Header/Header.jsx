@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   FiMenu,
@@ -9,7 +10,6 @@ import {
   FiMoon,
   FiGlobe,
   FiChevronDown,
-  FiUser,
 } from "react-icons/fi";
 import { useSettings } from "@/context/SettingsContext";
 
@@ -17,6 +17,18 @@ import styles from "./Header.module.css";
 
 export default function Header({ toggleSidebar }) {
   const { settings } = useSettings();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        setUser(JSON.parse(stored));
+      }
+    } catch (err) {
+      console.error("Failed to parse user in Header", err);
+    }
+  }, []);
 
   return (
     <header className={styles.header}>
@@ -32,7 +44,13 @@ export default function Header({ toggleSidebar }) {
           <FiMenu />
         </button>
 
-       
+        <div className={styles.searchBox}>
+          <FiSearch />
+          <input
+            type="text"
+            placeholder={`Search ${settings?.companyName ? settings.companyName + "..." : "..."}`}
+          />
+        </div>
 
       </div>
 
@@ -40,11 +58,13 @@ export default function Header({ toggleSidebar }) {
 
       <div className={styles.right}>
 
-        
+        <button className={styles.iconBtn} title="Language">
+          <FiGlobe />
+        </button>
 
-        {/* <button className={styles.iconBtn} title="Theme">
+        <button className={styles.iconBtn} title="Theme">
           <FiMoon />
-        </button> */}
+        </button>
 
         <button className={styles.iconBtn} title="Notifications">
           <FiBell />
@@ -63,8 +83,8 @@ export default function Header({ toggleSidebar }) {
           />
 
           <div>
-            <h4>Admin</h4>
-            <span>Administrator</span>
+            <h4>{user?.fullName || "Admin"}</h4>
+            <span>{user?.role || "Administrator"}</span>
           </div>
 
           <FiChevronDown />
