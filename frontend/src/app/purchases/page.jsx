@@ -3,6 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axios from "axios";
+import {
+  FiPlus,
+  FiPrinter,
+  FiDownload,
+  FiSearch,
+  FiChevronDown,
+  FiRefreshCw,
+  FiArrowDown,
+} from "react-icons/fi";
 import PurchaseTable from "./components/PurchaseTable";
 import "./purchases.css";
 
@@ -13,9 +22,9 @@ const api = axios.create({
 });
 
 export default function PurchasesPage() {
-  const [activeTab, setActiveTab] = useState("Purchase Order Management");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [sortOrder, setSortOrder] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
 
   const [purchases, setPurchases] = useState([]);
@@ -34,6 +43,7 @@ export default function PurchasesPage() {
       const res = await api.get("/purchases");
       setPurchases(res.data.data || []);
     } catch (err) {
+      console.error("Failed to fetch purchases:", err);
       setError(
         err.response?.data?.message || "Failed to load purchases. Please try again."
       );
@@ -42,12 +52,61 @@ export default function PurchasesPage() {
     }
   };
 
+  // Delete purchase handler
+  const handleDeletePurchase = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this purchase order?")) {
+      return;
+    }
+    try {
+      await api.delete(`/purchases/${id}`);
+      setPurchases((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete purchase order.");
+    }
+  };
+
+  // Print handle
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // Export handle
+  const handleExportCSV = () => {
+    if (purchases.length === 0) return;
+    const headers = ["Purchase No", "Supplier", "Products Count", "Total Amount", "Status"];
+    const rows = purchases.map((p) => [
+      p.purchaseNo,
+      p.supplier?.companyName || p.supplier?.name || "—",
+      p.items?.length || 0,
+      p.totalAmount,
+      p.status,
+    ]);
+
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "purchases_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleSort = () => {
+    if (sortOrder === "default") setSortOrder("asc");
+    else if (sortOrder === "asc") setSortOrder("desc");
+    else setSortOrder("default");
+  };
+
   // Map backend shape -> table row shape
   const mappedPurchases = useMemo(() => {
     return purchases.map((p) => ({
       id: p.id,
       purchaseNo: p.purchaseNo,
-      supplier: p.supplier?.name || "—",
+      supplier: p.supplier?.companyName || p.supplier?.name || "—",
       totalProducts: p.items?.length || 0,
       totalQty:
         p.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0,
@@ -58,7 +117,7 @@ export default function PurchasesPage() {
   }, [purchases]);
 
   const filteredPurchases = useMemo(() => {
-    return mappedPurchases.filter((purchase) => {
+    let result = mappedPurchases.filter((purchase) => {
       const q = search.toLowerCase();
       const matchesSearch =
         purchase.purchaseNo?.toLowerCase().includes(q) ||
@@ -71,7 +130,15 @@ export default function PurchasesPage() {
 
       return matchesSearch && matchesStatus;
     });
-  }, [mappedPurchases, search, statusFilter]);
+
+    if (sortOrder === "asc") {
+      result.sort((a, b) => (a.total || 0) - (b.total || 0));
+    } else if (sortOrder === "desc") {
+      result.sort((a, b) => (b.total || 0) - (a.total || 0));
+    }
+
+    return result;
+  }, [mappedPurchases, search, statusFilter, sortOrder]);
 
   const totalPages = Math.max(
     1,
@@ -83,118 +150,137 @@ export default function PurchasesPage() {
     return filteredPurchases.slice(start, start + PAGE_SIZE);
   }, [filteredPurchases, currentPage]);
 
-  // Reset to page 1 whenever filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, statusFilter]);
+  }, [search, statusFilter, sortOrder]);
 
   return (
-    <div className="purchases-page-wrapper">
-      {/* Top Module Sub-Navigation */}
-      <nav className="purchases-nav-tabs">
-        {[
-          "Purchase Order Management",
-          "Inventory Replenishment",
-          "Supplier Management",
-          "Returns and Refunds",
-        ].map((tab) => (
-          <button
-            key={tab}
-            className={`nav-tab-item ${activeTab === tab ? "active" : ""}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab}
+    <main className="page">
+      {/* PAGE HEADER */}
+      <header className="header">
+        <div>
+          <h1>Purchases</h1>
+          <p>Manage company purchase orders, supplier inventory, and stock receipts.</p>
+        </div>
+
+        <div className="headerActions">
+          <button className="secondaryButton" onClick={handlePrint}>
+            <FiPrinter size={15} />
+            Print
           </button>
-        ))}
-      </nav>
 
-      {/* Main Purchases Content Area */}
-      <main className="purchases-main-content">
-        {/* Action Toolbar */}
-        <div className="purchases-toolbar">
-          <Link href="/purchases/add" className="btn-add-order">
-            Add New Order <span>+</span>
+          <button className="secondaryButton" onClick={handleExportCSV}>
+            <FiDownload size={15} />
+            Export
+            <FiChevronDown size={14} />
+          </button>
+
+          <Link href="/purchases/add" className="addButton">
+            <FiPlus size={17} />
+            Add New
           </Link>
+        </div>
+      </header>
 
-          <div className="toolbar-controls">
+      {/* TABLE CARD */}
+      <section className="tableCard">
+        <div className="toolbar">
+          <div className="searchBox">
+            <FiSearch size={18} />
             <input
               type="text"
-              placeholder="Search Orders..."
+              placeholder="Search purchases..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="search-input-pill"
             />
-            <button className="btn-search-icon" title="Search">
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-            </button>
+          </div>
+
+          <div className="toolbarRight">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="status-dropdown-pill"
+              className="sortButton"
+              style={{ outline: "none", cursor: "pointer" }}
             >
-              <option value="All">Status</option>
+              <option value="All">All Status</option>
               <option value="PENDING">Pending</option>
               <option value="RECEIVED">Received</option>
               <option value="PARTIAL">Partial</option>
               <option value="CANCELLED">Cancelled</option>
             </select>
+
+            <button className="sortButton" onClick={handleSort}>
+              <FiArrowDown size={16} />
+              Sort ({sortOrder})
+              <FiChevronDown size={14} />
+            </button>
+
+            <button
+              className="iconButton"
+              title="Refresh"
+              onClick={fetchPurchases}
+            >
+              <FiRefreshCw size={17} />
+            </button>
           </div>
         </div>
 
         {/* Purchase Table */}
         {loading ? (
-          <div className="purchases-state-message">Loading purchases...</div>
+          <div style={{ padding: "40px", textAlign: "center", color: "#71839a" }}>
+            Loading purchase orders...
+          </div>
         ) : error ? (
-          <div className="purchases-state-message error">
+          <div style={{ padding: "30px", textAlign: "center", color: "#dc2626" }}>
             {error}{" "}
-            <button className="btn-retry" onClick={fetchPurchases}>
+            <button onClick={fetchPurchases} style={{ textDecoration: "underline", fontWeight: 700, marginLeft: "8px", cursor: "pointer" }}>
               Retry
             </button>
           </div>
-        ) : filteredPurchases.length === 0 ? (
-          <div className="purchases-state-message">No purchases found.</div>
         ) : (
           <>
-            <PurchaseTable purchases={paginatedPurchases} />
+            <PurchaseTable
+              purchases={paginatedPurchases}
+              onDelete={handleDeletePurchase}
+            />
 
-            {/* Bottom Floating Pagination */}
-            <div className="purchases-pagination-wrapper">
-              <div className="purchases-pagination-pill">
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div style={{ display: "flex", justifyContent: "center", gap: "8px", padding: "20px" }}>
                 <button
-                  className="page-btn"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
+                  className="secondaryButton"
+                  style={{ height: "32px", fontSize: "12px", padding: "0 12px" }}
                 >
-                  &lt;
+                  Prev
                 </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (num) => (
-                    <button
-                      key={num}
-                      className={`page-btn ${currentPage === num ? "active" : ""}`}
-                      onClick={() => setCurrentPage(num)}
-                    >
-                      {num}
-                    </button>
-                  )
-                )}
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => setCurrentPage(num)}
+                    className={currentPage === num ? "addButton" : "secondaryButton"}
+                    style={{ height: "32px", width: "32px", padding: 0, fontSize: "12px", borderRadius: "6px" }}
+                  >
+                    {num}
+                  </button>
+                ))}
+
                 <button
-                  className="page-btn"
-                  onClick={() =>
-                    setCurrentPage((p) => Math.min(totalPages, p + 1))
-                  }
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
+                  className="secondaryButton"
+                  style={{ height: "32px", fontSize: "12px", padding: "0 12px" }}
                 >
-                  &gt;
+                  Next
                 </button>
               </div>
-            </div>
+            )}
           </>
         )}
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
+

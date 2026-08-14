@@ -12,6 +12,22 @@
   --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
+[data-theme="dark"],
+html.dark {
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --text-dark: #f8fafc;
+  --text-muted: #94a3b8;
+  --card-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] body,
+html.dark body {
+  background: var(--bg-main);
+  color: var(--text-dark);
+}
+
+
 /* Reset & Defaults */
 
 *,
