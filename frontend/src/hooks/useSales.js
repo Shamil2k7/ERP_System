@@ -13,8 +13,36 @@ export default function useSales() {
       setLoading(true);
 
       const response = await getSalesOrders();
+      const rawSales = response.data || [];
 
-      setSales(response.data || []);
+      const mappedSales = rawSales.map((sale) => {
+        const orderDateObj = sale.orderDate ? new Date(sale.orderDate) : new Date(sale.createdAt);
+        const formattedDate = orderDateObj.toISOString().split("T")[0];
+
+        let paymentStatus = "Pending";
+        if (sale.status === "COMPLETED") {
+          paymentStatus = "Paid";
+        } else if (sale.status === "CANCELLED") {
+          paymentStatus = "Cancelled";
+        }
+
+        return {
+          id: sale.id,
+          invoiceNo: sale.orderNumber || "INV-N/A",
+          customer: sale.customerName || "Walk-in Customer",
+          cashier: "Admin",
+          date: formattedDate,
+          paymentMethod: "Cash",
+          paymentStatus,
+          subTotal: Number(sale.totalAmount || 0),
+          discount: Number(sale.discountAmount || 0),
+          tax: Number(sale.taxAmount || 0),
+          total: Number(sale.netAmount || sale.totalAmount || 0),
+          items: sale.items || [],
+        };
+      });
+
+      setSales(mappedSales);
     } catch (err) {
       console.error(err);
       setError(err.message);
