@@ -673,12 +673,6 @@ export default function Sidebar({ isOpen, onClose }) {
         </Link>
 
         <h4 className={styles.title}>System</h4>
-
-        
-
-
-
-        
       </nav>
     </aside>
   );
