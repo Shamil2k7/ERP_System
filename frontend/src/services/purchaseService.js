@@ -1,65 +1,37 @@
+import axios from "axios";
 import API_URL from "@/config/api";
 
-export async function getPurchases() {
-  const res = await fetch(`${API_URL}/purchases`);
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const BASE_URL = API_URL || `${API_BASE}/api`;
 
-  if (!res.ok) {
-    throw new Error("Failed to load purchases");
-  }
+const purchaseAPI = axios.create({
+  baseURL: `${BASE_URL}/purchases`,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-  return res.json();
-}
+export const getPurchases = async () => {
+  const response = await purchaseAPI.get("/");
+  return response.data;
+};
 
-export async function getPurchase(id) {
-  const res = await fetch(`${API_URL}/purchases/${id}`);
+export const getPurchase = async (id) => {
+  const response = await purchaseAPI.get(`/${id}`);
+  return response.data;
+};
 
-  if (!res.ok) {
-    throw new Error("Purchase not found");
-  }
+export const createPurchase = async (data) => {
+  const response = await purchaseAPI.post("/", data);
+  return response.data;
+};
 
-  return res.json();
-}
+export const updatePurchase = async (id, data) => {
+  const response = await purchaseAPI.put(`/${id}`, data);
+  return response.data;
+};
 
-export async function createPurchase(data) {
-  const res = await fetch(`${API_URL}/purchases`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!res.ok) {
-    throw new Error("Unable to create purchase");
-  }
-
-  return res.json();
-}
-
-export async function updatePurchase(id, data) {
-  const res = await fetch(`${API_URL}/purchases/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!res.ok) {
-    throw new Error("Unable to update purchase");
-  }
-
-  return res.json();
-}
-
-export async function deletePurchase(id) {
-  const res = await fetch(`${API_URL}/purchases/${id}`, {
-    method: "DELETE",
-  });
-
-  if (!res.ok) {
-    throw new Error("Unable to delete purchase");
-  }
-
-  return res.json();
-}
+export const deletePurchase = async (id) => {
+  const response = await purchaseAPI.delete(`/${id}`);
+  return response.data;
+};
