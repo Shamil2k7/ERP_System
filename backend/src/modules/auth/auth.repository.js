@@ -12,7 +12,8 @@ const findUserByLogin = async (login) => {
     },
 
     include: {
-      role: true,
+      roleRef: true,
+      branch: true,
     },
   });
 };

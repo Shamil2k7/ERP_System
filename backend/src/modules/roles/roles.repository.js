@@ -56,6 +56,16 @@ const deleteRole = async (id) => {
   });
 };
 
+const unassignUsersFromRole = async (roleId) => {
+  return await prisma.user.updateMany({
+    where: { roleId },
+    data: {
+      roleId: null,
+      role: "Employee",
+    },
+  });
+};
+
 export {
   getAllRoles,
   getRoleById,
@@ -63,4 +73,5 @@ export {
   createRole,
   updateRole,
   deleteRole,
+  unassignUsersFromRole,
 };

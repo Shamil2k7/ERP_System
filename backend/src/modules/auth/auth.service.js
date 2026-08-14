@@ -47,7 +47,7 @@ const loginService = async (login, password) => {
       email: employee.email,
       employeeId: employee.employeeId,
       phone: employee.phone,
-      role: employee.role?.name,
+      role: employee.roleRef?.name || employee.role || "Employee",
     },
   };
 };
