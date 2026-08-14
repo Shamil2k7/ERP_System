@@ -6,6 +6,10 @@ import { usePathname } from "next/navigation";
 import { useSettings } from "@/context/SettingsContext";
 
 import {
+  FiPieChart,
+  FiDollarSign,
+  FiPrinter,
+  FiTrendingUp,
   FiGrid,
   FiMapPin,
   FiBarChart2,
