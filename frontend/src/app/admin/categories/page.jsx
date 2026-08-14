@@ -171,6 +171,7 @@ export default function CategoriesPage() {
       },
     });
   };
+  
 
   const handleRefresh = () => {
     setSearch("");

@@ -74,10 +74,23 @@ export const updateProduct = async (id, data) => {
 
 
 export const deleteProduct = async (id) => {
-  return await prisma.product.delete({
-    where: {
-      id,
-    },
+  return await prisma.$transaction(async (tx) => {
+    // Delete related barcodes
+    await tx.barcode.deleteMany({
+      where: { productId: id },
+    });
+
+    // Delete related inventories
+    await tx.inventory.deleteMany({
+      where: { productId: id },
+    });
+
+    // Finally delete the product
+    return await tx.product.delete({
+      where: {
+        id,
+      },
+    });
   });
 };
 

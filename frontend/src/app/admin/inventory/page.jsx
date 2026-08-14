@@ -4,13 +4,12 @@ import { useMemo, useState, useEffect } from "react";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
+
 import {
   FiSearch,
-  FiCalendar,
   FiFilter,
   FiChevronDown,
   FiRefreshCw,
-  FiMoreVertical,
   FiPrinter,
   FiDownload,
   FiPlus,
@@ -18,6 +17,7 @@ import {
   FiCheckCircle,
   FiAlertTriangle,
   FiXCircle,
+  FiEye,
   FiEdit2,
   FiTrash2,
 } from "react-icons/fi";
@@ -33,8 +33,12 @@ export default function InventoryPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [warehouseFilter, setWarehouseFilter] = useState("All");
   const [sortBy, setSortBy] = useState("Latest");
-  const [openMenu, setOpenMenu] = useState(null);
+
   const { showSuccess, showError, showConfirm } = useAlert();
+
+  /* =========================================================
+     FETCH INVENTORY
+  ========================================================= */
 
   useEffect(() => {
     fetchInventories();
@@ -43,9 +47,15 @@ export default function InventoryPage() {
   const fetchInventories = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/inventory");
+
+      const res = await axios.get(
+        "http://localhost:5000/api/inventory"
+      );
+
       if (res.data && res.data.data) {
         setInventoriesData(res.data.data);
+      } else {
+        setInventoriesData([]);
       }
     } catch (error) {
       console.error("Error fetching inventories:", error);
@@ -55,105 +65,184 @@ export default function InventoryPage() {
     }
   };
 
+  /* =========================================================
+     DELETE INVENTORY
+  ========================================================= */
+
   const handleDelete = (id) => {
-    setOpenMenu(null);
     showConfirm({
       title: "Delete Inventory Record",
-      message: "Are you sure you want to delete this inventory record? This action cannot be undone.",
+      message:
+        "Are you sure you want to delete this inventory record? This action cannot be undone.",
       confirmText: "Delete Record",
       type: "danger",
+
       onConfirm: async () => {
         try {
-          await axios.delete(`http://localhost:5000/api/inventory/${id}`);
-          showSuccess("Inventory updated", "Inventory record deleted successfully");
+          await axios.delete(
+            `http://localhost:5000/api/inventory/${id}`
+          );
+
+          showSuccess(
+            "Inventory updated",
+            "Inventory record deleted successfully"
+          );
+
           fetchInventories();
         } catch (error) {
+          console.error(error);
+
           showError(
             "Record couldn't be deleted",
             "Failed to delete inventory record."
           );
-          console.error(error);
         }
       },
     });
   };
 
+  /* =========================================================
+     FILTER + SORT
+  ========================================================= */
+
   const filteredInventories = useMemo(() => {
     let result = [...inventoriesData];
 
+    /* Search */
     if (search.trim()) {
       const keyword = search.toLowerCase();
 
       result = result.filter(
         (inv) =>
-          inv.product?.name?.toLowerCase().includes(keyword) ||
-          inv.product?.sku?.toLowerCase().includes(keyword) ||
-          inv.warehouse?.name?.toLowerCase().includes(keyword)
+          inv.product?.name
+            ?.toLowerCase()
+            .includes(keyword) ||
+          inv.product?.sku
+            ?.toLowerCase()
+            .includes(keyword) ||
+          inv.warehouse?.name
+            ?.toLowerCase()
+            .includes(keyword)
       );
     }
 
+    /* Warehouse */
     if (warehouseFilter !== "All") {
-      result = result.filter((inv) => inv.warehouse?.name === warehouseFilter);
+      result = result.filter(
+        (inv) =>
+          inv.warehouse?.name === warehouseFilter
+      );
     }
 
+    /* Status */
     if (statusFilter !== "All") {
       result = result.filter((inv) => {
         const qty = inv.quantity || 0;
         const minStock = inv.minimumStock || 10;
-        if (statusFilter === "In Stock") return qty > minStock;
-        if (statusFilter === "Low Stock") return qty > 0 && qty <= minStock;
-        if (statusFilter === "No Stock") return qty === 0;
+
+        if (statusFilter === "In Stock") {
+          return qty > minStock;
+        }
+
+        if (statusFilter === "Low Stock") {
+          return qty > 0 && qty <= minStock;
+        }
+
+        if (statusFilter === "No Stock") {
+          return qty === 0;
+        }
+
         return true;
       });
     }
 
+    /* Sort */
     if (sortBy === "Product Name") {
       result.sort((a, b) =>
-        (a.product?.name || "").localeCompare(b.product?.name || "")
+        (a.product?.name || "").localeCompare(
+          b.product?.name || ""
+        )
       );
     }
 
     if (sortBy === "Quantity High") {
-      result.sort((a, b) => (b.quantity || 0) - (a.quantity || 0));
+      result.sort(
+        (a, b) =>
+          (b.quantity || 0) - (a.quantity || 0)
+      );
     }
 
     if (sortBy === "Quantity Low") {
-      result.sort((a, b) => (a.quantity || 0) - (b.quantity || 0));
+      result.sort(
+        (a, b) =>
+          (a.quantity || 0) - (b.quantity || 0)
+      );
     }
 
     return result;
-  }, [search, statusFilter, warehouseFilter, sortBy, inventoriesData]);
+  }, [
+    search,
+    statusFilter,
+    warehouseFilter,
+    sortBy,
+    inventoriesData,
+  ]);
 
-  // Extract unique warehouses for filter dropdown
+  /* =========================================================
+     UNIQUE WAREHOUSES
+  ========================================================= */
+
   const uniqueWarehouses = useMemo(() => {
     const warehouses = new Set();
+
     inventoriesData.forEach((inv) => {
       if (inv.warehouse?.name) {
         warehouses.add(inv.warehouse.name);
       }
     });
+
     return Array.from(warehouses);
   }, [inventoriesData]);
+
+  /* =========================================================
+     STATISTICS
+  ========================================================= */
 
   const totalInventories = inventoriesData.length;
 
   const inStock = inventoriesData.filter(
-    (inv) => (inv.quantity || 0) > (inv.minimumStock || 10)
+    (inv) =>
+      (inv.quantity || 0) >
+      (inv.minimumStock || 10)
   ).length;
 
   const lowStock = inventoriesData.filter(
-    (inv) => (inv.quantity || 0) > 0 && (inv.quantity || 0) <= (inv.minimumStock || 10)
+    (inv) => {
+      const qty = inv.quantity || 0;
+      const minStock = inv.minimumStock || 10;
+
+      return qty > 0 && qty <= minStock;
+    }
   ).length;
 
   const noStock = inventoriesData.filter(
     (inv) => (inv.quantity || 0) === 0
   ).length;
 
+  /* =========================================================
+     INVENTORY STATUS
+  ========================================================= */
+
   const getInventoryStatus = (inv) => {
     const qty = inv.quantity || 0;
     const minStock = inv.minimumStock || 10;
+
     if (qty === 0) return "No Stock";
-    if (qty <= minStock) return "Low Stock";
+
+    if (qty <= minStock) {
+      return "Low Stock";
+    }
+
     return "In Stock";
   };
 
@@ -161,15 +250,43 @@ export default function InventoryPage() {
     if (status === "In Stock") {
       return styles.inStock;
     }
+
     if (status === "Low Stock") {
       return styles.lowStock;
     }
+
     return styles.noStock;
   };
+
+  /* =========================================================
+     VIEW
+  ========================================================= */
+
+  const handleView = (id) => {
+    window.location.href =
+      `/admin/inventory/view/${id}`;
+  };
+
+  /* =========================================================
+     EDIT
+  ========================================================= */
+
+  const handleEdit = (id) => {
+    window.location.href =
+      `/admin/inventory/edit/${id}`;
+  };
+
+  /* =========================================================
+     PRINT
+  ========================================================= */
 
   const handlePrint = () => {
     window.print();
   };
+
+  /* =========================================================
+     EXPORT CSV
+  ========================================================= */
 
   const handleExport = () => {
     const headers = [
@@ -183,20 +300,23 @@ export default function InventoryPage() {
       "Status",
     ];
 
-    const rows = filteredInventories.map((inv) => [
-      inv.product?.name || "N/A",
-      inv.product?.sku || "N/A",
-      inv.warehouse?.name || "N/A",
-      inv.quantity || 0,
-      inv.minimumStock || 0,
-      inv.maximumStock || 0,
-      inv.reorderLevel || 0,
-      getInventoryStatus(inv),
-    ]);
-
-    const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join(
-      "\n"
+    const rows = filteredInventories.map(
+      (inv) => [
+        inv.product?.name || "N/A",
+        inv.product?.sku || "N/A",
+        inv.warehouse?.name || "N/A",
+        inv.quantity || 0,
+        inv.minimumStock || 0,
+        inv.maximumStock || 0,
+        inv.reorderLevel || 0,
+        getInventoryStatus(inv),
+      ]
     );
+
+    const csv = [
+      headers.join(","),
+      ...rows.map((row) => row.join(",")),
+    ].join("\n");
 
     const blob = new Blob([csv], {
       type: "text/csv;charset=utf-8;",
@@ -205,31 +325,47 @@ export default function InventoryPage() {
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
+
     link.href = url;
     link.download = "inventory.csv";
 
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
 
     URL.revokeObjectURL(url);
   };
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
     <main className={styles.page}>
       <Toaster position="top-right" />
 
-      {/* HEADER */}
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
       <div className={styles.header}>
         <div>
           <h1>Inventory Management</h1>
         </div>
 
         <div className={styles.headerActions}>
-          <button className={styles.secondaryButton} onClick={handlePrint}>
+          <button
+            className={styles.secondaryButton}
+            onClick={handlePrint}
+          >
             <FiPrinter />
             Print
           </button>
 
-          <button className={styles.secondaryButton} onClick={handleExport}>
+          <button
+            className={styles.secondaryButton}
+            onClick={handleExport}
+          >
             <FiDownload />
             Export
             <FiChevronDown />
@@ -238,7 +374,8 @@ export default function InventoryPage() {
           <button
             className={styles.addButton}
             onClick={() => {
-              window.location.href = "/admin/inventory/add";
+              window.location.href =
+                "/admin/inventory/add";
             }}
           >
             <FiPlus />
@@ -247,28 +384,45 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* STAT CARDS */}
+      {/* =====================================================
+          STAT CARDS
+      ===================================================== */}
+
       <div className={styles.statsGrid}>
-        {/* Total Records */}
+        {/* Total */}
         <div className={styles.statCard}>
           <div>
             <p>Total Records</p>
+
             <h2>{totalInventories}</h2>
-            <span className={styles.growth}>Total Entries</span>
+
+            <span className={styles.growth}>
+              Total Entries
+            </span>
           </div>
-          <div className={`${styles.statIcon} ${styles.blueIcon}`}>
+
+          <div
+            className={`${styles.statIcon} ${styles.blueIcon}`}
+          >
             <FiBox />
           </div>
         </div>
 
-        {/* In Stock */}
+        {/* Healthy */}
         <div className={styles.statCard}>
           <div>
             <p>Healthy Stock</p>
+
             <h2>{inStock}</h2>
-            <span className={styles.growth}>Optimal Levels</span>
+
+            <span className={styles.growth}>
+              Optimal Levels
+            </span>
           </div>
-          <div className={`${styles.statIcon} ${styles.greenIcon}`}>
+
+          <div
+            className={`${styles.statIcon} ${styles.greenIcon}`}
+          >
             <FiCheckCircle />
           </div>
         </div>
@@ -277,79 +431,139 @@ export default function InventoryPage() {
         <div className={styles.statCard}>
           <div>
             <p>Low Stock</p>
+
             <h2>{lowStock}</h2>
-            <span className={styles.alertText}>Reorder soon</span>
+
+            <span className={styles.alertText}>
+              Reorder soon
+            </span>
           </div>
-          <div className={`${styles.statIcon} ${styles.orangeIcon}`}>
+
+          <div
+            className={`${styles.statIcon} ${styles.orangeIcon}`}
+          >
             <FiAlertTriangle />
           </div>
         </div>
 
-        {/* No Stock */}
+        {/* Out of Stock */}
         <div className={styles.statCard}>
           <div>
             <p>Out of Stock</p>
+
             <h2>{noStock}</h2>
-            <span className={styles.alertText}>Urgent Action</span>
+
+            <span className={styles.alertText}>
+              Urgent Action
+            </span>
           </div>
-          <div className={`${styles.statIcon} ${styles.redIcon}`}>
+
+          <div
+            className={`${styles.statIcon} ${styles.redIcon}`}
+          >
             <FiXCircle />
           </div>
         </div>
       </div>
 
-      {/* TABLE CARD */}
+      {/* =====================================================
+          TABLE CARD
+      ===================================================== */}
+
       <section className={styles.tableCard}>
-        {/* Toolbar */}
+
+        {/* ===================================================
+            TOOLBAR
+        =================================================== */}
+
         <div className={styles.toolbar}>
+
           {/* Search */}
           <div className={styles.searchBox}>
             <FiSearch />
+
             <input
               type="text"
               placeholder="Search by product, sku or warehouse..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
             />
           </div>
 
           <div className={styles.toolbarRight}>
-            {/* Warehouse Filter */}
+
+            {/* Warehouse */}
             <select
               className={styles.filterButton}
               value={warehouseFilter}
-              onChange={(e) => setWarehouseFilter(e.target.value)}
+              onChange={(e) =>
+                setWarehouseFilter(e.target.value)
+              }
             >
-              <option value="All">All Warehouses</option>
-              {uniqueWarehouses.map((w) => (
-                <option key={w} value={w}>
-                  {w}
+              <option value="All">
+                All Warehouses
+              </option>
+
+              {uniqueWarehouses.map((warehouse) => (
+                <option
+                  key={warehouse}
+                  value={warehouse}
+                >
+                  {warehouse}
                 </option>
               ))}
             </select>
 
-            {/* Status Filter */}
+            {/* Status */}
             <select
               className={styles.filterButton}
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) =>
+                setStatusFilter(e.target.value)
+              }
             >
-              <option value="All">All Statuses</option>
-              <option value="In Stock">In Stock</option>
-              <option value="Low Stock">Low Stock</option>
-              <option value="No Stock">Out of Stock</option>
+              <option value="All">
+                All Statuses
+              </option>
+
+              <option value="In Stock">
+                In Stock
+              </option>
+
+              <option value="Low Stock">
+                Low Stock
+              </option>
+
+              <option value="No Stock">
+                Out of Stock
+              </option>
             </select>
 
             {/* Sort */}
             <select
               className={styles.sortButton}
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) =>
+                setSortBy(e.target.value)
+              }
             >
-              <option value="Latest">Sort: Latest</option>
-              <option value="Product Name">Product Name (A-Z)</option>
-              <option value="Quantity High">Quantity (High to Low)</option>
-              <option value="Quantity Low">Quantity (Low to High)</option>
+              <option value="Latest">
+                Sort: Latest
+              </option>
+
+              <option value="Product Name">
+                Product Name (A-Z)
+              </option>
+
+              <option value="Quantity High">
+                Quantity (High to Low)
+              </option>
+
+              <option value="Quantity Low">
+                Quantity (Low to High)
+              </option>
             </select>
 
             {/* Refresh */}
@@ -363,8 +577,12 @@ export default function InventoryPage() {
           </div>
         </div>
 
-        {/* TABLE */}
+        {/* ===================================================
+            TABLE
+        =================================================== */}
+
         <div className={styles.tableWrapper}>
+
           {loading ? (
             <div
               style={{
@@ -376,12 +594,17 @@ export default function InventoryPage() {
             >
               <Loader2
                 className={styles.spinner}
-                style={{ animation: "spin 1s linear infinite" }}
+                style={{
+                  animation:
+                    "spin 1s linear infinite",
+                }}
                 size={40}
               />
             </div>
           ) : (
             <table className={styles.table}>
+
+              {/* TABLE HEADER */}
               <thead>
                 <tr>
                   <th>Product</th>
@@ -392,80 +615,141 @@ export default function InventoryPage() {
                   <th>Max Stock</th>
                   <th>Reorder Lvl</th>
                   <th>Status</th>
-                  <th style={{ textAlign: "center" }}>Action</th>
+                  <th
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    Action
+                  </th>
                 </tr>
               </thead>
+
+              {/* TABLE BODY */}
               <tbody>
+
                 {filteredInventories.length > 0 ? (
+
                   filteredInventories.map((inv) => {
-                    const status = getInventoryStatus(inv);
+
+                    const status =
+                      getInventoryStatus(inv);
+
                     return (
                       <tr key={inv.id}>
-                        {/* Product */}
+
+                        {/* PRODUCT */}
                         <td>
-                          <div className={styles.productCell}>
+                          <div
+                            className={
+                              styles.productCell
+                            }
+                          >
                             <div
                               className={`${styles.productIcon} ${
-                                styles[inv.product?.iconType || "default"]
+                                styles[
+                                  inv.product
+                                    ?.iconType ||
+                                    "default"
+                                ]
                               }`}
                             >
                               {inv.product?.image ? (
+
                                 <img
                                   src={
-                                    inv.product.image.startsWith("http")
-                                      ? inv.product.image
+                                    inv.product.image.startsWith(
+                                      "http"
+                                    )
+                                      ? inv.product
+                                          .image
                                       : `http://localhost:5000${
-                                          inv.product.image.startsWith("/")
+                                          inv.product.image.startsWith(
+                                            "/"
+                                          )
                                             ? ""
                                             : "/"
-                                        }${inv.product.image}`
+                                        }${
+                                          inv.product
+                                            .image
+                                        }`
                                   }
-                                  alt={inv.product.name}
+                                  alt={
+                                    inv.product
+                                      ?.name ||
+                                    "Product"
+                                  }
                                   style={{
                                     width: "100%",
                                     height: "100%",
-                                    objectFit: "cover",
-                                    borderRadius: "4px",
+                                    objectFit:
+                                      "cover",
+                                    borderRadius:
+                                      "4px",
                                   }}
                                 />
+
                               ) : (
                                 <FiBox />
                               )}
                             </div>
-                            <strong>{inv.product?.name || "N/A"}</strong>
+
+                            <strong>
+                              {inv.product?.name ||
+                                "N/A"}
+                            </strong>
                           </div>
                         </td>
 
                         {/* SKU */}
-                        <td>{inv.product?.sku || "N/A"}</td>
-
-                        {/* Warehouse */}
                         <td>
-                          <span style={{ fontWeight: 500 }}>
-                            {inv.warehouse?.name || "N/A"}
+                          {inv.product?.sku ||
+                            "N/A"}
+                        </td>
+
+                        {/* WAREHOUSE */}
+                        <td>
+                          <span
+                            style={{
+                              fontWeight: 500,
+                            }}
+                          >
+                            {inv.warehouse?.name ||
+                              "N/A"}
                           </span>
                         </td>
 
-                        {/* Quantity */}
+                        {/* QUANTITY */}
                         <td
                           style={{
                             fontWeight: 600,
-                            color: qtyColor(inv.quantity, inv.minimumStock),
+                            color: qtyColor(
+                              inv.quantity,
+                              inv.minimumStock
+                            ),
                           }}
                         >
-                          {String(inv.quantity || 0).padStart(2, "0")}
+                          {String(
+                            inv.quantity || 0
+                          ).padStart(2, "0")}
                         </td>
 
-                        {/* Min Stock */}
-                        <td>{inv.minimumStock || 0}</td>
+                        {/* MIN STOCK */}
+                        <td>
+                          {inv.minimumStock || 0}
+                        </td>
 
-                        {/* Max Stock */}
-                        <td>{inv.maximumStock || 0}</td>
+                        {/* MAX STOCK */}
+                        <td>
+                          {inv.maximumStock || 0}
+                        </td>
 
-                        {/* Reorder Level */}
-                        <td>{inv.reorderLevel || 0}</td>
+                        {/* REORDER LEVEL */}
+                        <td>
+                          {inv.reorderLevel || 0}
+                        </td>
 
-                        {/* Status */}
+                        {/* STATUS */}
                         <td>
                           <span
                             className={`${styles.status} ${getStatusClass(
@@ -476,54 +760,77 @@ export default function InventoryPage() {
                           </span>
                         </td>
 
-                        {/* Action */}
+                        {/* =================================================
+                            ACTION BUTTONS
+                        ================================================= */}
+
                         <td>
-                          <div className={styles.actionWrapper}>
+                          <div
+                            className={
+                              styles.actionButtons
+                            }
+                          >
+
+                            {/* VIEW */}
                             <button
-                              className={styles.actionButton}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenMenu(
-                                  openMenu === inv.id ? null : inv.id
-                                );
-                              }}
+                              type="button"
+                              className={
+                                styles.actionButton
+                              }
+                              title="View"
+                              onClick={() =>
+                                handleView(inv.id)
+                              }
                             >
-                              <FiMoreVertical />
+                              <FiEye />
                             </button>
 
-                            {openMenu === inv.id && (
-                              <div className={styles.actionMenu}>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.location.href = `/admin/inventory/edit/${inv.id}`;
-                                  }}
-                                >
-                                  <FiEdit2 size={14} style={{ marginRight: '6px' }} /> Edit Details
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(inv.id);
-                                  }}
-                                  style={{ color: "red" }}
-                                >
-                                  <FiTrash2 size={14} style={{ marginRight: '6px' }} /> Delete Record
-                                </button>
-                              </div>
-                            )}
+                            {/* EDIT */}
+                            <button
+                              type="button"
+                              className={
+                                styles.actionButton
+                              }
+                              title="Edit"
+                              onClick={() =>
+                                handleEdit(inv.id)
+                              }
+                            >
+                              <FiEdit2 />
+                            </button>
+
+                            {/* DELETE */}
+                            <button
+                              type="button"
+                              className={`${styles.actionButton} ${styles.deleteButton}`}
+                              title="Delete"
+                              onClick={() =>
+                                handleDelete(inv.id)
+                              }
+                            >
+                              <FiTrash2 />
+                            </button>
+
                           </div>
                         </td>
+
                       </tr>
                     );
                   })
+
                 ) : (
+
                   <tr>
-                    <td colSpan="9" className={styles.empty}>
+                    <td
+                      colSpan="9"
+                      className={styles.empty}
+                    >
                       No inventory records found
                     </td>
                   </tr>
+
                 )}
+
               </tbody>
             </table>
           )}
@@ -533,9 +840,18 @@ export default function InventoryPage() {
   );
 }
 
-// Helper for quantity color
+/* =========================================================
+   QUANTITY COLOR
+========================================================= */
+
 function qtyColor(qty, minStock) {
-  if (!qty || qty === 0) return "#dc2626"; // red
-  if (qty <= (minStock || 10)) return "#d97706"; // orange
-  return "#059669"; // green
+  if (!qty || qty === 0) {
+    return "#dc2626";
+  }
+
+  if (qty <= (minStock || 10)) {
+    return "#d97706";
+  }
+
+  return "#059669";
 }

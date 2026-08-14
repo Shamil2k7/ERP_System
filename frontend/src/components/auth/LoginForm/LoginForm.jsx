@@ -170,14 +170,14 @@ export default function LoginForm() {
           </button>
         </form>
 
-        <div className={styles.footer}>
+        {/* <div className={styles.footer}>
           <p>
             Don't have an account?{" "}
             <Link href="/auth/register">
               Register
             </Link>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

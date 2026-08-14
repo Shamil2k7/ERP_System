@@ -1,17 +1,15 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import axios from 'axios';
-import { toast, Toaster } from 'react-hot-toast';
-import { Loader2 } from 'lucide-react';
+import axios from "axios";
+import { toast, Toaster } from "react-hot-toast";
+import { Loader2 } from "lucide-react";
+
 import {
   FiSearch,
   FiCalendar,
-  FiFilter,
   FiChevronDown,
-  FiArrowUpDown,
   FiRefreshCw,
-  FiMoreVertical,
   FiPrinter,
   FiDownload,
   FiPlus,
@@ -19,20 +17,35 @@ import {
   FiCheckCircle,
   FiAlertTriangle,
   FiXCircle,
+  FiEye,
+  FiEdit2,
+  FiTrash2,
 } from "react-icons/fi";
 
 import styles from "./products.module.css";
 import { useAlert } from "@/context/AlertContext";
 
 export default function ProductsPage() {
+  /* =========================================================
+     STATE
+  ========================================================= */
+
   const [productsData, setProductsData] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sortBy, setSortBy] = useState("Latest");
-  const [openMenu, setOpenMenu] = useState(null);
-  const { showSuccess, showError, showConfirm } = useAlert();
+
+  const {
+    showSuccess,
+    showError,
+    showConfirm,
+  } = useAlert();
+
+  /* =========================================================
+     FETCH PRODUCTS
+  ========================================================= */
 
   useEffect(() => {
     fetchProducts();
@@ -41,112 +54,275 @@ export default function ProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/products');
+
+      const res = await axios.get(
+        "http://localhost:5000/api/products"
+      );
+
       if (res.data && res.data.data) {
         setProductsData(res.data.data);
+      } else {
+        setProductsData([]);
       }
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
+
+      showError(
+        "Products couldn't be loaded",
+        "Failed to fetch products from the server."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  /* =========================================================
+     DELETE PRODUCT
+  ========================================================= */
+
   const handleDelete = (id) => {
-    setOpenMenu(null);
     showConfirm({
       title: "Delete Product",
-      message: "Are you sure you want to delete this product from stock inventory? This action cannot be undone.",
+
+      message:
+        "Are you sure you want to delete this product from stock inventory? This action cannot be undone.",
+
       confirmText: "Delete Product",
+
       type: "danger",
+
       onConfirm: async () => {
         try {
-          await axios.delete(`http://localhost:5000/api/products/${id}`);
-          showSuccess("Product updated", "Product deleted successfully");
-          fetchProducts();
+          await axios.delete(
+            `http://localhost:5000/api/products/${id}`
+          );
+
+          showSuccess(
+            "Product deleted",
+            "Product deleted successfully."
+          );
+
+          await fetchProducts();
         } catch (error) {
-          showError("Product couldn't be deleted", "Failed to delete product. Active dependency exists.");
-          console.error(error);
+          console.error(
+            error.response?.data?.message ||
+              error.message
+          );
+
+          showError(
+            "Product couldn't be deleted",
+            error.response?.data?.message ||
+              "Failed to delete product. Active dependency exists."
+          );
         }
       },
     });
   };
 
+  /* =========================================================
+     FILTER + SEARCH + SORT
+  ========================================================= */
+
   const filteredProducts = useMemo(() => {
     let result = [...productsData];
 
-    if (search.trim()) {
-      const keyword = search.toLowerCase();
+    /* -------------------------
+       SEARCH
+    ------------------------- */
 
-      result = result.filter(
-        (product) =>
-          product.name?.toLowerCase().includes(keyword) ||
-          product.code?.toLowerCase().includes(keyword) ||
-          product.sku?.toLowerCase().includes(keyword) ||
-          product.category?.name?.toLowerCase().includes(keyword) ||
-          product.brand?.name?.toLowerCase().includes(keyword)
-      );
+    if (search.trim()) {
+      const keyword = search.toLowerCase().trim();
+
+      result = result.filter((product) => {
+        return (
+          product.name
+            ?.toLowerCase()
+            .includes(keyword) ||
+
+          product.code
+            ?.toLowerCase()
+            .includes(keyword) ||
+
+          product.sku
+            ?.toLowerCase()
+            .includes(keyword) ||
+
+          product.category?.name
+            ?.toLowerCase()
+            .includes(keyword) ||
+
+          product.brand?.name
+            ?.toLowerCase()
+            .includes(keyword)
+        );
+      });
     }
+
+    /* -------------------------
+       STATUS FILTER
+    ------------------------- */
 
     if (statusFilter !== "All") {
-      result = result.filter(
-        (product) => {
-          if (statusFilter === 'In Stock') return (product.inventories?.[0]?.quantity || 0) > (product.inventories?.[0]?.lowStock || 0);
-          if (statusFilter === 'Low Stock') return (product.inventories?.[0]?.quantity || 0) > 0 && (product.inventories?.[0]?.quantity || 0) <= (product.inventories?.[0]?.lowStock || 10);
-          if (statusFilter === 'No Stock') return (product.inventories?.[0]?.quantity || 0) === 0;
-          return true;
+      result = result.filter((product) => {
+        const quantity =
+          Number(
+            product.inventories?.[0]?.quantity || 0
+          );
+
+        const minimumStock =
+          Number(
+            product.inventories?.[0]?.minimumStock ||
+              product.inventories?.[0]?.lowStock ||
+              10
+          );
+
+        if (statusFilter === "In Stock") {
+          return quantity > minimumStock;
         }
-      );
+
+        if (statusFilter === "Low Stock") {
+          return (
+            quantity > 0 &&
+            quantity <= minimumStock
+          );
+        }
+
+        if (statusFilter === "No Stock") {
+          return quantity === 0;
+        }
+
+        return true;
+      });
     }
+
+    /* -------------------------
+       SORT
+    ------------------------- */
 
     if (sortBy === "Name") {
       result.sort((a, b) =>
-        (a.name || "").localeCompare(b.name || "")
+        (a.name || "").localeCompare(
+          b.name || ""
+        )
       );
     }
 
     if (sortBy === "Price Low") {
       result.sort(
-        (a, b) => parseFloat(a.sellingPrice || 0) - parseFloat(b.sellingPrice || 0)
+        (a, b) =>
+          Number(a.sellingPrice || 0) -
+          Number(b.sellingPrice || 0)
       );
     }
 
     if (sortBy === "Price High") {
       result.sort(
-        (a, b) => parseFloat(b.sellingPrice || 0) - parseFloat(a.sellingPrice || 0)
+        (a, b) =>
+          Number(b.sellingPrice || 0) -
+          Number(a.sellingPrice || 0)
       );
     }
 
     if (sortBy === "Quantity") {
       result.sort(
-        (a, b) => (b.inventories?.[0]?.quantity || 0) - (a.inventories?.[0]?.quantity || 0)
+        (a, b) =>
+          Number(
+            b.inventories?.[0]?.quantity || 0
+          ) -
+          Number(
+            a.inventories?.[0]?.quantity || 0
+          )
       );
     }
 
     return result;
-  }, [search, statusFilter, sortBy, productsData]);
+  }, [
+    search,
+    statusFilter,
+    sortBy,
+    productsData,
+  ]);
+
+  /* =========================================================
+     STATISTICS
+  ========================================================= */
 
   const totalProducts = productsData.length;
-  
+
   const inStock = productsData.filter(
-    (product) => (product.inventories?.[0]?.quantity || 0) > 0
+    (product) => {
+      const quantity =
+        Number(
+          product.inventories?.[0]?.quantity || 0
+        );
+
+      return quantity > 0;
+    }
   ).length;
 
   const lowStock = productsData.filter(
-    (product) => (product.inventories?.[0]?.quantity || 0) > 0 && (product.inventories?.[0]?.quantity || 0) <= (product.inventories?.[0]?.minimumStock || 10)
+    (product) => {
+      const quantity =
+        Number(
+          product.inventories?.[0]?.quantity || 0
+        );
+
+      const minimumStock =
+        Number(
+          product.inventories?.[0]?.minimumStock ||
+            product.inventories?.[0]?.lowStock ||
+            10
+        );
+
+      return (
+        quantity > 0 &&
+        quantity <= minimumStock
+      );
+    }
   ).length;
 
   const noStock = productsData.filter(
-    (product) => (product.inventories?.[0]?.quantity || 0) === 0
+    (product) => {
+      const quantity =
+        Number(
+          product.inventories?.[0]?.quantity || 0
+        );
+
+      return quantity === 0;
+    }
   ).length;
 
+  /* =========================================================
+     PRODUCT STATUS
+  ========================================================= */
+
   const getProductStatus = (product) => {
-    const qty = product.inventories?.[0]?.quantity || 0;
-    const minStock = product.inventories?.[0]?.minimumStock || 10;
-    if (qty === 0) return "No Stock";
-    if (qty <= minStock) return "Low Stock";
+    const quantity =
+      Number(
+        product.inventories?.[0]?.quantity || 0
+      );
+
+    const minimumStock =
+      Number(
+        product.inventories?.[0]?.minimumStock ||
+          product.inventories?.[0]?.lowStock ||
+          10
+      );
+
+    if (quantity === 0) {
+      return "No Stock";
+    }
+
+    if (quantity <= minimumStock) {
+      return "Low Stock";
+    }
+
     return "In Stock";
   };
+
+  /* =========================================================
+     STATUS CLASS
+  ========================================================= */
 
   const getStatusClass = (status) => {
     if (status === "In Stock") {
@@ -160,9 +336,17 @@ export default function ProductsPage() {
     return styles.noStock;
   };
 
+  /* =========================================================
+     PRINT
+  ========================================================= */
+
   const handlePrint = () => {
     window.print();
   };
+
+  /* =========================================================
+     EXPORT CSV
+  ========================================================= */
 
   const handleExport = () => {
     const headers = [
@@ -178,72 +362,145 @@ export default function ProductsPage() {
       "Purchase Price",
     ];
 
-    const rows = filteredProducts.map((product) => [
-      product.code || 'N/A',
-      product.name || 'N/A',
-      product.sku || 'N/A',
-      product.category?.name || 'N/A',
-      product.brand?.name || 'N/A',
-      product.unit?.name || 'N/A',
-      product.inventories?.[0]?.quantity || 0,
-      getProductStatus(product),
-      product.sellingPrice || 0,
-      product.costPrice || 0,
-    ]);
+    const rows = filteredProducts.map(
+      (product) => [
+        product.code || "N/A",
+
+        product.name || "N/A",
+
+        product.sku || "N/A",
+
+        product.category?.name || "N/A",
+
+        product.brand?.name || "N/A",
+
+        product.unit?.name || "N/A",
+
+        product.inventories?.[0]?.quantity || 0,
+
+        getProductStatus(product),
+
+        product.sellingPrice || 0,
+
+        product.costPrice || 0,
+      ]
+    );
 
     const csv = [
       headers.join(","),
-      ...rows.map((row) => row.join(",")),
+      ...rows.map((row) =>
+        row
+          .map((value) => {
+            const stringValue =
+              String(value ?? "");
+
+            if (
+              stringValue.includes(",") ||
+              stringValue.includes('"')
+            ) {
+              return `"${stringValue.replace(
+                /"/g,
+                '""'
+              )}"`;
+            }
+
+            return stringValue;
+          })
+          .join(",")
+      ),
     ].join("\n");
 
     const blob = new Blob([csv], {
       type: "text/csv;charset=utf-8;",
     });
 
-    const url = URL.createObjectURL(blob);
+    const url =
+      URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
+    const link =
+      document.createElement("a");
+
     link.href = url;
     link.download = "products.csv";
 
+    document.body.appendChild(link);
+
     link.click();
+
+    document.body.removeChild(link);
 
     URL.revokeObjectURL(url);
   };
 
+  /* =========================================================
+     PRODUCT IMAGE URL
+  ========================================================= */
+
+  const getProductImage = (image) => {
+    if (!image) {
+      return null;
+    }
+
+    if (
+      image.startsWith("http://") ||
+      image.startsWith("https://")
+    ) {
+      return image;
+    }
+
+    return `http://localhost:5000${
+      image.startsWith("/") ? "" : "/"
+    }${image}`;
+  };
+
+  /* =========================================================
+     JSX
+  ========================================================= */
+
   return (
     <main className={styles.page}>
       <Toaster position="top-right" />
-      {/* =========================
+
+      {/* =====================================================
           HEADER
-      ========================= */}
+      ===================================================== */}
 
       <div className={styles.header}>
-
         <div>
           <h1>Products</h1>
         </div>
 
         <div className={styles.headerActions}>
+          {/* PRINT */}
 
           <button
+            type="button"
             className={styles.secondaryButton}
             onClick={handlePrint}
           >
             <FiPrinter />
-            Print
+
+            <span>Print</span>
           </button>
 
+          {/* EXPORT */}
+
           <button
+            type="button"
             className={styles.secondaryButton}
             onClick={handleExport}
           >
             <FiDownload />
-            Export
+
+            <span>Export</span>
+
             <FiChevronDown />
           </button>
 
+          {/* ADD NEW */}
+
           <button
+            type="button"
             className={styles.addButton}
             onClick={() => {
               window.location.href =
@@ -251,22 +508,20 @@ export default function ProductsPage() {
             }}
           >
             <FiPlus />
-            Add New
-          </button>
 
+            <span>Add New</span>
+          </button>
         </div>
       </div>
 
-      {/* =========================
+      {/* =====================================================
           STAT CARDS
-      ========================= */}
+      ===================================================== */}
 
       <div className={styles.statsGrid}>
-
-        {/* Total */}
+        {/* TOTAL PRODUCTS */}
 
         <div className={styles.statCard}>
-
           <div>
             <p>Total Products</p>
 
@@ -282,13 +537,11 @@ export default function ProductsPage() {
           >
             <FiBox />
           </div>
-
         </div>
 
-        {/* In Stock */}
+        {/* IN STOCK */}
 
         <div className={styles.statCard}>
-
           <div>
             <p>In Stock</p>
 
@@ -304,13 +557,11 @@ export default function ProductsPage() {
           >
             <FiCheckCircle />
           </div>
-
         </div>
 
-        {/* Low Stock */}
+        {/* LOW STOCK */}
 
         <div className={styles.statCard}>
-
           <div>
             <p>Low Stock</p>
 
@@ -326,13 +577,11 @@ export default function ProductsPage() {
           >
             <FiAlertTriangle />
           </div>
-
         </div>
 
-        {/* No Stock */}
+        {/* NO STOCK */}
 
         <div className={styles.statCard}>
-
           <div>
             <p>No Stock</p>
 
@@ -348,25 +597,22 @@ export default function ProductsPage() {
           >
             <FiXCircle />
           </div>
-
         </div>
-
       </div>
 
-      {/* =========================
-          PRODUCT TABLE CARD
-      ========================= */}
+      {/* =====================================================
+          TABLE CARD
+      ===================================================== */}
 
       <section className={styles.tableCard}>
-
-        {/* Toolbar */}
+        {/* ===================================================
+            TOOLBAR
+        =================================================== */}
 
         <div className={styles.toolbar}>
-
-          {/* Search */}
+          {/* SEARCH */}
 
           <div className={styles.searchBox}>
-
             <FiSearch />
 
             <input
@@ -377,28 +623,31 @@ export default function ProductsPage() {
                 setSearch(e.target.value)
               }
             />
-
           </div>
 
-          {/* Date */}
+          {/* DATE */}
 
-          <button className={styles.dateButton}>
+          <button
+            type="button"
+            className={styles.dateButton}
+          >
             <FiCalendar />
 
-            <span>
-              Today
-            </span>
+            <span>Today</span>
           </button>
 
-          <div className={styles.toolbarRight}>
+          {/* RIGHT TOOLBAR */}
 
-            {/* Filter */}
+          <div className={styles.toolbarRight}>
+            {/* FILTER */}
 
             <select
               className={styles.filterButton}
               value={statusFilter}
               onChange={(e) =>
-                setStatusFilter(e.target.value)
+                setStatusFilter(
+                  e.target.value
+                )
               }
             >
               <option value="All">
@@ -418,7 +667,7 @@ export default function ProductsPage() {
               </option>
             </select>
 
-            {/* Sort */}
+            {/* SORT */}
 
             <select
               className={styles.sortButton}
@@ -448,211 +697,357 @@ export default function ProductsPage() {
               </option>
             </select>
 
-            {/* Column button */}
+            {/* COLUMNS */}
 
             <button
+              type="button"
               className={styles.iconButton}
               title="Columns"
             >
               <span>Ⅱ</span>
             </button>
 
-            {/* Refresh */}
+            {/* REFRESH */}
 
             <button
+              type="button"
               className={styles.iconButton}
               title="Refresh"
               onClick={fetchProducts}
             >
               <FiRefreshCw />
             </button>
-
           </div>
-
         </div>
 
-        {/* =========================
+        {/* ===================================================
             TABLE
-        ========================= */}
+        =================================================== */}
 
         <div className={styles.tableWrapper}>
-
           {loading ? (
-             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px' }}>
-                <Loader2 className={styles.spinner} style={{ animation: 'spin 1s linear infinite' }} size={40} />
-             </div>
+            <div className={styles.loading}>
+              <Loader2
+                className={styles.spinner}
+                size={40}
+              />
+
+              <span>
+                Loading products...
+              </span>
+            </div>
           ) : (
-          <table className={styles.table}>
+            <table className={styles.table}>
+              {/* =================================================
+                  TABLE HEADER
+              ================================================= */}
 
-            <thead>
-              <tr>
-                <th>Code</th>
-                <th>Product</th>
-                <th>SKU</th>
-                <th>Category</th>
-                <th>Brand</th>
-                <th>Unit</th>
-                <th>Quantity</th>
-                <th>Status</th>
-                <th>Selling Price</th>
-                <th>Purchase Price</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+              <thead>
+                <tr>
+                  <th>Code</th>
 
-            <tbody>
+                  <th>Product</th>
 
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => {
-                  const status = getProductStatus(product);
-                  return (
-                  <tr 
-                    key={product.id}
-                    onClick={() => window.location.href = `/admin/products/details/${product.id}`}
-                    style={{ cursor: 'pointer' }}
-                  >
+                  <th>SKU</th>
 
-                    <td className={styles.code}>
-                      {product.code || `#${product.id?.substring(0,6)}`}
-                    </td>
+                  <th>Category</th>
 
-                    {/* Product */}
+                  <th>Brand</th>
 
-                    <td>
+                  <th>Unit</th>
 
-                      <div className={styles.productCell}>
+                  <th>Quantity</th>
 
-                        <div
-                          className={`${styles.productIcon} ${styles[product.iconType || 'default']}`}
-                        >
-                          {product.image ? (
-                             <img src={product.image.startsWith('http') ? product.image : `http://localhost:5000${product.image.startsWith('/') ? '' : '/'}${product.image}`} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px' }} />
-                          ) : product.icon || <FiBox />}
-                        </div>
+                  <th>Status</th>
 
-                        <strong>
-                          {product.name}
-                        </strong>
+                  <th>Selling Price</th>
 
-                      </div>
+                  <th>Purchase Price</th>
 
-                    </td>
+                  <th>Action</th>
+                </tr>
+              </thead>
 
-                    <td>{product.sku}</td>
+              {/* =================================================
+                  TABLE BODY
+              ================================================= */}
 
-                    <td>
-                      {product.category?.name || 'N/A'}
-                    </td>
+              <tbody>
+                {filteredProducts.length >
+                0 ? (
+                  filteredProducts.map(
+                    (product) => {
+                      const status =
+                        getProductStatus(
+                          product
+                        );
 
-                    <td>
-                      {product.brand?.name || 'N/A'}
-                    </td>
+                      const imageUrl =
+                        getProductImage(
+                          product.image
+                        );
 
-                    <td>
-                      {product.unit?.name || 'N/A'}
-                    </td>
+                      const quantity =
+                        Number(
+                          product
+                            .inventories?.[0]
+                            ?.quantity || 0
+                        );
 
-                    <td>
-                      {String(product.inventories?.[0]?.quantity || 0).padStart(
-                        2,
-                        "0"
-                      )}
-                    </td>
-
-                    {/* Status */}
-
-                    <td>
-
-                      <span
-                        className={`${styles.status} ${getStatusClass(status)}`}
-                      >
-                        {status}
-                      </span>
-
-                    </td>
-
-                    {/* Selling Price */}
-
-                    <td className={styles.price}>
-                      ${product.sellingPrice}
-                    </td>
-
-                    {/* Purchase Price */}
-
-                    <td className={styles.price}>
-                      ${product.costPrice}
-                    </td>
-
-                    {/* Action */}
-
-                    <td>
-
-                      <div className={styles.actionWrapper}>
-
-                        <button
-                          className={styles.actionButton}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenMenu(
-                              openMenu === product.id
-                                ? null
-                                : product.id
-                            );
+                      return (
+                        <tr
+                          key={product.id}
+                          className={
+                            styles.productRow
+                          }
+                          onClick={() => {
+                            window.location.href =
+                              `/admin/products/details/${product.id}`;
                           }}
                         >
-                          <FiMoreVertical />
-                        </button>
+                          {/* CODE */}
 
-                        {openMenu === product.id && (
-
-                          <div
+                          <td
                             className={
-                              styles.actionMenu
+                              styles.code
                             }
                           >
-                            <button onClick={(e) => { e.stopPropagation(); window.location.href = `/admin/products/details/${product.id}`; }}>
-                              View
-                            </button>
+                            {product.code ||
+                              `#${String(
+                                product.id ||
+                                  ""
+                              ).substring(
+                                0,
+                                6
+                              )}`}
+                          </td>
 
-                            <button onClick={(e) => { e.stopPropagation(); window.location.href = `/admin/products/edit/${product.id}`; }}>
-                              Edit
-                            </button>
+                          {/* PRODUCT */}
 
-                            <button onClick={(e) => { e.stopPropagation(); handleDelete(product.id); }} style={{ color: 'red' }}>
-                              Delete
-                            </button>
-                          </div>
+                          <td>
+                            <div
+                              className={
+                                styles.productCell
+                              }
+                            >
+                              <div
+                                className={`${
+                                  styles.productIcon
+                                } ${
+                                  styles[
+                                    product.iconType ||
+                                      "default"
+                                  ] || ""
+                                }`}
+                              >
+                                {imageUrl ? (
+                                  <img
+                                    src={
+                                      imageUrl
+                                    }
+                                    alt={
+                                      product.name ||
+                                      "Product"
+                                    }
+                                    className={
+                                      styles.productImage
+                                    }
+                                  />
+                                ) : (
+                                  product.icon || (
+                                    <FiBox />
+                                  )
+                                )}
+                              </div>
 
-                        )}
+                              <strong>
+                                {product.name ||
+                                  "N/A"}
+                              </strong>
+                            </div>
+                          </td>
 
+                          {/* SKU */}
+
+                          <td>
+                            {product.sku ||
+                              "N/A"}
+                          </td>
+
+                          {/* CATEGORY */}
+
+                          <td>
+                            {product.category
+                              ?.name ||
+                              "N/A"}
+                          </td>
+
+                          {/* BRAND */}
+
+                          <td>
+                            {product.brand
+                              ?.name ||
+                              "N/A"}
+                          </td>
+
+                          {/* UNIT */}
+
+                          <td>
+                            {product.unit
+                              ?.name ||
+                              "N/A"}
+                          </td>
+
+                          {/* QUANTITY */}
+
+                          <td>
+                            {String(
+                              quantity
+                            ).padStart(2, "0")}
+                          </td>
+
+                          {/* STATUS */}
+
+                          <td>
+                            <span
+                              className={`${styles.status} ${getStatusClass(
+                                status
+                              )}`}
+                            >
+                              {status}
+                            </span>
+                          </td>
+
+                          {/* SELLING PRICE */}
+
+                          <td
+                            className={
+                              styles.price
+                            }
+                          >
+                            $
+                            {Number(
+                              product.sellingPrice ||
+                                0
+                            ).toFixed(2)}
+                          </td>
+
+                          {/* PURCHASE PRICE */}
+
+                          <td
+                            className={
+                              styles.price
+                            }
+                          >
+                            $
+                            {Number(
+                              product.costPrice ||
+                                0
+                            ).toFixed(2)}
+                          </td>
+
+                          {/* =================================================
+                              ACTIONS
+                          ================================================= */}
+
+                          <td
+                            className={
+                              styles.actionCell
+                            }
+                          >
+                            <div
+                              className={
+                                styles.actionButtons
+                              }
+                            >
+                              {/* VIEW */}
+
+                              <button
+                                type="button"
+                                title="View"
+                                aria-label="View product"
+                                className={`${styles.actionIconButton} ${styles.viewButton}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+
+                                  window.location.href =
+                                    `/admin/products/details/${product.id}`;
+                                }}
+                              >
+                                <FiEye />
+                              </button>
+
+                              {/* EDIT */}
+
+                              <button
+                                type="button"
+                                title="Edit"
+                                aria-label="Edit product"
+                                className={`${styles.actionIconButton} ${styles.editButton}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+
+                                  window.location.href =
+                                    `/admin/products/edit/${product.id}`;
+                                }}
+                              >
+                                <FiEdit2 />
+                              </button>
+
+                              {/* DELETE */}
+
+                              <button
+                                type="button"
+                                title="Delete"
+                                aria-label="Delete product"
+                                className={`${styles.actionIconButton} ${styles.deleteButton}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+
+                                  handleDelete(
+                                    product.id
+                                  );
+                                }}
+                              >
+                                <FiTrash2 />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )
+                ) : (
+                  /* =================================================
+                     EMPTY
+                  ================================================= */
+
+                  <tr>
+                    <td
+                      colSpan="11"
+                      className={
+                        styles.empty
+                      }
+                    >
+                      <div
+                        className={
+                          styles.emptyContent
+                        }
+                      >
+                        <FiBox />
+
+                        <span>
+                          No products found
+                        </span>
                       </div>
-
                     </td>
-
                   </tr>
-
-                )})
-              ) : (
-
-                <tr>
-                  <td
-                    colSpan="11"
-                    className={styles.empty}
-                  >
-                    No products found
-                  </td>
-                </tr>
-
-              )}
-
-            </tbody>
-
-          </table>
+                )}
+              </tbody>
+            </table>
           )}
         </div>
-
       </section>
-
     </main>
   );
 }
