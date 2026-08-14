@@ -45,14 +45,32 @@ import styles from "./Sidebar.module.css";
 // ─── ROLE MENU CONFIGURATION ──────────────────────────────────────────────────
 
 const ROLE_MENUS = {
+  super_admin: [
+    {
+      title: "Super Admin",
+      items: [
+        { href: "/dashboard", label: "Dashboard", icon: FiGrid },
+        { href: "/admin/branches", label: "Branches", icon: FiMapPin },
+        { href: "/admin/add-admin", label: "Add Admin", icon: FiUserCheck },
+        { href: "/admin/business-type", label: "Business Type", icon: FiBriefcase },
+        { href: "/admin/employees/view", label: "Employees", icon: FiUserCheck },
+        { href: "/admin/employees/add", label: "Add Employee", icon: FiUsers },
+        { href: "/admin/designations", label: "Roles", icon: FiBriefcase },
+        { href: "/reports", label: "Report", icon: FiBarChart2 },
+        { href: "/admin/settings", label: "Settings", icon: FiSettings },
+      ],
+    },
+  ],
+
   admin: [
     {
       title: "Admin",
       items: [
         { href: "/dashboard", label: "Dashboard", icon: FiGrid },
-        { href: "/admin/branches", label: "Branch", icon: FiMapPin },
+        { href: "/admin/branches", label: "Branches", icon: FiMapPin },
+        { href: "/admin/business-type", label: "Business Type", icon: FiBriefcase },
+        { href: "/admin/employees/view", label: "Employees", icon: FiUserCheck },
         { href: "/reports", label: "Reports", icon: FiBarChart2 },
-        { href: "/admin/employees/view", label: "Manager", icon: FiUserCheck },
         { href: "/admin/audit-logs", label: "Audit Log", icon: FiClock },
         { href: "/admin/settings", label: "Settings", icon: FiSettings },
       ],
@@ -126,6 +144,7 @@ const ROLE_MENUS = {
 const normalizeRole = (roleStr) => {
   if (!roleStr) return "admin";
   const r = roleStr.toLowerCase().trim();
+  if (r.includes("super") || r.includes("sooper")) return "super_admin";
   if (r.includes("branch")) return "branch_manager";
   if (r.includes("cashier")) return "cashier";
   if (r.includes("inventory") || r.includes("stock")) return "inventory_manager";

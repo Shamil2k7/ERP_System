@@ -38,6 +38,11 @@ const createRole = async (data) => {
     data: {
       name: data.name.trim(),
     },
+    include: {
+      _count: {
+        select: { users: true },
+      },
+    },
   });
 };
 
@@ -46,6 +51,11 @@ const updateRole = async (id, data) => {
     where: { id },
     data: {
       name: data.name ? data.name.trim() : undefined,
+    },
+    include: {
+      _count: {
+        select: { users: true },
+      },
     },
   });
 };
