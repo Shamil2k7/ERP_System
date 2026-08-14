@@ -30,21 +30,23 @@ export default function SupplierSelect({ value, onChange }) {
     <select
       value={value}
       onChange={onChange}
-      className="w-full border rounded-lg p-3"
+      className="w-full border border-slate-200 rounded-lg p-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none bg-white font-medium shadow-sm transition-all"
       disabled={loading}
+      required
     >
       <option value="">
         {loading ? "Loading suppliers..." : "Select Supplier"}
       </option>
 
       {suppliers.map((supplier) => {
-        const name = supplier.companyName || supplier.name;
+        const name = supplier.companyName || supplier.name || "Unnamed Supplier";
         return (
-          <option key={supplier.id} value={name}>
-            {name}
+          <option key={supplier.id} value={supplier.id}>
+            {name} {supplier.phone ? `(${supplier.phone})` : ""}
           </option>
         );
       })}
     </select>
   );
 }
+

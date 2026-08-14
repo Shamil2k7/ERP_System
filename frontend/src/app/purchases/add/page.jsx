@@ -1,25 +1,50 @@
 "use client";
 
+import Link from "next/link";
+import { FiPrinter, FiDownload, FiX } from "react-icons/fi";
 import PurchaseForm from "../components/PurchaseForm";
+import "../purchases.css";
 
 export default function AddPurchasePage() {
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="page">
+      {/* PAGE HEADER */}
+      <header className="header">
+        <div>
+          <h1>Purchases</h1>
+          <p>Manage company purchase orders, supplier inventory, and stock receipts.</p>
+        </div>
 
-      <div className="mb-8">
+        <div className="headerActions">
+          <button
+            className="secondaryButton"
+            onClick={() => window.print()}
+          >
+            <FiPrinter size={15} />
+            Print
+          </button>
 
-        <h1 className="text-3xl font-bold">
-          Create Purchase
-        </h1>
+          <button
+            className="secondaryButton"
+            onClick={() => alert("Exporting template...")}
+          >
+            <FiDownload size={15} />
+            Export
+          </button>
 
-        <p className="text-gray-500 mt-2">
-          Create a new purchase order.
-        </p>
+          <Link href="/purchases" className="addButton">
+            <FiX size={17} />
+            Close
+          </Link>
+        </div>
+      </header>
 
-      </div>
-
+      {/* ADD CARD */}
       <PurchaseForm />
-
     </div>
   );
 }
+
+
+
+

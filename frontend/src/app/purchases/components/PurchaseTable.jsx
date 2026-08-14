@@ -1,65 +1,129 @@
 "use client";
 
 import Link from "next/link";
+import { FiEye, FiEdit2, FiTrash2 } from "react-icons/fi";
 
-export default function PurchaseTable({ purchases = [] }) {
+export default function PurchaseTable({ purchases = [], onDelete }) {
   return (
-    <div className="purchases-table-container">
-      <table className="purchases-table">
+    <div style={{ width: "100%", overflowX: "auto" }}>
+      <table className="table">
         <thead>
           <tr>
             <th>Purchase ID</th>
-            <th>Total Products</th>
-            <th>Total Quantity</th>
+            <th>Supplier</th>
+            <th>Products Count</th>
+            <th>Total Qty</th>
             <th>Total Amount</th>
-            <th>Vendor Name</th>
             <th>Phone</th>
             <th>Status</th>
-            <th style={{ textAlign: "right" }}>Action</th>
+            <th style={{ textAlign: "right" }}>Actions</th>
           </tr>
         </thead>
         <tbody>
           {purchases.length === 0 ? (
             <tr>
-              <td colSpan={8} style={{ textAlign: "center", padding: "32px", color: "#71717a" }}>
-                No Purchase Orders Found
+              <td
+                colSpan={8}
+                style={{ textAlign: "center", padding: "40px", color: "#8a99aa" }}
+              >
+                No purchase orders found.
               </td>
             </tr>
           ) : (
             purchases.map((item) => {
-              const statusClass =
-                item.status?.toLowerCase() === "delivered" || item.status?.toLowerCase() === "received"
-                  ? "delivered"
-                  : "pending";
+              const statusLower = (item.status || "PENDING").toLowerCase();
+
+              const isReceived =
+                statusLower === "received" ||
+                statusLower === "completed" ||
+                statusLower === "delivered";
 
               return (
                 <tr key={item.id}>
-                  <td className="purchase-id-cell">{item.purchaseNo || `144826`}</td>
-                  <td>{item.totalProducts || 20}</td>
-                  <td>{item.totalQty || 1200}</td>
-                  <td className="purchase-amount-cell">
-                    ${(item.total || 12000).toLocaleString()}
+                  <td style={{ color: "#2563eb", fontWeight: 600 }}>
+                    {item.purchaseNo || "—"}
                   </td>
-                  <td>{item.supplier || "Name Goes Here"}</td>
-                  <td>{item.phone || "+985 1256 48799"}</td>
+                  <td style={{ color: "#17304b", fontWeight: 600 }}>
+                    {item.supplier || "—"}
+                  </td>
+                  <td>{item.totalProducts || 0} items</td>
+                  <td>{item.totalQty || 0}</td>
+                  <td style={{ fontWeight: 700, color: "#17304b" }}>
+                    ₹{Number(item.total || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  </td>
+                  <td>{item.phone || "—"}</td>
                   <td>
-                    <span className={`badge-status ${statusClass}`}>
-                      {item.status || "Pending"}
+                    <span
+                      className={
+                        isReceived ? "activeStatus" : "pendingStatus"
+                      }
+                    >
+                      {item.status || "PENDING"}
                     </span>
                   </td>
                   <td style={{ textAlign: "right" }}>
-                    <div style={{ display: "inline-flex", gap: "8px", alignItems: "center" }}>
+                    <div
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        justifyContent: "flex-end",
+                      }}
+                    >
                       <Link
                         href={`/purchases/${item.id}`}
-                        style={{ fontSize: "12px", color: "#52525b", textDecoration: "none" }}
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: "#ffffff",
+                          color: "#557089",
+                          border: "1px solid #dfe5eb",
+                          borderRadius: "6px",
+                        }}
+                        title="View Details"
                       >
-                        View
+                        <FiEye size={15} />
                       </Link>
-                      <button className="action-dots-btn" title="More Actions">
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                          <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
-                        </svg>
-                      </button>
+                      <Link
+                        href={`/purchases/edit/${item.id}`}
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: "#ffffff",
+                          color: "#2563eb",
+                          border: "1px solid #dfe5eb",
+                          borderRadius: "6px",
+                        }}
+                        title="Edit Order"
+                      >
+                        <FiEdit2 size={15} />
+                      </Link>
+                      {onDelete && (
+                        <button
+                          onClick={() => onDelete(item.id)}
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "#ffffff",
+                            color: "#dc2626",
+                            border: "1px solid #dfe5eb",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                          }}
+                          title="Delete Order"
+                        >
+                          <FiTrash2 size={15} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -71,3 +135,4 @@ export default function PurchaseTable({ purchases = [] }) {
     </div>
   );
 }
+
