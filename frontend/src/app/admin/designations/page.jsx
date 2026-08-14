@@ -263,7 +263,6 @@ export default function DesignationsPage() {
       });
     }
 
-    setEditingId(item._id);
     setShowAddForm(true);
     setOpenMenu(null);
   };
@@ -405,7 +404,7 @@ export default function DesignationsPage() {
               </p>
             </div>
 
-            <button className={styles.closeButton} onClick={() => setShowAddForm(false)}>
+            <button className={styles.closeButton} onClick={() => { setShowAddForm(false); setEditingItem(null); }}>
               <FiX size={18} />
             </button>
           </div>
@@ -475,7 +474,7 @@ export default function DesignationsPage() {
                 <button
                   type="button"
                   className={styles.cancelButton}
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => { setShowAddForm(false); setEditingItem(null); }}
                 >
                   Cancel
                 </button>
@@ -506,7 +505,7 @@ export default function DesignationsPage() {
                 <button
                   type="button"
                   className={styles.cancelButton}
-                  onClick={() => setShowAddForm(false)}
+                  onClick={() => { setShowAddForm(false); setEditingItem(null); }}
                 >
                   Cancel
                 </button>

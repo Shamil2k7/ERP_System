@@ -54,9 +54,9 @@ const modifyRole = async (id, updateData) => {
     throw new Error("Role not found");
   }
 
-  if (updateData.name && updateData.name.trim() !== existingRole.name) {
+  if (updateData.name && updateData.name.trim().toLowerCase() !== existingRole.name.toLowerCase()) {
     const existingName = await getRoleByName(updateData.name);
-    if (existingName) {
+    if (existingName && existingName.id !== id) {
       throw new Error("Role name already exists");
     }
   }

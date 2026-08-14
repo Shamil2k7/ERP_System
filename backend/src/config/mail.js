@@ -329,11 +329,107 @@ const sendEmployeeUpdatedEmail = async (
 };
 
 
+// Send admin creation credentials email
+const sendAdminCredentialsEmail = async (
+  email,
+  adminId,
+  fullName,
+  password,
+  businessType
+) => {
+  try {
+    const tx = getTransporter();
+
+    await tx.sendMail({
+      from: `"ERP System" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Your ERP Admin Account Credentials",
+
+      html: `
+        <div style="
+          font-family: Arial, sans-serif;
+          max-width: 600px;
+          margin: auto;
+          padding: 25px;
+          border: 1px solid #ddd;
+          border-radius: 10px;
+        ">
+
+          <h2 style="color: #2563eb;">
+            Welcome to ERP System - Administrator Account
+          </h2>
+
+          <p>
+            Hello <strong>${fullName}</strong>,
+          </p>
+
+          <p>
+            Your administrator account has been created by the Super Admin.
+          </p>
+
+          <p>
+            You can use the following credentials to log in:
+          </p>
+
+          <div style="
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+          ">
+
+            <p style="margin: 6px 0;">
+              <strong>Admin ID:</strong> ${adminId}
+            </p>
+
+            <p style="margin: 6px 0;">
+              <strong>Email Address:</strong> ${email}
+            </p>
+
+            <p style="margin: 6px 0;">
+              <strong>Business Type:</strong> ${businessType || 'N/A'}
+            </p>
+
+            <p style="margin: 6px 0;">
+              <strong>Password:</strong> 
+              <span style="font-family: monospace; background: #e0e7ff; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-weight: bold;">
+                ${password}
+              </span>
+            </p>
+
+          </div>
+
+          <p>
+            You can sign in to the ERP Portal using your <strong>Email Address (${email})</strong> or <strong>Admin ID (${adminId})</strong>.
+          </p>
+
+          <p style="color: #dc2626; margin-top: 15px;">
+            Please change your password after your first login for security.
+          </p>
+
+          <p style="margin-top: 30px;">
+            Regards,<br>
+            <strong>ERP System Management</strong>
+          </p>
+
+        </div>
+      `,
+    });
+
+    console.log(`Admin credentials email sent successfully to ${email}`);
+  } catch (error) {
+    console.error("Failed to send admin credentials email:", error.message);
+  }
+};
+
+
 export {
   sendEmployeeCredentialsEmail,
   // sendVerificationEmail,
   sendOTPEmail,
   sendEmployeeUpdatedEmail,
+  sendAdminCredentialsEmail,
 };
 
 
