@@ -14,20 +14,63 @@ class SalesRepository {
   // Get All Sales Orders
   // ===============================
   async findAll() {
-    return await prisma.salesOrder.findMany({
+    const orders = await prisma.salesOrder.findMany({
       orderBy: {
         createdAt: "desc",
       },
     });
+    
+    return await Promise.all(
+      orders.map(async (order) => {
+        let customerName = "Walk-in Customer";
+        if (order.customerId) {
+          const customer = await prisma.customer.findUnique({
+            where: { id: order.customerId },
+            select: { name: true }
+          });
+          if (customer) {
+            customerName = customer.name;
+          }
+        }
+        return {
+          ...order,
+          customerName
+        };
+      })
+    );
   }
 
   // ===============================
   // Get Sales Order By ID
   // ===============================
   async findById(id) {
-    return await prisma.salesOrder.findUnique({
+    const order = await prisma.salesOrder.findUnique({
       where: { id },
     });
+    
+    if (!order) return null;
+    
+    let customerName = "Walk-in Customer";
+    let customerPhone = "";
+    let customerEmail = "";
+    if (order.customerId) {
+      const customer = await prisma.customer.findUnique({
+        where: { id: order.customerId },
+        select: { name: true, phone: true, email: true }
+      });
+      if (customer) {
+        customerName = customer.name;
+        customerPhone = customer.phone || "";
+        customerEmail = customer.email || "";
+      }
+    }
+    
+    return {
+      ...order,
+      customerName,
+      customerPhone,
+      customerEmail
+    };
   }
 
   // ===============================

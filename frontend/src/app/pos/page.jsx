@@ -10,6 +10,7 @@ import OrderPanel from "./components/OrderPanel";
 import API_URL from "@/config/api";
 import Swal from "sweetalert2";
 import axios from "axios";
+import { useAlert } from "@/context/AlertContext";
 
 export default function POSPage() {
   const [products, setProducts] = useState([]);

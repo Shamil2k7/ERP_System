@@ -1,112 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import axios from "axios";
 import PurchaseTable from "./components/PurchaseTable";
 import "./purchases.css";
 
-const purchaseData = [
-  {
-    id: 1,
-    purchaseNo: "144826",
-    supplier: "Name Goes Here",
-    totalProducts: 20,
-    totalQty: 1200,
-    total: 12000,
-    phone: "+985 1256 48799",
-    status: "Pending",
-  },
-  {
-    id: 2,
-    purchaseNo: "144826",
-    supplier: "Name Goes Here",
-    totalProducts: 20,
-    totalQty: 1200,
-    total: 12000,
-    phone: "+985 1256 48799",
-    status: "Delivered",
-  },
-  {
-    id: 3,
-    purchaseNo: "144826",
-    supplier: "Name Goes Here",
-    totalProducts: 20,
-    totalQty: 1200,
-    total: 12000,
-    phone: "+985 1256 48799",
-    status: "Delivered",
-  },
-  {
-    id: 4,
-    purchaseNo: "144826",
-    supplier: "Name Goes Here",
-    totalProducts: 20,
-    totalQty: 1200,
-    total: 12000,
-    phone: "+985 1256 48799",
-    status: "Delivered",
-  },
-  {
-    id: 5,
-    purchaseNo: "144826",
-    supplier: "Name Goes Here",
-    totalProducts: 20,
-    totalQty: 1200,
-    total: 12000,
-    phone: "+985 1256 48799",
-    status: "Pending",
-  },
-  {
-    id: 6,
-    purchaseNo: "144826",
-    supplier: "Name Goes Here",
-    totalProducts: 20,
-    totalQty: 1200,
-    total: 12000,
-    phone: "+985 1256 48799",
-    status: "Pending",
-  },
-  {
-    id: 7,
-    purchaseNo: "144826",
-    supplier: "Name Goes Here",
-    totalProducts: 20,
-    totalQty: 1200,
-    total: 12000,
-    phone: "+985 1256 48799",
-    status: "Pending",
-  },
-  {
-    id: 8,
-    purchaseNo: "144826",
-    supplier: "Name Goes Here",
-    totalProducts: 20,
-    totalQty: 1200,
-    total: 12000,
-    phone: "+985 1256 48799",
-    status: "Delivered",
-  },
-  {
-    id: 9,
-    purchaseNo: "144826",
-    supplier: "Name Goes Here",
-    totalProducts: 20,
-    totalQty: 1200,
-    total: 12000,
-    phone: "+985 1256 48799",
-    status: "Delivered",
-  },
-  {
-    id: 10,
-    purchaseNo: "144826",
-    supplier: "Name Goes Here",
-    totalProducts: 20,
-    totalQty: 1200,
-    total: 12000,
-    phone: "+985 1256 48799",
-    status: "Pending",
-  },
-];
+const PAGE_SIZE = 10;
+
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
+});
 
 export default function PurchasesPage() {
   const [activeTab, setActiveTab] = useState("Purchase Order Management");
@@ -114,19 +18,74 @@ export default function PurchasesPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [purchases, setPurchases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchPurchases();
+  }, []);
+
+  const fetchPurchases = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await api.get("/purchases");
+      setPurchases(res.data.data || []);
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Failed to load purchases. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Map backend shape -> table row shape
+  const mappedPurchases = useMemo(() => {
+    return purchases.map((p) => ({
+      id: p.id,
+      purchaseNo: p.purchaseNo,
+      supplier: p.supplier?.name || "—",
+      totalProducts: p.items?.length || 0,
+      totalQty:
+        p.items?.reduce((sum, item) => sum + (item.quantity || 0), 0) || 0,
+      total: p.totalAmount,
+      phone: p.supplier?.phone || "—",
+      status: p.status,
+    }));
+  }, [purchases]);
+
   const filteredPurchases = useMemo(() => {
-    return purchaseData.filter((purchase) => {
+    return mappedPurchases.filter((purchase) => {
+      const q = search.toLowerCase();
       const matchesSearch =
-        purchase.purchaseNo.toLowerCase().includes(search.toLowerCase()) ||
-        purchase.supplier.toLowerCase().includes(search.toLowerCase()) ||
-        purchase.phone.toLowerCase().includes(search.toLowerCase());
+        purchase.purchaseNo?.toLowerCase().includes(q) ||
+        purchase.supplier?.toLowerCase().includes(q) ||
+        purchase.phone?.toLowerCase().includes(q);
 
       const matchesStatus =
         statusFilter === "All" ||
-        purchase.status.toLowerCase() === statusFilter.toLowerCase();
+        purchase.status?.toLowerCase() === statusFilter.toLowerCase();
 
       return matchesSearch && matchesStatus;
     });
+  }, [mappedPurchases, search, statusFilter]);
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredPurchases.length / PAGE_SIZE)
+  );
+
+  const paginatedPurchases = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredPurchases.slice(start, start + PAGE_SIZE);
+  }, [filteredPurchases, currentPage]);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
   }, [search, statusFilter]);
 
   return (
@@ -177,41 +136,64 @@ export default function PurchasesPage() {
               className="status-dropdown-pill"
             >
               <option value="All">Status</option>
-              <option value="Pending">Pending</option>
-              <option value="Delivered">Delivered</option>
+              <option value="PENDING">Pending</option>
+              <option value="RECEIVED">Received</option>
+              <option value="PARTIAL">Partial</option>
+              <option value="CANCELLED">Cancelled</option>
             </select>
           </div>
         </div>
 
         {/* Purchase Table */}
-        <PurchaseTable purchases={filteredPurchases} />
-
-        {/* Bottom Floating Pagination */}
-        <div className="purchases-pagination-wrapper">
-          <div className="purchases-pagination-pill">
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            >
-              &lt;
-            </button>
-            {[1, 2, 3, 4, 5].map((num) => (
-              <button
-                key={num}
-                className={`page-btn ${currentPage === num ? "active" : ""}`}
-                onClick={() => setCurrentPage(num)}
-              >
-                {num}
-              </button>
-            ))}
-            <button
-              className="page-btn"
-              onClick={() => setCurrentPage((p) => Math.min(5, p + 1))}
-            >
-              &gt;
+        {loading ? (
+          <div className="purchases-state-message">Loading purchases...</div>
+        ) : error ? (
+          <div className="purchases-state-message error">
+            {error}{" "}
+            <button className="btn-retry" onClick={fetchPurchases}>
+              Retry
             </button>
           </div>
-        </div>
+        ) : filteredPurchases.length === 0 ? (
+          <div className="purchases-state-message">No purchases found.</div>
+        ) : (
+          <>
+            <PurchaseTable purchases={paginatedPurchases} />
+
+            {/* Bottom Floating Pagination */}
+            <div className="purchases-pagination-wrapper">
+              <div className="purchases-pagination-pill">
+                <button
+                  className="page-btn"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  &lt;
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (num) => (
+                    <button
+                      key={num}
+                      className={`page-btn ${currentPage === num ? "active" : ""}`}
+                      onClick={() => setCurrentPage(num)}
+                    >
+                      {num}
+                    </button>
+                  )
+                )}
+                <button
+                  className="page-btn"
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  &gt;
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
