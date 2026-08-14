@@ -22,7 +22,7 @@ const login = async (req, res) => {
         hour12: true,
       });
 
-      recordAuditLog(req, {
+      await recordAuditLog(req, {
         action: "LOGIN",
         entity: "Employee",
         entityId: result.user.id,

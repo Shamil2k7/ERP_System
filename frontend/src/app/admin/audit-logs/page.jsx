@@ -32,7 +32,7 @@ import styles from "./auditLogs.module.css";
 const formatDateTime = (iso) => {
   if (!iso) return "N/A";
   const d = new Date(iso);
-  if (isNaN(d)) return "N/A";
+  if (isNaN(d.getTime())) return "N/A";
   return d.toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" }) +
     " at " +
     d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true });
@@ -41,14 +41,14 @@ const formatDateTime = (iso) => {
 const formatTime = (iso) => {
   if (!iso) return "";
   const d = new Date(iso);
-  if (isNaN(d)) return "";
+  if (isNaN(d.getTime())) return "";
   return d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
 };
 
 const formatDate = (iso) => {
   if (!iso) return "";
   const d = new Date(iso);
-  if (isNaN(d)) return "";
+  if (isNaN(d.getTime())) return "";
   return d.toLocaleDateString("en-US", { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
 };
 

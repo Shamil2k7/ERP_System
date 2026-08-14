@@ -54,8 +54,11 @@ export default function LoginForm() {
       }
 
       localStorage.setItem("token", data.token);
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
 
-      showSuccess("Employee added", "User logged in successfully! Redirecting...");
+      showSuccess("Login Successful", "User logged in successfully! Redirecting...");
 
       window.location.href = "/dashboard";
     } catch (err) {

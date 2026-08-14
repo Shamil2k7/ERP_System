@@ -234,14 +234,14 @@ export default function DesignationsPage() {
           if (isDesig) {
             await deleteDesignation(id);
             setDesignations((prev) => prev.filter((item) => item.id !== id));
-            showSuccess("Product updated", "Designation deleted successfully");
+            showSuccess("Designation Deleted", "Designation deleted successfully");
           } else {
             await deleteRole(id);
             setRoles((prev) => prev.filter((r) => r.id !== id));
-            showSuccess("Product updated", "Role deleted successfully");
+            showSuccess("Role Deleted", "Role deleted successfully");
           }
         } catch (error) {
-          showError("Product couldn't be deleted", error.response?.data?.message || "Failed to delete item");
+          showError("Deletion Failed", error.response?.data?.message || "Failed to delete item");
         }
       },
     });
