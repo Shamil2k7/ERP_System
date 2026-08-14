@@ -7,7 +7,7 @@ import { useSettings } from "@/context/SettingsContext";
 
 import {
   FiPieChart,
-  FiDollarSign,
+  // FiDollarSign,
   FiPrinter,
   FiTrendingUp,
   FiGrid,
@@ -33,9 +33,9 @@ import {
   FiFileText,
   FiCreditCard,
   FiDollarSign,
-  FiTrendingUp,
-  FiPieChart,
-  FiPrinter,
+  // FiTrendingUp,
+  // FiPieChart,
+  // FiPrinter,
   FiLogOut,
   FiX,
 } from "react-icons/fi";
