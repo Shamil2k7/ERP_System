@@ -1,24 +1,34 @@
+/* =========================================================
+   INVENTORY PAGE
+========================================================= */
+
 .page {
   min-height: 100vh;
   width: 100%;
   padding: 32px;
   box-sizing: border-box;
 
-  background: #f9fafb;
+  background: #f8fafc;
   color: #374151;
 
   font-family: "Inter", sans-serif;
+
+  position: relative;
+  z-index: 1;
 }
 
-/* =========================
+
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
 .header {
+  position: relative;
+  z-index: 20;
+
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  flex-wrap: wrap;
+  justify-content: space-between;
 
   gap: 16px;
   margin-bottom: 28px;
@@ -27,10 +37,11 @@
 .header h1 {
   margin: 0;
 
+  color: #111827;
+
   font-size: 2rem;
   font-weight: 700;
-
-  color: #111827;
+  line-height: 1.2;
 }
 
 .headerActions {
@@ -39,9 +50,10 @@
   gap: 10px;
 }
 
-/* =========================
-   BUTTONS
-========================= */
+
+/* =========================================================
+   HEADER BUTTONS
+========================================================= */
 
 .secondaryButton,
 .addButton {
@@ -57,24 +69,21 @@
   border-radius: 8px;
 
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 14px;
   font-weight: 600;
 
   cursor: pointer;
 
   transition:
-    background-color 0.2s ease,
+    background 0.2s ease,
     border-color 0.2s ease,
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
 
-/* Secondary */
-
 .secondaryButton {
-  background: #ffffff;
-
   color: #374151;
+  background: #ffffff;
 
   border: 1px solid #d1d5db;
 }
@@ -84,16 +93,20 @@
   border-color: #9ca3af;
 }
 
-/* Add New */
+.secondaryButton svg,
+.addButton svg {
+  width: 16px;
+  height: 16px;
+}
 
 .addButton {
+  color: #ffffff;
+
   background: linear-gradient(
     135deg,
     #4f46e5,
     #6366f1
   );
-
-  color: #ffffff;
 
   border: none;
 
@@ -105,18 +118,18 @@
   transform: translateY(-2px);
 
   box-shadow:
-    0 6px 16px rgba(79, 70, 229, 0.35);
+    0 7px 18px rgba(79, 70, 229, 0.3);
 }
 
-.addButton:active {
-  transform: translateY(0);
-}
 
-/* =========================
-   STAT CARDS
-========================= */
+/* =========================================================
+   STATISTICS
+========================================================= */
 
 .statsGrid {
+  position: relative;
+  z-index: 10;
+
   display: grid;
 
   grid-template-columns:
@@ -131,8 +144,8 @@
   min-height: 128px;
 
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
+  justify-content: space-between;
 
   padding: 22px;
 
@@ -163,27 +176,31 @@
 .statCard p {
   margin: 0 0 6px;
 
-  font-size: 0.95rem;
-
   color: #6b7280;
+
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .statCard h2 {
   margin: 0 0 7px;
 
+  color: #111827;
+
   font-size: 1.7rem;
   font-weight: 700;
-
-  color: #111827;
 }
 
-/* =========================
+
+/* =========================================================
    STAT ICONS
-========================= */
+========================================================= */
 
 .statIcon {
   width: 46px;
   height: 46px;
+
+  flex-shrink: 0;
 
   display: flex;
   align-items: center;
@@ -192,6 +209,11 @@
   border-radius: 10px;
 
   font-size: 19px;
+}
+
+.statIcon svg {
+  width: 20px;
+  height: 20px;
 }
 
 .greenIcon {
@@ -214,73 +236,93 @@
   background: #fef2f2;
 }
 
-/* =========================
+
+/* =========================================================
    STAT TEXT
-========================= */
+========================================================= */
 
 .growth {
   display: inline-block;
 
   padding: 4px 8px;
 
-  border-radius: 6px;
-
+  color: #059669;
   background: #ecfdf5;
 
-  color: #059669;
+  border-radius: 6px;
 
-  font-size: 0.7rem;
+  font-size: 11px;
   font-weight: 600;
 }
 
 .alertText {
   color: #6b7280;
 
-  font-size: 0.75rem;
+  font-size: 12px;
+  font-weight: 500;
 }
 
-/* =========================
+
+/* =========================================================
    TABLE CARD
-========================= */
+========================================================= */
 
 .tableCard {
+  position: relative;
+  z-index: 30;
+
+  width: 100%;
+
   background: #ffffff;
 
-  border: 1px solid #eef0f4;
+  border: 1px solid #e5e7eb;
 
-  border-radius: 12px;
+  border-radius: 13px;
 
-  overflow: hidden;
+  overflow: visible;
 
   box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    0 4px 12px rgba(15, 23, 42, 0.05);
 }
 
-/* =========================
+
+/* =========================================================
    TOOLBAR
-========================= */
+========================================================= */
 
 .toolbar {
+  position: relative;
+  z-index: 100;
+
+  min-height: 72px;
+
   display: flex;
   align-items: center;
 
-  gap: 10px;
+  gap: 12px;
 
-  padding: 20px;
+  padding: 16px 20px;
 
-  border-bottom: 1px solid #eef0f4;
+  box-sizing: border-box;
 
   background: #ffffff;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  border-radius: 13px 13px 0 0;
 }
 
-/* =========================
-   SEARCH
-========================= */
+
+/* =========================================================
+   SEARCH BOX
+========================================================= */
 
 .searchBox {
-  width: 320px;
-  height: 42px;
+  position: relative;
+  z-index: 101;
+
+  width: 340px;
+  height: 44px;
 
   display: flex;
   align-items: center;
@@ -291,15 +333,16 @@
 
   box-sizing: border-box;
 
+  color: #6b7280;
   background: #ffffff;
 
   border: 1px solid #d1d5db;
 
   border-radius: 8px;
 
-  color: #6b7280;
-
-  transition: all 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .searchBox:focus-within {
@@ -309,240 +352,103 @@
     0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
+.searchBox svg {
+  flex-shrink: 0;
+
+  width: 17px;
+  height: 17px;
+}
+
 .searchBox input {
   width: 100%;
+
+  padding: 0;
 
   border: none;
   outline: none;
 
+  color: #111827;
   background: transparent;
 
-  color: #111827;
-
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .searchBox input::placeholder {
   color: #9ca3af;
 }
 
-/* =========================
-   DATE BUTTON
-========================= */
 
-.dateButton {
-  height: 42px;
-
-  display: flex;
-  align-items: center;
-
-  gap: 8px;
-
-  padding: 0 14px;
-
-  background: #ffffff;
-
-  color: #374151;
-
-  border: 1px solid #d1d5db;
-
-  border-radius: 8px;
-
-  font-family: inherit;
-  font-size: 0.875rem;
-
-  cursor: pointer;
-
-  transition: all 0.2s ease;
-}
-
-.dateButton:hover {
-  border-color: #9ca3af;
-  background: #f9fafb;
-}
-
-/* =========================
+/* =========================================================
    TOOLBAR RIGHT
-========================= */
+========================================================= */
 
 .toolbarRight {
+  position: relative;
+  z-index: 102;
+
   margin-left: auto;
 
   display: flex;
   align-items: center;
 
-  gap: 9px;
+  gap: 8px;
 }
+
+
+/* =========================================================
+   FILTER / SORT
+========================================================= */
 
 .filterButton,
 .sortButton {
-  height: 42px;
+  height: 44px;
 
-  display: flex;
-  align-items: center;
-
-  gap: 7px;
+  min-width: 120px;
 
   padding: 0 13px;
 
-  background: #ffffff;
-
   color: #374151;
+  background: #ffffff;
 
   border: 1px solid #d1d5db;
 
   border-radius: 8px;
 
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 14px;
 
   cursor: pointer;
+  outline: none;
 
-  transition: all 0.2s ease;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .filterButton:hover,
 .sortButton:hover {
-  border-color: #9ca3af;
-
   background: #f9fafb;
+  border-color: #9ca3af;
 }
 
-.iconButton {
-  width: 42px;
-  height: 42px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #ffffff;
-
-  color: #6b7280;
-
-  border: 1px solid #d1d5db;
-
-  border-radius: 8px;
-
-  cursor: pointer;
-
-  transition: all 0.2s ease;
-}
-
-.iconButton:hover {
-  color: #4f46e5;
-
+.filterButton:focus,
+.sortButton:focus {
   border-color: #6366f1;
 
-  background: #f5f3ff;
+  box-shadow:
+    0 0 0 3px rgba(99, 102, 241, 0.08);
 }
 
-/* =========================
-   TABLE
-========================= */
 
-.tableWrapper {
-  width: 100%;
+/* =========================================================
+   REFRESH BUTTON
+========================================================= */
 
-  overflow-x: auto;
-}
-
-.table {
-  width: 100%;
-
-  min-width: 1200px;
-
-  border-collapse: collapse;
-}
-
-/* =========================
-   TABLE HEADER
-========================= */
-
-.table th {
-  padding: 15px 10px;
-
-  text-align: left;
-
-  white-space: nowrap;
-
-  background: #fafafa;
-
-  color: #374151;
-
-  font-size: 0.8rem;
-
-  font-weight: 600;
-
-  border-bottom: 1px solid #e5e7eb;
-}
-
-/* =========================
-   TABLE BODY
-========================= */
-
-.table td {
-  padding: 13px 10px;
-
-  height: 38px;
-
-  white-space: nowrap;
-
-  color: #6b7280;
-
-  font-size: 0.875rem;
-
-  border-bottom: 1px solid #eef0f4;
-}
-
-.table tbody tr {
-  transition: background-color 0.2s ease;
-}
-
-.table tbody tr:hover {
-  background: #f9fafb;
-}
-
-.table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* =========================
-   CODE
-========================= */
-
-.code {
-  color: #6b7280 !important;
-
-  font-weight: 500;
-}
-
-/* =========================
-   PRODUCT CELL
-========================= */
-
-.productCell {
-  display: flex;
-
-  align-items: center;
-
-  gap: 11px;
-
-  min-width: 250px;
-}
-
-.productCell strong {
-  color: #111827;
-
-  font-size: 0.9rem;
-
-  font-weight: 600;
-}
-
-.productIcon {
-  width: 36px;
-  height: 36px;
+.iconButton {
+  width: 44px;
+  height: 44px;
 
   flex-shrink: 0;
 
@@ -550,12 +456,218 @@
   align-items: center;
   justify-content: center;
 
+  padding: 0;
+
+  color: #64748b;
+  background: #ffffff;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.iconButton:hover {
+  color: #4f46e5;
+
+  background: #f5f3ff;
+
+  border-color: #a5b4fc;
+
+  transform: rotate(15deg);
+}
+
+.iconButton svg {
+  width: 17px;
+  height: 17px;
+}
+
+
+/* =========================================================
+   TABLE WRAPPER
+========================================================= */
+
+.tableWrapper {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+
+  overflow-x: auto;
+  overflow-y: visible;
+
+  border-radius: 0 0 13px 13px;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table {
+  width: 100%;
+
+  min-width: 1250px;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  table-layout: auto;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+========================================================= */
+
+.table th {
+  height: 52px;
+
+  padding: 0 12px;
+
+  box-sizing: border-box;
+
+  color: #374151;
+  background: #fafafa;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  text-align: left;
+
+  white-space: nowrap;
+}
+
+.table th:first-child {
+  padding-left: 18px;
+}
+
+.table th:last-child {
+  width: 150px;
+  min-width: 150px;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   TABLE BODY
+========================================================= */
+
+.table td {
+  height: 60px;
+
+  padding: 0 12px;
+
+  box-sizing: border-box;
+
+  color: #64748b;
+  background: #ffffff;
+
+  border-bottom: 1px solid #eef0f4;
+
+  font-size: 14px;
+
+  white-space: nowrap;
+
+  vertical-align: middle;
+}
+
+.table tbody tr {
+  position: relative;
+
+  transition:
+    background 0.15s ease;
+}
+
+.table tbody tr:hover td {
+  background: #fafbff;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table td:last-child {
+  width: 150px;
+  min-width: 150px;
+
+  padding-left: 8px;
+  padding-right: 8px;
+
+  text-align: center;
+
+  position: relative;
+  z-index: 20;
+}
+
+
+/* =========================================================
+   PRODUCT CELL
+========================================================= */
+
+.productCell {
+  min-width: 240px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+}
+
+.productCell strong {
+  color: #111827;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   PRODUCT IMAGE / ICON
+========================================================= */
+
+.productIcon {
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
   border-radius: 8px;
 
   font-size: 17px;
 }
 
-/* Product icon colors */
+.productIcon img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  border-radius: 8px;
+}
+
+
+/* =========================================================
+   PRODUCT ICON TYPES
+========================================================= */
 
 .apple {
   color: #374151;
@@ -602,22 +714,31 @@
   background: #eff6ff;
 }
 
-/* =========================
+.default {
+  color: #64748b;
+  background: #f1f5f9;
+}
+
+
+/* =========================================================
    STATUS
-========================= */
+========================================================= */
 
 .status {
   display: inline-flex;
-
   align-items: center;
+  justify-content: center;
+
+  min-width: 75px;
 
   padding: 5px 9px;
 
   border-radius: 6px;
 
-  font-size: 0.75rem;
-
+  font-size: 12px;
   font-weight: 600;
+
+  white-space: nowrap;
 }
 
 .inStock {
@@ -638,132 +759,291 @@
   background: #fef2f2;
 }
 
-/* =========================
-   PRICE
-========================= */
 
-.price {
-  color: #374151 !important;
+/* =========================================================
+   ACTION BUTTONS
+========================================================= */
 
-  font-weight: 600;
-}
-
-/* =========================
-   ACTION
-========================= */
-
-.actionWrapper {
+.actionButtons {
   position: relative;
+  z-index: 30;
 
-  display: flex;
-
-  justify-content: center;
-}
-
-.actionButton {
-  width: 36px;
-  height: 36px;
+  width: 100%;
 
   display: flex;
   align-items: center;
   justify-content: center;
 
+  gap: 6px;
+}
+
+
+/* =========================================================
+   INDIVIDUAL ACTION BUTTON
+========================================================= */
+
+.actionButton {
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  color: #64748b;
   background: #ffffff;
 
-  color: #6b7280;
+  border: 1px solid #d8dee8;
 
-  border: 1px solid #d1d5db;
-
-  border-radius: 8px;
+  border-radius: 7px;
 
   cursor: pointer;
 
-  transition: all 0.2s ease;
+  outline: none;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.actionButton:hover {
-  color: #4f46e5;
+.actionButton svg {
+  width: 17px;
+  height: 17px;
 
-  border-color: #6366f1;
-
-  background: #f5f3ff;
+  stroke-width: 1.8;
 }
 
-/* =========================
-   ACTION MENU
-========================= */
 
-.actionMenu {
-  position: absolute;
+/* =========================================================
+   VIEW BUTTON
+========================================================= */
 
-  top: 40px;
-  right: 0;
+.actionButton:first-child:hover {
+  color: #2563eb;
 
-  z-index: 20;
+  background: #eff6ff;
 
-  min-width: 140px;
+  border-color: #bfdbfe;
 
-  padding: 5px;
-
-  background: #ffffff;
-
-  border: 1px solid #e5e7eb;
-
-  border-radius: 8px;
+  transform: translateY(-1px);
 
   box-shadow:
-    0 10px 25px rgba(0, 0, 0, 0.1);
+    0 3px 8px rgba(37, 99, 235, 0.12);
 }
 
-.actionMenu button {
-  width: 100%;
 
-  padding: 9px 10px;
+/* =========================================================
+   EDIT BUTTON
+========================================================= */
 
-  text-align: left;
+.actionButton:nth-child(2):hover {
+  color: #7c3aed;
 
-  background: transparent;
-
-  color: #374151;
-
-  border: none;
-
-  border-radius: 6px;
-
-  font-family: inherit;
-
-  cursor: pointer;
-}
-
-.actionMenu button:hover {
   background: #f5f3ff;
 
+  border-color: #ddd6fe;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 3px 8px rgba(124, 58, 237, 0.12);
+}
+
+
+/* =========================================================
+   DELETE BUTTON
+========================================================= */
+
+.deleteButton {
+  color: #64748b;
+}
+
+.deleteButton:hover {
+  color: #dc2626;
+
+  background: #fef2f2;
+
+  border-color: #fecaca;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 3px 8px rgba(220, 38, 38, 0.12);
+}
+
+
+/* =========================================================
+   ACTION BUTTON ACTIVE
+========================================================= */
+
+.actionButton:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   EMPTY TABLE
+========================================================= */
+
+.empty {
+  height: 180px !important;
+
+  padding: 50px !important;
+
+  color: #9ca3af !important;
+
+  text-align: center !important;
+
+  font-size: 14px !important;
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.spinner {
   color: #4f46e5;
 }
 
-/* =========================
-   EMPTY
-========================= */
 
-.empty {
-  padding: 50px !important;
+/* =========================================================
+   SPINNER ANIMATION
+========================================================= */
 
-  text-align: center;
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
 
-  color: #9ca3af !important;
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
+
+/* =========================================================
+   Z-INDEX LAYERS
+   IMPORTANT FOR ACTION BUTTONS
+========================================================= */
+
+.page {
+  position: relative;
+  z-index: 1;
+}
+
+.header {
+  position: relative;
+  z-index: 20;
+}
+
+.statsGrid {
+  position: relative;
+  z-index: 10;
+}
+
+.tableCard {
+  position: relative;
+  z-index: 30;
+}
+
+.toolbar {
+  position: relative;
+  z-index: 100;
+}
+
+.searchBox {
+  position: relative;
+  z-index: 101;
+}
+
+.toolbarRight {
+  position: relative;
+  z-index: 102;
+}
+
+.tableWrapper {
+  position: relative;
+  z-index: 1;
+}
+
+.table tbody td:last-child {
+  position: relative;
+  z-index: 20;
+}
+
+.actionButtons {
+  position: relative;
+  z-index: 200;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
+.tableWrapper::-webkit-scrollbar {
+  height: 7px;
+}
+
+.tableWrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+/* =========================================================
+   RESPONSIVE - 1200px
+========================================================= */
 
 @media (max-width: 1200px) {
+  .page {
+    padding: 24px;
+  }
+
   .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 
   .toolbar {
     flex-wrap: wrap;
+  }
+
+  .toolbarRight {
+    margin-left: auto;
+  }
+}
+
+
+/* =========================================================
+   RESPONSIVE - 1000px
+========================================================= */
+
+@media (max-width: 1000px) {
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .searchBox {
+    width: 300px;
   }
 
   .toolbarRight {
@@ -775,9 +1055,14 @@
   }
 }
 
+
+/* =========================================================
+   RESPONSIVE - 700px
+========================================================= */
+
 @media (max-width: 700px) {
   .page {
-    padding: 20px;
+    padding: 20px 16px;
   }
 
   .header {
@@ -799,14 +1084,16 @@
     grid-template-columns: 1fr;
   }
 
-  .searchBox {
-    width: 100%;
+  .toolbar {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    padding: 14px;
   }
 
-  .dateButton {
+  .searchBox {
     width: 100%;
-
-    justify-content: center;
   }
 
   .toolbarRight {
@@ -814,17 +1101,30 @@
 
     display: grid;
 
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 1fr)
+      44px;
 
-    margin-left: 0;
+    gap: 7px;
   }
 
   .filterButton,
-  .sortButton,
-  .iconButton {
+  .sortButton {
     width: 100%;
+
+    min-width: 0;
+  }
+
+  .iconButton {
+    width: 44px;
   }
 }
+
+
+/* =========================================================
+   RESPONSIVE - 500px
+========================================================= */
 
 @media (max-width: 500px) {
   .page {
@@ -838,11 +1138,28 @@
   .headerActions {
     display: grid;
 
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .secondaryButton,
+  .addButton {
+    width: 100%;
   }
 
   .toolbar {
-    padding: 16px;
+    padding: 12px;
+  }
+
+  .toolbarRight {
+    grid-template-columns:
+      1fr 1fr;
+  }
+
+  .filterButton,
+  .sortButton,
+  .iconButton {
+    width: 100%;
   }
 
   .table th,
@@ -850,16 +1167,63 @@
     padding-left: 8px;
     padding-right: 8px;
   }
+
+  .actionButtons {
+    gap: 5px;
+  }
+
+  .actionButton {
+    width: 32px;
+    height: 32px;
+  }
+
+  .actionButton svg {
+    width: 15px;
+    height: 15px;
+  }
 }
 
-/* =========================
+
+/* =========================================================
+   VERY SMALL DEVICES
+========================================================= */
+
+@media (max-width: 380px) {
+  .page {
+    padding: 12px;
+  }
+
+  .headerActions {
+    grid-template-columns: 1fr;
+  }
+
+  .statsGrid {
+    gap: 12px;
+  }
+
+  .statCard {
+    padding: 18px;
+  }
+
+  .toolbarRight {
+    grid-template-columns: 1fr;
+  }
+
+  .iconButton {
+    width: 100%;
+  }
+}
+
+
+/* =========================================================
    PRINT
-========================= */
+========================================================= */
 
 @media print {
   .headerActions,
-  .toolbar {
-    display: none;
+  .toolbar,
+  .actionButtons {
+    display: none !important;
   }
 
   .page {
@@ -879,7 +1243,15 @@
     background: #ffffff;
   }
 
-  .table tbody tr:hover {
+  .tableWrapper {
+    overflow: visible;
+  }
+
+  .table {
+    min-width: 0;
+  }
+
+  .table tbody tr:hover td {
     background: transparent;
   }
 }

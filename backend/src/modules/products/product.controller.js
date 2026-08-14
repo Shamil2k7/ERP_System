@@ -111,9 +111,10 @@ export const deleteProduct = async (req, res) => {
       message: "Product deleted successfully",
     });
   } catch (error) {
-    return res.status(404).json({
+    const isNotFound = error.message === "Product not found.";
+    return res.status(isNotFound ? 404 : 400).json({
       success: false,
-      message: error.message,
+      message: isNotFound ? error.message : "Failed to delete product. Active dependency exists.",
     });
   }
 };

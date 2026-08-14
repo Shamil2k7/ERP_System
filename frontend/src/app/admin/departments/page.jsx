@@ -8,14 +8,13 @@ import {
   FiDownload,
   FiSearch,
   FiChevronDown,
-  FiMoreVertical,
-  FiRefreshCw,
-  FiArrowDown,
   FiX,
   FiSave,
   FiFilter,
   FiEdit2,
   FiTrash2,
+  FiRefreshCw,
+  FiArrowDown,
 } from "react-icons/fi";
 
 import styles from "./departments.module.css";
@@ -28,11 +27,11 @@ export default function DepartmentsPage() {
 
   const [search, setSearch] = useState("");
   const [showAdd, setShowAdd] = useState(false);
-  const [openMenu, setOpenMenu] = useState(null);
-  const { showSuccess, showWarning, showError, showConfirm } = useAlert();
   const [editingId, setEditingId] = useState(null);
 
   const [sortOrder, setSortOrder] = useState("default");
+
+  const { showSuccess, showWarning, showError, showConfirm } = useAlert();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -45,10 +44,16 @@ export default function DepartmentsPage() {
   /* =========================
      FETCH DEPARTMENTS
   ========================= */
+
   const fetchDepartments = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/departments");
+      setError(null);
+
+      const res = await axios.get(
+        "http://localhost:5000/api/departments"
+      );
+
       if (res.data.success) {
         setDepartments(res.data.data);
       }
@@ -71,6 +76,7 @@ export default function DepartmentsPage() {
   const filteredDepartments = useMemo(() => {
     let result = departments.filter((item) => {
       const keyword = search.toLowerCase();
+
       const code = item.code?.toLowerCase() || "";
       const name = item.name?.toLowerCase() || "";
       const head = item.head?.toLowerCase() || "";
@@ -84,12 +90,20 @@ export default function DepartmentsPage() {
       );
     });
 
+    /* =========================
+       SORT
+    ========================= */
+
     if (sortOrder === "asc") {
-      result.sort((a, b) => a.name.localeCompare(b.name));
+      result.sort((a, b) =>
+        (a.name || "").localeCompare(b.name || "")
+      );
     }
 
     if (sortOrder === "desc") {
-      result.sort((a, b) => b.name.localeCompare(a.name));
+      result.sort((a, b) =>
+        (b.name || "").localeCompare(a.name || "")
+      );
     }
 
     return result;
@@ -101,6 +115,7 @@ export default function DepartmentsPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -108,19 +123,25 @@ export default function DepartmentsPage() {
   };
 
   /* =========================
-     ADD/EDIT DEPARTMENT
+     ADD / EDIT DEPARTMENT
   ========================= */
 
   const handleSaveDepartment = async (e) => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      showWarning("Invalid form data", "Please enter department name");
+      showWarning(
+        "Invalid form data",
+        "Please enter department name"
+      );
       return;
     }
 
     if (!formData.code.trim()) {
-      showWarning("Invalid form data", "Please enter department code");
+      showWarning(
+        "Invalid form data",
+        "Please enter department code"
+      );
       return;
     }
 
@@ -134,14 +155,28 @@ export default function DepartmentsPage() {
 
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/departments/${editingId}`, payload);
-        showSuccess("Product updated", "Department updated successfully");
+        await axios.put(
+          `http://localhost:5000/api/departments/${editingId}`,
+          payload
+        );
+
+        showSuccess(
+          "Department updated",
+          "Department updated successfully"
+        );
       } else {
-        await axios.post("http://localhost:5000/api/departments", payload);
-        showSuccess("Product created", "Department created successfully");
+        await axios.post(
+          "http://localhost:5000/api/departments",
+          payload
+        );
+
+        showSuccess(
+          "Department created",
+          "Department created successfully"
+        );
       }
 
-      fetchDepartments();
+      await fetchDepartments();
 
       setFormData({
         name: "",
@@ -150,11 +185,17 @@ export default function DepartmentsPage() {
         employees: "",
         status: "ACTIVE",
       });
+
       setEditingId(null);
       setShowAdd(false);
     } catch (err) {
       console.error(err);
-      showError("Invalid form data", err.response?.data?.message || "Failed to save department");
+
+      showError(
+        "Invalid form data",
+        err.response?.data?.message ||
+          "Failed to save department"
+      );
     }
   };
 
@@ -163,20 +204,33 @@ export default function DepartmentsPage() {
   ========================= */
 
   const handleDelete = (id) => {
-    setOpenMenu(null);
     showConfirm({
       title: "Delete Department",
-      message: "Are you sure you want to delete this department? Employees assigned to this department may be affected.",
+      message:
+        "Are you sure you want to delete this department? Employees assigned to this department may be affected.",
       confirmText: "Delete Department",
       type: "danger",
+
       onConfirm: async () => {
         try {
-          await axios.delete(`http://localhost:5000/api/departments/${id}`);
-          showSuccess("Product updated", "Department deleted successfully");
-          fetchDepartments();
+          await axios.delete(
+            `http://localhost:5000/api/departments/${id}`
+          );
+
+          showSuccess(
+            "Department deleted",
+            "Department deleted successfully"
+          );
+
+          await fetchDepartments();
         } catch (err) {
           console.error(err);
-          showError("Product couldn't be deleted", err.response?.data?.message || "Failed to delete department");
+
+          showError(
+            "Department couldn't be deleted",
+            err.response?.data?.message ||
+              "Failed to delete department"
+          );
         }
       },
     });
@@ -188,20 +242,25 @@ export default function DepartmentsPage() {
 
   const handleEdit = (item) => {
     setEditingId(item.id);
+
     setFormData({
-      name: item.name,
-      code: item.code,
+      name: item.name || "",
+      code: item.code || "",
       head: item.head || "",
       employees: item.employees || 0,
       status: item.status || "ACTIVE",
     });
 
     setShowAdd(true);
-    setOpenMenu(null);
   };
+
+  /* =========================
+     CANCEL
+  ========================= */
 
   const handleCancel = () => {
     setEditingId(null);
+
     setFormData({
       name: "",
       code: "",
@@ -209,6 +268,7 @@ export default function DepartmentsPage() {
       employees: "",
       status: "ACTIVE",
     });
+
     setShowAdd(false);
   };
 
@@ -233,56 +293,97 @@ export default function DepartmentsPage() {
   const handleRefresh = () => {
     setSearch("");
     setSortOrder("default");
-    setOpenMenu(null);
     fetchDepartments();
   };
+
+  /* =========================
+     PRINT
+  ========================= */
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  /* =========================
+     RENDER
+  ========================= */
 
   return (
     <main className={styles.page}>
       {/* =========================
           PAGE HEADER
       ========================= */}
+
       <header className={styles.header}>
         <div>
           <h1>Departments</h1>
         </div>
 
         <div className={styles.headerActions}>
-          <button className={styles.secondaryButton} onClick={() => window.print()}>
+          <button
+            type="button"
+            className={styles.secondaryButton}
+            onClick={handlePrint}
+          >
             <FiPrinter size={15} />
             Print
           </button>
 
-          <button className={styles.secondaryButton}>
+          <button
+            type="button"
+            className={styles.secondaryButton}
+          >
             <FiDownload size={15} />
             Export
             <FiChevronDown size={14} />
           </button>
 
           <button
+            type="button"
             className={styles.addButton}
             onClick={() => {
               if (showAdd) {
                 handleCancel();
               } else {
+                setEditingId(null);
+
+                setFormData({
+                  name: "",
+                  code: "",
+                  head: "",
+                  employees: "",
+                  status: "ACTIVE",
+                });
+
                 setShowAdd(true);
               }
             }}
           >
-            {showAdd ? <FiX size={17} /> : <FiPlus size={17} />}
+            {showAdd ? (
+              <FiX size={17} />
+            ) : (
+              <FiPlus size={17} />
+            )}
+
             {showAdd ? "Close" : "Add New"}
           </button>
         </div>
       </header>
 
       {/* =========================
-          ADD/EDIT DEPARTMENT FORM
+          ADD / EDIT FORM
       ========================= */}
+
       {showAdd && (
         <section className={styles.addCard}>
           <div className={styles.addHeader}>
             <div>
-              <h2>{editingId ? "Edit Department" : "Add Department"}</h2>
+              <h2>
+                {editingId
+                  ? "Edit Department"
+                  : "Add Department"}
+              </h2>
+
               <p>
                 {editingId
                   ? "Update the details of the department."
@@ -290,16 +391,27 @@ export default function DepartmentsPage() {
               </p>
             </div>
 
-            <button className={styles.closeButton} onClick={handleCancel}>
-              <FiX />
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={handleCancel}
+              title="Close"
+            >
+              <FiX size={18} />
             </button>
           </div>
 
-          <form className={styles.form} onSubmit={handleSaveDepartment}>
+          <form
+            className={styles.form}
+            onSubmit={handleSaveDepartment}
+          >
+            {/* Department Name */}
+
             <div className={styles.formGroup}>
               <label>
                 Department Name <span>*</span>
               </label>
+
               <input
                 type="text"
                 name="name"
@@ -309,10 +421,13 @@ export default function DepartmentsPage() {
               />
             </div>
 
+            {/* Department Code */}
+
             <div className={styles.formGroup}>
               <label>
                 Department Code <span>*</span>
               </label>
+
               <input
                 type="text"
                 name="code"
@@ -322,8 +437,11 @@ export default function DepartmentsPage() {
               />
             </div>
 
+            {/* Department Head */}
+
             <div className={styles.formGroup}>
               <label>Department Head</label>
+
               <input
                 type="text"
                 name="head"
@@ -333,8 +451,11 @@ export default function DepartmentsPage() {
               />
             </div>
 
+            {/* Employees */}
+
             <div className={styles.formGroup}>
               <label>Number of Employees</label>
+
               <input
                 type="number"
                 name="employees"
@@ -345,23 +466,44 @@ export default function DepartmentsPage() {
               />
             </div>
 
+            {/* Status */}
+
             <div className={styles.formGroup}>
               <label>Status</label>
-              <select name="status" value={formData.status} onChange={handleChange}>
+
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+              >
                 <option value="ACTIVE">Active</option>
-                <option value="INACTIVE">Inactive</option>
+                <option value="INACTIVE">
+                  Inactive
+                </option>
               </select>
             </div>
 
+            {/* Form Actions */}
+
             <div className={styles.formActions}>
-              <button type="button" className={styles.cancelButton} onClick={handleCancel}>
+              <button
+                type="button"
+                className={styles.cancelButton}
+                onClick={handleCancel}
+              >
                 <FiX size={16} />
                 Cancel
               </button>
 
-              <button type="submit" className={styles.saveButton}>
+              <button
+                type="submit"
+                className={styles.saveButton}
+              >
                 <FiSave size={16} />
-                {editingId ? "Update Department" : "Save Department"}
+
+                {editingId
+                  ? "Update Department"
+                  : "Save Department"}
               </button>
             </div>
           </form>
@@ -371,36 +513,60 @@ export default function DepartmentsPage() {
       {/* =========================
           TABLE CARD
       ========================= */}
+
       <section className={styles.tableCard}>
+        {/* Toolbar */}
+
         <div className={styles.toolbar}>
+          {/* Search */}
+
           <div className={styles.searchBox}>
             <FiSearch size={18} />
+
             <input
               type="text"
               placeholder="Search"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
             />
           </div>
 
+          {/* Toolbar Right */}
+
           <div className={styles.toolbarRight}>
-            <button className={styles.filterButton}>
+            <button
+              type="button"
+              className={styles.filterButton}
+            >
               <FiFilter size={16} />
               Filter
               <FiChevronDown size={14} />
             </button>
 
-            <button className={styles.sortButton} onClick={handleSort}>
+            <button
+              type="button"
+              className={styles.sortButton}
+              onClick={handleSort}
+            >
               <FiArrowDown size={16} />
               Sort By
               <FiChevronDown size={14} />
             </button>
 
-            <button className={styles.iconButton} title="Refresh" onClick={handleRefresh}>
+            <button
+              type="button"
+              className={styles.iconButton}
+              title="Refresh"
+              onClick={handleRefresh}
+            >
               <FiRefreshCw size={17} />
             </button>
           </div>
         </div>
+
+        {/* Table */}
 
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
@@ -417,28 +583,78 @@ export default function DepartmentsPage() {
             </thead>
 
             <tbody>
+              {/* Loading */}
+
               {loading ? (
                 <tr>
-                  <td colSpan="7" className={styles.empty}>
+                  <td
+                    colSpan="7"
+                    className={styles.empty}
+                  >
                     Loading departments...
                   </td>
                 </tr>
               ) : error ? (
+                /* Error */
+
                 <tr>
-                  <td colSpan="7" className={styles.empty}>
+                  <td
+                    colSpan="7"
+                    className={styles.empty}
+                  >
                     {error}
                   </td>
                 </tr>
               ) : filteredDepartments.length > 0 ? (
+                /* Data */
+
                 filteredDepartments.map((item) => (
                   <tr key={item.id}>
-                    <td className={styles.code}>{item.code}</td>
-                    <td>
-                      <strong className={styles.departmentName}>{item.name}</strong>
+                    {/* Code */}
+
+                    <td className={styles.code}>
+                      {item.code}
                     </td>
+
+                    {/* Department */}
+
+                    <td>
+                      <strong
+                        className={
+                          styles.departmentName
+                        }
+                      >
+                        {item.name}
+                      </strong>
+                    </td>
+
+                    {/* Head */}
+
                     <td>{item.head || "-"}</td>
+
+                    {/* Employees */}
+
                     <td>{item.employees}</td>
-                    <td>{new Date(item.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</td>
+
+                    {/* Created */}
+
+                    <td>
+                      {item.createdAt
+                        ? new Date(
+                            item.createdAt
+                          ).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )
+                        : "-"}
+                    </td>
+
+                    {/* Status */}
+
                     <td>
                       <span
                         className={
@@ -447,40 +663,61 @@ export default function DepartmentsPage() {
                             : styles.inactiveStatus
                         }
                       >
-                        {item.status === "ACTIVE" ? "Active" : "Inactive"}
+                        {item.status === "ACTIVE"
+                          ? "Active"
+                          : "Inactive"}
                       </span>
                     </td>
+
+                    {/* ACTION BUTTONS */}
+
                     <td>
-                      <div className={styles.actionWrapper}>
+                      <div
+                        className={
+                          styles.actionButtons
+                        }
+                      >
+                        {/* EDIT */}
+
                         <button
-                          className={styles.actionButton}
-                          onClick={() => setOpenMenu(openMenu === item.id ? null : item.id)}
+                          type="button"
+                          className={
+                            styles.editButton
+                          }
+                          title="Edit"
+                          onClick={() =>
+                            handleEdit(item)
+                          }
                         >
-                          <FiMoreVertical size={17} />
+                          <FiEdit2 size={17} />
                         </button>
 
-                        {openMenu === item.id && (
-                          <div className={styles.actionMenu}>
-                            <button onClick={() => handleEdit(item)}>
-                              <FiEdit2 size={14} />
-                              Edit
-                            </button>
-                            <button
-                              className={styles.deleteAction}
-                              onClick={() => handleDelete(item.id)}
-                            >
-                              <FiTrash2 size={14} />
-                              Delete
-                            </button>
-                          </div>
-                        )}
+                        {/* DELETE */}
+
+                        <button
+                          type="button"
+                          className={
+                            styles.deleteButton
+                          }
+                          title="Delete"
+                          onClick={() =>
+                            handleDelete(item.id)
+                          }
+                        >
+                          <FiTrash2 size={17} />
+                        </button>
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
+                /* Empty */
+
                 <tr>
-                  <td colSpan="7" className={styles.empty}>
+                  <td
+                    colSpan="7"
+                    className={styles.empty}
+                  >
                     No departments found.
                   </td>
                 </tr>
