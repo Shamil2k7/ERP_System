@@ -32,6 +32,10 @@ import {
   FiTruck,
   FiFileText,
   FiCreditCard,
+  FiDollarSign,
+  FiTrendingUp,
+  FiPieChart,
+  FiPrinter,
   FiLogOut,
   FiX,
 } from "react-icons/fi";
