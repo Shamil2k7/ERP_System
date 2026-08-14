@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import axios from "axios";
 import {
   FiPlus,
   FiPrinter,
@@ -13,13 +12,10 @@ import {
   FiArrowDown,
 } from "react-icons/fi";
 import PurchaseTable from "./components/PurchaseTable";
+import { getPurchases, deletePurchase } from "@/services/purchaseService";
 import "./purchases.css";
 
 const PAGE_SIZE = 10;
-
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
-});
 
 export default function PurchasesPage() {
   const [search, setSearch] = useState("");
@@ -40,12 +36,13 @@ export default function PurchasesPage() {
       setLoading(true);
       setError(null);
 
-      const res = await api.get("/purchases");
-      setPurchases(res.data.data || []);
+      const res = await getPurchases();
+      const purchasesData = res.data || res || [];
+      setPurchases(Array.isArray(purchasesData) ? purchasesData : []);
     } catch (err) {
       console.error("Failed to fetch purchases:", err);
       setError(
-        err.response?.data?.message || "Failed to load purchases. Please try again."
+        err.response?.data?.message || err.message || "Failed to load purchases. Please try again."
       );
     } finally {
       setLoading(false);
@@ -58,12 +55,13 @@ export default function PurchasesPage() {
       return;
     }
     try {
-      await api.delete(`/purchases/${id}`);
+      await deletePurchase(id);
       setPurchases((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to delete purchase order.");
+      alert(err.response?.data?.message || err.message || "Failed to delete purchase order.");
     }
   };
+
 
   // Print handle
   const handlePrint = () => {
