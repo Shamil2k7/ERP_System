@@ -131,7 +131,16 @@ export default function Sidebar({ isOpen, onClose }) {
           <FiClock />
           <span>Audit Logs</span>
         </Link>
+        
 
+        <Link
+          href="/settings/landing"
+          className={isActivePath("/settings/landing") ? styles.active : ""}
+          onClick={handleLinkClick}
+        >
+          <FiSettings />
+          <span>Settings Landing</span>
+        </Link>
         <Link
           href="/admin/settings"
           className={isActivePath("/admin/settings") ? styles.active : ""}
@@ -367,7 +376,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <span>Credit Notes</span>
         </Link>
 
-        {/* <Link
+        <Link
           href="/admin/sales-quotes"
           className={isActivePath("/admin/sales-quotes") ? styles.active : ""}
           onClick={handleLinkClick}
@@ -550,7 +559,7 @@ export default function Sidebar({ isOpen, onClose }) {
           <span>Payroll</span>
         </Link>
 
-        <h4 className={styles.title}>System</h4> */}
+        <h4 className={styles.title}>System</h4>
 
         
 
