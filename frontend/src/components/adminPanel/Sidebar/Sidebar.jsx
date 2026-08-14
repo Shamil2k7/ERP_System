@@ -669,40 +669,6 @@ export default function Sidebar({ isOpen, onClose }) {
         </Link>
 
         <h4 className={styles.title}>System</h4>
-
-        
-
-
-
-        <Link
-        {currentRoleSections.map((section, idx) => (
-          <div key={idx}>
-            <h4 className={styles.title}>{section.title}</h4>
-            {section.items.map((item) => {
-              const IconComp = item.icon;
-              return (
-                <Link
-                  key={item.href + item.label}
-                  href={item.href}
-                  className={isActivePath(item.href) ? styles.active : ""}
-                  onClick={handleLinkClick}
-                >
-                  <IconComp />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        ))}
-
-        <a
-          href="/logout"
-          className={`${styles.logout} ${isActivePath("/logout") ? styles.active : ""}`}
-          onClick={handleLogout}
-        >
-          <FiLogOut />
-          <span>Logout</span>
-        </a>
       </nav>
     </aside>
   );
