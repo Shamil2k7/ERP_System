@@ -115,6 +115,17 @@ export default function Header({ toggleSidebar }) {
       )
     : [];
 
+  const getDisplayRole = (roleStr) => {
+    if (!roleStr) return "Administrator";
+    const r = roleStr.trim();
+    if (r.toLowerCase() === "super_admin" || r.toLowerCase() === "super admin") return "Super Admin";
+    if (r.toLowerCase() === "branch_manager" || r.toLowerCase() === "branch manager") return "Branch Manager";
+    if (r.toLowerCase() === "inventory_manager" || r.toLowerCase() === "inventory manager") return "Inventory Manager";
+    if (r.toLowerCase() === "cashier") return "Cashier";
+    if (r.toLowerCase() === "admin") return "Admin";
+    return r.charAt(0).toUpperCase() + r.slice(1);
+  };
+
   const getInitials = (name) => {
     if (!name) return "U";
     const parts = name.trim().split(" ");
@@ -225,7 +236,7 @@ export default function Header({ toggleSidebar }) {
 
             <div className={styles.profileDetails}>
               <h4>{user?.fullName || "Admin User"}</h4>
-              <span>{user?.role || "Administrator"}</span>
+              <span>{getDisplayRole(user?.role)}</span>
             </div>
 
             <FiChevronDown className={`${styles.chevron} ${isProfileOpen ? styles.chevronRotated : ""}`} />
@@ -243,7 +254,7 @@ export default function Header({ toggleSidebar }) {
                 </div>
                 <div className={styles.cardUserInfo}>
                   <h4>{user?.fullName || "Admin User"}</h4>
-                  <span className={styles.roleTag}>{user?.role || "Administrator"}</span>
+                  <span className={styles.roleTag}>{getDisplayRole(user?.role)}</span>
                   <span className={styles.userEmail}>{user?.email || "admin@erp.com"}</span>
                 </div>
               </div>
