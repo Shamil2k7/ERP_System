@@ -3,7 +3,8 @@ import { z } from "zod";
 const SalesStatusEnum = z.enum([
   "DRAFT",
   "CONFIRMED",
-  "INVOICED",
+  "PROCESSING",
+  "COMPLETED",
   "CANCELLED",
 ]);
 
