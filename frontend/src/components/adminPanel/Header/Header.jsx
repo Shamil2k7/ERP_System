@@ -19,6 +19,8 @@ import {
   FiGrid,
   FiMapPin,
   FiTag,
+  FiUserCheck,
+  FiBriefcase,
 } from "react-icons/fi";
 import { useSettings } from "@/context/SettingsContext";
 
@@ -27,6 +29,8 @@ import styles from "./Header.module.css";
 // Quick search searchable routes catalog
 const QUICK_SEARCH_ITEMS = [
   { label: "Dashboard", href: "/dashboard", icon: FiGrid, category: "Core" },
+  { label: "Add Admin / Manage Admins", href: "/admin/add-admin", icon: FiUserCheck, category: "Super Admin" },
+  { label: "Business Type Management", href: "/admin/business-type", icon: FiBriefcase, category: "Super Admin" },
   { label: "Customers", href: "/customers", icon: FiUsers, category: "Sales" },
   { label: "Inventory / Stock", href: "/warehouse/stock", icon: FiBox, category: "Inventory" },
   { label: "Sales Orders", href: "/sales", icon: FiShoppingCart, category: "Sales" },
