@@ -221,6 +221,26 @@ export default function Sidebar({ isOpen, onClose }) {
       </div>
 
       <nav>
+        <h4 className={styles.title}>Super Admin</h4>
+
+        <Link
+          href="/admin/add-admin"
+          className={isActivePath("/admin/add-admin") ? styles.active : ""}
+          onClick={handleLinkClick}
+        >
+          <FiUserCheck />
+          <span>Add Admin</span>
+        </Link>
+
+        <Link
+          href="/admin/business-type"
+          className={isActivePath("/admin/business-type") ? styles.active : ""}
+          onClick={handleLinkClick}
+        >
+          <FiBriefcase />
+          <span>Business Type</span>
+        </Link>
+
         <h4 className={styles.title}>Admin</h4>
 
         <Link

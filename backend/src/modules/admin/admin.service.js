@@ -45,9 +45,15 @@ export const createAdminService = async ({
   // Hash password
   const passwordHash = await bcrypt.hash(password, 12);
 
-  // Generate dynamic ID
-  const allAdmins = await getAllAdmins();
-  const generatedId = `ADM-${String(allAdmins.length + 1001)}`;
+  // Generate a collision-proof unique employee ID
+  // Using timestamp + random suffix avoids duplicates even after deletions
+  const generateUniqueAdminId = () => {
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 5).toUpperCase();
+    return `ADM-${timestamp}-${random}`;
+  };
+
+  let generatedId = generateUniqueAdminId();
 
   // Create admin
   const admin = await createAdmin({
