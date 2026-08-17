@@ -275,3 +275,73 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ---- Profile Info Card ---- */
+.profileInfoCard {
+  grid-column: 1 / -1;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 1.75rem 2rem;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 4px 24px rgba(99, 102, 241, 0.07);
+  border: 1px solid rgba(99, 102, 241, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.profileAvatarGroup {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.largeAvatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+}
+
+.profileNameSection h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.35rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.profileMeta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  color: #64748b;
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.roleBadgeLarge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.9rem;
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+  color: #3730a3;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid #a5b4fc;
+}
+

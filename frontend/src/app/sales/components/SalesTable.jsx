@@ -122,6 +122,8 @@ export default function SalesTable({ sales = [] }) {
                       View
                     </Link>
 
+                    
+
                   </div>
 
                 </td>

@@ -53,7 +53,7 @@ const ROLE_MENUS = {
         { href: "/admin/branches", label: "Branches", icon: FiMapPin },
         { href: "/admin/add-admin", label: "Add Admin", icon: FiUserCheck },
         { href: "/admin/business-type", label: "Business Type", icon: FiBriefcase },
-        { href: "/admin/employees/view", label: "Employees", icon: FiUserCheck },
+        { href: "/admin/managers", label: "Manager", icon: FiUserCheck },
         { href: "/admin/employees/add", label: "Add Employee", icon: FiUsers },
         { href: "/admin/designations", label: "Roles", icon: FiBriefcase },
         { href: "/reports", label: "Report", icon: FiBarChart2 },
@@ -69,7 +69,7 @@ const ROLE_MENUS = {
         { href: "/dashboard", label: "Dashboard", icon: FiGrid },
         { href: "/admin/branches", label: "Branches", icon: FiMapPin },
         { href: "/admin/business-type", label: "Business Type", icon: FiBriefcase },
-        { href: "/admin/employees/view", label: "Employees", icon: FiUserCheck },
+        { href: "/admin/managers", label: "Manager", icon: FiUserCheck },
         { href: "/reports", label: "Reports", icon: FiBarChart2 },
         { href: "/admin/audit-logs", label: "Audit Log", icon: FiClock },
         { href: "/admin/settings", label: "Settings", icon: FiSettings },
@@ -221,6 +221,26 @@ export default function Sidebar({ isOpen, onClose }) {
       </div>
 
       <nav>
+        <h4 className={styles.title}>Super Admin</h4>
+
+        <Link
+          href="/admin/add-admin"
+          className={isActivePath("/admin/add-admin") ? styles.active : ""}
+          onClick={handleLinkClick}
+        >
+          <FiUserCheck />
+          <span>Add Admin</span>
+        </Link>
+
+        <Link
+          href="/admin/business-type"
+          className={isActivePath("/admin/business-type") ? styles.active : ""}
+          onClick={handleLinkClick}
+        >
+          <FiBriefcase />
+          <span>Business Type</span>
+        </Link>
+
         <h4 className={styles.title}>Admin</h4>
 
         <Link
@@ -251,8 +271,8 @@ export default function Sidebar({ isOpen, onClose }) {
         </Link>
 
         <Link
-          href="/admin/employees/view"
-          className={isActivePath("/admin/employees/view") ? styles.active : ""}
+          href="/admin/managers"
+          className={isActivePath("/admin/managers") ? styles.active : ""}
           onClick={handleLinkClick}
         >
           <FiUserCheck />

@@ -424,12 +424,120 @@ const sendAdminCredentialsEmail = async (
 };
 
 
+// Send manager creation credentials email
+const sendManagerCredentialsEmail = async (
+  email,
+  employeeId,
+  fullName,
+  password,
+  branchName = null,
+  roleName = "Manager"
+) => {
+  try {
+    const tx = getTransporter();
+
+    const branchHtml = branchName
+      ? `
+            <p style="margin: 6px 0;">
+              <strong>Branch:</strong> ${branchName}
+            </p>
+      `
+      : "";
+
+    await tx.sendMail({
+      from: `"ERP System" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Your ERP Manager Account Credentials",
+
+      html: `
+        <div style="
+          font-family: Arial, sans-serif;
+          max-width: 600px;
+          margin: auto;
+          padding: 25px;
+          border: 1px solid #ddd;
+          border-radius: 10px;
+        ">
+
+          <h2 style="color: #2563eb;">
+            Welcome to ERP System - Manager Account
+          </h2>
+
+          <p>
+            Hello <strong>${fullName}</strong>,
+          </p>
+
+          <p>
+            Your Manager account has been created by the administrator.
+          </p>
+
+          <p>
+            You can use the following credentials to log in:
+          </p>
+
+          <div style="
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+          ">
+
+            <p style="margin: 6px 0;">
+              <strong>Manager ID:</strong> ${employeeId}
+            </p>
+
+            <p style="margin: 6px 0;">
+              <strong>Email Address:</strong> ${email}
+            </p>
+
+            <p style="margin: 6px 0;">
+              <strong>Role:</strong> ${roleName}
+            </p>
+
+            ${branchHtml}
+
+            <p style="margin: 6px 0;">
+              <strong>Password:</strong> 
+              <span style="font-family: monospace; background: #e0e7ff; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-weight: bold;">
+                ${password}
+              </span>
+            </p>
+
+          </div>
+
+          <p>
+            You can sign in to the ERP Portal using your <strong>Email Address (${email})</strong> or <strong>Manager ID (${employeeId})</strong>.
+          </p>
+
+          <p style="color: #dc2626; margin-top: 15px;">
+            Please change your password after your first login for security.
+          </p>
+
+          <p style="margin-top: 30px;">
+            Regards,<br>
+            <strong>ERP System Management</strong>
+          </p>
+
+        </div>
+      `,
+    });
+
+    console.log(`Manager credentials email sent successfully to ${email}`);
+  } catch (error) {
+    console.error("Failed to send manager credentials email:", error.message);
+  }
+};
+
+
 export {
   sendEmployeeCredentialsEmail,
   // sendVerificationEmail,
   sendOTPEmail,
   sendEmployeeUpdatedEmail,
   sendAdminCredentialsEmail,
+  sendManagerCredentialsEmail,
 };
+
 
 
