@@ -3,38 +3,25 @@
 import { useMemo, useState, useEffect } from "react";
 import axios from "axios";
 import {
-  FiPlus,
   FiPrinter,
-  FiDownload,
   FiSearch,
-  FiChevronDown,
   FiRefreshCw,
-  FiX,
-  FiSave,
   FiTrash2,
   FiPhone,
   FiMail,
   FiShield,
   FiUserCheck,
   FiMapPin,
-  FiLock,
-  FiCreditCard,
-  FiCheckCircle,
 } from "react-icons/fi";
 import { toast, Toaster } from "react-hot-toast";
 
-import { getBranches } from "@/services/branchService";
 import { useAlert } from "@/context/AlertContext";
 import styles from "./managers.module.css";
 
 export default function ManagersPage() {
   const [managers, setManagers] = useState([]);
-  const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
 
   const { showSuccess, showError, showConfirm } = useAlert();
 
@@ -50,20 +37,8 @@ export default function ManagersPage() {
 
   // Fetch branches and managers on load
   useEffect(() => {
-    fetchBranches();
     fetchManagers();
   }, []);
-
-  const fetchBranches = async () => {
-    try {
-      const res = await getBranches();
-      if (res.success && Array.isArray(res.data)) {
-        setBranches(res.data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch branches:", err);
-    }
-  };
 
   const fetchManagers = async () => {
     try {
@@ -245,7 +220,7 @@ export default function ManagersPage() {
           <h1>
             <FiUserCheck style={{ color: "#4f46e5" }} /> Managers Management
           </h1>
-          <p>View all managers, track assigned branches, and register new managers.</p>
+          <p>View all managers and track assigned branches.</p>
         </div>
 
         <div className={styles.headerActions}>
@@ -260,17 +235,6 @@ export default function ManagersPage() {
           <button className={styles.secondaryButton} onClick={() => fetchManagers()}>
             <FiRefreshCw size={15} />
             Refresh
-          </button>
-
-          <button
-            className={styles.addButton}
-            onClick={() => {
-              if (showAdd) handleCancel();
-              else setShowAdd(true);
-            }}
-          >
-            {showAdd ? <FiX size={17} /> : <FiPlus size={17} />}
-            {showAdd ? "Close Form" : "Add Manager"}
           </button>
         </div>
       </header>
@@ -520,7 +484,7 @@ export default function ManagersPage() {
               ) : (
                 <tr>
                   <td colSpan="6" className={styles.empty}>
-                    No manager records found. Click &quot;Add Manager&quot; above to create one.
+                    No manager records found.
                   </td>
                 </tr>
               )}
@@ -531,3 +495,4 @@ export default function ManagersPage() {
     </main>
   );
 }
+
