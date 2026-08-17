@@ -45,7 +45,7 @@ export default function ManagersPage() {
     branchId: "",
     employeeId: "",
     password: "",
-    role: "Admin", // Fixed role as required
+    role: "Manager", // Fixed role as required
   });
 
   // Fetch branches and managers on load
@@ -68,10 +68,9 @@ export default function ManagersPage() {
   const fetchManagers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/employees");
-      const allEmployees = res.data?.data || [];
-      // Filter managers or all employees with manager/admin role
-      setManagers(allEmployees);
+      const res = await axios.get("http://localhost:5000/api/managers");
+      const list = res.data?.data || res.data || [];
+      setManagers(Array.isArray(list) ? list : []);
     } catch (err) {
       console.error("Failed to fetch managers:", err);
       toast.error("Failed to fetch manager records");
@@ -153,15 +152,15 @@ export default function ManagersPage() {
         email: formData.email.trim().toLowerCase(),
         phone: formData.phone.trim(),
         branchId: formData.branchId,
-        role: "Admin", // Fixed role: Admin
+        role: "Manager", // Fixed role: Manager
         password: formData.password,
         employeeId: autoId,
       };
 
-      await axios.post("http://localhost:5000/api/employees", payload, { headers });
+      await axios.post("http://localhost:5000/api/managers", payload, { headers });
 
       toast.success("Manager added successfully!");
-      showSuccess("Manager Account Created", `Manager ${payload.fullName} has been created with role Admin.`);
+      showSuccess("Manager Account Created", `Manager ${payload.fullName} has been created with role Manager.`);
 
       fetchManagers();
       handleCancel();
@@ -182,7 +181,7 @@ export default function ManagersPage() {
       type: "danger",
       onConfirm: async () => {
         try {
-          await axios.delete(`http://localhost:5000/api/employees/${id}`);
+          await axios.delete(`http://localhost:5000/api/managers/${id}`);
           showSuccess("Manager Deleted", "Manager record deleted successfully.");
           fetchManagers();
         } catch (err) {
@@ -202,7 +201,7 @@ export default function ManagersPage() {
       branchId: "",
       employeeId: "",
       password: "",
-      role: "Admin",
+      role: "Manager",
     });
     setShowAdd(false);
   };
@@ -282,7 +281,7 @@ export default function ManagersPage() {
           <div className={styles.addHeader}>
             <div>
               <h2>Add New Manager</h2>
-              <p>Fill in details below to register a manager with assigned branch and fixed Admin role.</p>
+              <p>Fill in details below to register a manager with assigned branch and fixed Manager role.</p>
             </div>
             <button className={styles.closeButton} onClick={handleCancel}>
               <FiX />
@@ -370,7 +369,7 @@ export default function ManagersPage() {
                 {errors.branchId && <span className={styles.errorText}>{errors.branchId}</span>}
               </div>
 
-              {/* Role (FIXED TO ADMIN) */}
+              {/* Role (FIXED TO MANAGER) */}
               <div className={styles.formGroup}>
                 <label>
                   Role <span>* (Fixed)</span>
@@ -378,12 +377,12 @@ export default function ManagersPage() {
                 <input
                   type="text"
                   name="role"
-                  value="Admin"
+                  value="Manager"
                   readOnly
                   disabled
                   className={`${styles.input} ${styles.fixedInput}`}
                 />
-                <span className={styles.fieldHint}>🔒 Role is permanently fixed as Admin</span>
+                <span className={styles.fieldHint}>🔒 Role is permanently fixed as Manager</span>
               </div>
 
               {/* Password */}
@@ -454,7 +453,7 @@ export default function ManagersPage() {
               ) : filteredManagers.length > 0 ? (
                 filteredManagers.map((item) => {
                   const managerName = item.fullName || item.name || "Manager";
-                  const roleName = item.roleRef?.name || item.role || "Admin";
+                  const roleName = item.roleRef?.name || item.role || "Manager";
                   const branchName = item.branch?.name || "Main Branch";
                   const initials = getInitials(managerName);
 
