@@ -305,7 +305,7 @@ export default function POSPage() {
       branchId: "00000000-0000-0000-0000-000000000000",
       customerId: customer || null,
       orderNumber: `SO-${Date.now()}`,
-      status: "CONFIRMED",
+      status: "COMPLETED",
       orderDate: new Date().toISOString(),
       totalAmount,
       taxAmount,

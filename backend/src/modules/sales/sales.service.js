@@ -99,7 +99,8 @@ class SalesService {
     const allowedStatus = [
       "DRAFT",
       "CONFIRMED",
-      "INVOICED",
+      "PROCESSING",
+      "COMPLETED",
       "CANCELLED",
     ];
 
