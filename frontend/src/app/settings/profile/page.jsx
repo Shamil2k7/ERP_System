@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import {
   KeyRound,
@@ -213,6 +213,37 @@ function ChangePasswordCard() {
 
 /* ─── Page ─── */
 export default function ProfilePage() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        setUser(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error("Failed to parse user in profile page", e);
+    }
+  }, []);
+
+  const getInitials = (name) => {
+    if (!name) return "U";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return parts[0].substring(0, 2).toUpperCase();
+  };
+
+  const getDisplayRole = (roleStr) => {
+    if (!roleStr) return "Administrator";
+    const r = roleStr.trim();
+    if (r.toLowerCase() === "super_admin" || r.toLowerCase() === "super admin") return "Super Admin";
+    if (r.toLowerCase() === "branch_manager" || r.toLowerCase() === "branch manager") return "Branch Manager";
+    if (r.toLowerCase() === "inventory_manager" || r.toLowerCase() === "inventory manager") return "Inventory Manager";
+    if (r.toLowerCase() === "cashier") return "Cashier";
+    if (r.toLowerCase() === "admin") return "Admin";
+    return r.charAt(0).toUpperCase() + r.slice(1);
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -223,11 +254,33 @@ export default function ProfilePage() {
           <h1 className={styles.title}>My Profile</h1>
         </div>
         <p className={styles.subtitle}>
-          Manage your account credentials — change your password below.
+          Manage your account profile details and security settings.
         </p>
       </div>
 
       <div className={styles.grid}>
+        {/* User Info & Role Banner */}
+        <div className={styles.profileInfoCard}>
+          <div className={styles.profileAvatarGroup}>
+            <div className={styles.largeAvatar}>
+              {getInitials(user?.fullName || "User")}
+            </div>
+            <div className={styles.profileNameSection}>
+              <h2>
+                {user?.fullName || "Admin User"}
+                <span className={styles.roleBadgeLarge}>
+                  {getDisplayRole(user?.role)}
+                </span>
+              </h2>
+              <div className={styles.profileMeta}>
+                <span>📧 {user?.email || "user@erp.com"}</span>
+                {user?.phone && <span>📞 {user.phone}</span>}
+                {user?.employeeId && <span>🆔 ID: {user.employeeId}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <ChangePasswordCard />
       </div>
     </div>
