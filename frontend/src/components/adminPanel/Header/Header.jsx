@@ -117,13 +117,13 @@ export default function Header({ toggleSidebar }) {
 
   const getDisplayRole = (roleStr) => {
     if (!roleStr) return "Administrator";
-    const r = roleStr.trim();
-    if (r.toLowerCase() === "super_admin" || r.toLowerCase() === "super admin") return "Super Admin";
-    if (r.toLowerCase() === "branch_manager" || r.toLowerCase() === "branch manager") return "Branch Manager";
-    if (r.toLowerCase() === "inventory_manager" || r.toLowerCase() === "inventory manager") return "Inventory Manager";
-    if (r.toLowerCase() === "cashier") return "Cashier";
-    if (r.toLowerCase() === "admin") return "Admin";
-    return r.charAt(0).toUpperCase() + r.slice(1);
+    const r = roleStr.trim().toLowerCase();
+    if (r.includes("super") || r.includes("sooper")) return "Super Admin";
+    if (r.includes("branch")) return "Branch Manager";
+    if (r.includes("inventory")) return "Inventory Manager";
+    if (r.includes("cashier")) return "Cashier";
+    if (r === "admin") return "Admin";
+    return roleStr.charAt(0).toUpperCase() + roleStr.slice(1);
   };
 
   const getInitials = (name) => {

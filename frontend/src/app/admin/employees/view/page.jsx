@@ -168,12 +168,14 @@ export default function EmployeePage() {
     setCurrentEmployee(employee);
     setErrors({});
 
+    const initialRole = employee.roleRef?.name || (typeof employee.role === "string" ? employee.role : employee.role?.name || "Super Admin");
+
     setFormData({
       fullName: employee.fullName || "",
       email: employee.email || "",
       phone: employee.phone || "",
       employeeId: employee.employeeId || "",
-      role: employee.role?.name || "Admin",
+      role: initialRole,
       branchId: employee.branchId || employee.branch?.id || "",
     });
 
@@ -307,21 +309,25 @@ export default function EmployeePage() {
       return "Employee";
     }
 
-    if (
-      employee.role &&
-      typeof employee.role === "object"
-    ) {
-      return employee.role.name || "Employee";
+    let roleStr = "";
+    if (employee.roleRef && employee.roleRef.name) {
+      roleStr = employee.roleRef.name;
+    } else if (employee.role && typeof employee.role === "object") {
+      roleStr = employee.role.name || "";
+    } else if (employee.role && typeof employee.role === "string") {
+      roleStr = employee.role;
     }
 
-    if (
-      employee.role &&
-      typeof employee.role === "string"
-    ) {
-      return employee.role;
-    }
+    if (!roleStr) return "Employee";
 
-    return "Employee";
+    const lower = roleStr.toLowerCase().trim();
+    if (lower.includes("super") || lower.includes("sooper")) return "Super Admin";
+    if (lower === "admin") return "Admin";
+    if (lower.includes("branch")) return "Branch Manager";
+    if (lower.includes("inventory")) return "Inventory Manager";
+    if (lower.includes("cashier")) return "Cashier";
+
+    return roleStr;
   };
 
   // =====================================================
