@@ -12,6 +12,7 @@ model Role {
   name String @unique
 
   users User[]
+  managers Manager[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -988,6 +989,7 @@ model Branch {
   updatedAt DateTime @updatedAt
 
   users User[]
+  managers Manager[]
 }
 
 
@@ -1016,4 +1018,40 @@ model Admin {
   @@index([name])
   @@index([type])
   @@map("admins")
+}
+
+// MANAGER
+
+model Manager {
+  id String @id @default(uuid())
+
+  fullName String
+
+  email String @unique
+
+  phone String @unique
+
+  employeeId String? @unique
+
+  passwordHash String
+
+  plainPassword String?
+
+  role String @default("Admin")
+
+  roleId String?
+
+  roleRef Role? @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  branchId String?
+
+  branch Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([fullName])
+  @@index([email])
+  @@map("managers")
 }

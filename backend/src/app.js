@@ -20,6 +20,7 @@ import returnRoutes from "./modules/returns/returns.routes.js";
 import discountRoutes from "./modules/discounts/discounts.routes.js";
 import taxRoutes from "./modules/taxes/taxes.routes.js";
 import employeeRoutes from "./modules/employees/employees.routes.js";
+import managerRoutes from "./modules/managers/managers.routes.js";
 
 import branchRoutes from "./modules/branch/branch.routes.js";
 
@@ -156,6 +157,11 @@ app.use(
 app.use(
   "/api/employees",
   employeeRoutes
+);
+
+app.use(
+  "/api/managers",
+  managerRoutes
 );
 
 app.use(
