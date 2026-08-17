@@ -67,12 +67,12 @@ export default function SalesPage() {
           </p>
         </div>
 
-        <Link
+        {/* <Link
           href="/sales/add"
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg self-start"
         >
           + New Sale
-        </Link>
+        </Link> */}
 
       </div>
 
