@@ -25,17 +25,7 @@ export default function ManagersPage() {
 
   const { showSuccess, showError, showConfirm } = useAlert();
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    branchId: "",
-    employeeId: "",
-    password: "",
-    role: "Manager", // Fixed role as required
-  });
-
-  // Fetch branches and managers on load
+  // Fetch managers on load
   useEffect(() => {
     fetchManagers();
   }, []);
@@ -43,108 +33,18 @@ export default function ManagersPage() {
   const fetchManagers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/managers");
-      const list = res.data?.data || res.data || [];
-      setManagers(Array.isArray(list) ? list : []);
+      const res = await axios.get("http://localhost:5000/api/employees");
+      const allEmployees = res.data?.data || [];
+      const managerOnlyList = allEmployees.filter((item) => {
+        const roleName = (item.roleRef?.name || item.role || item.type || "").toLowerCase().trim();
+        return roleName.includes("manager") && !roleName.includes("admin");
+      });
+      setManagers(managerOnlyList);
     } catch (err) {
       console.error("Failed to fetch managers:", err);
       toast.error("Failed to fetch manager records");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required";
-    } else if (formData.fullName.trim().length < 3) {
-      newErrors.fullName = "Name must be at least 3 characters";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email address is required";
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.email.trim())) {
-        newErrors.email = "Enter a valid email address";
-      }
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    } else {
-      const phoneRegex = /^[\+\d\s\-\(\)]{7,20}$/;
-      if (!phoneRegex.test(formData.phone.trim())) {
-        newErrors.phone = "Enter a valid phone number (7-20 digits)";
-      }
-    }
-
-    if (!formData.branchId) {
-      newErrors.branchId = "Branch selection is required";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  const handleSaveManager = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      // Auto-generate employeeId if not manually provided
-      const autoId = formData.employeeId.trim() || `MGR-${Math.floor(1000 + Math.random() * 9000)}`;
-
-      const payload = {
-        fullName: formData.fullName.trim(),
-        email: formData.email.trim().toLowerCase(),
-        phone: formData.phone.trim(),
-        branchId: formData.branchId,
-        role: "Manager", // Fixed role: Manager
-        password: formData.password,
-        employeeId: autoId,
-      };
-
-      await axios.post("http://localhost:5000/api/managers", payload, { headers });
-
-      toast.success("Manager added successfully!");
-      showSuccess("Manager Account Created", `Manager ${payload.fullName} has been created with role Manager.`);
-
-      fetchManagers();
-      handleCancel();
-    } catch (err) {
-      console.error(err);
-      const serverMsg = err.response?.data?.message || err.message || "Failed to create manager";
-      toast.error(serverMsg);
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -156,7 +56,7 @@ export default function ManagersPage() {
       type: "danger",
       onConfirm: async () => {
         try {
-          await axios.delete(`http://localhost:5000/api/managers/${id}`);
+          await axios.delete(`http://localhost:5000/api/employees/${id}`);
           showSuccess("Manager Deleted", "Manager record deleted successfully.");
           fetchManagers();
         } catch (err) {
@@ -165,20 +65,6 @@ export default function ManagersPage() {
         }
       },
     });
-  };
-
-  const handleCancel = () => {
-    setErrors({});
-    setFormData({
-      fullName: "",
-      email: "",
-      phone: "",
-      branchId: "",
-      employeeId: "",
-      password: "",
-      role: "Manager",
-    });
-    setShowAdd(false);
   };
 
   // Filter managers by search
@@ -238,147 +124,6 @@ export default function ManagersPage() {
           </button>
         </div>
       </header>
-
-      {/* ADD MANAGER FORM */}
-      {showAdd && (
-        <section className={styles.addCard}>
-          <div className={styles.addHeader}>
-            <div>
-              <h2>Add New Manager</h2>
-              <p>Fill in details below to register a manager with assigned branch and fixed Manager role.</p>
-            </div>
-            <button className={styles.closeButton} onClick={handleCancel}>
-              <FiX />
-            </button>
-          </div>
-
-          <form onSubmit={handleSaveManager} noValidate>
-            <div className={styles.formGrid}>
-              {/* Full Name */}
-              <div className={styles.formGroup}>
-                <label>
-                  Full Name <span>*</span>
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="e.g. Sarah Jenkins"
-                  className={styles.input}
-                  style={errors.fullName ? { borderColor: "#ef4444" } : {}}
-                />
-                {errors.fullName && <span className={styles.errorText}>{errors.fullName}</span>}
-              </div>
-
-              {/* Phone Number */}
-              <div className={styles.formGroup}>
-                <label>
-                  Phone Number <span>*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="e.g. +1 555-0192"
-                  className={styles.input}
-                  style={errors.phone ? { borderColor: "#ef4444" } : {}}
-                />
-                {errors.phone && <span className={styles.errorText}>{errors.phone}</span>}
-              </div>
-
-              {/* Email Address */}
-              <div className={styles.formGroup}>
-                <label>
-                  Email Address <span>*</span>
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="manager@company.com"
-                  className={styles.input}
-                  style={errors.email ? { borderColor: "#ef4444" } : {}}
-                />
-                {errors.email && <span className={styles.errorText}>{errors.email}</span>}
-              </div>
-
-              {/* Branch */}
-              <div className={styles.formGroup}>
-                <label>
-                  Branch <span>*</span>
-                </label>
-                <select
-                  name="branchId"
-                  value={formData.branchId}
-                  onChange={handleChange}
-                  className={styles.select}
-                  style={errors.branchId ? { borderColor: "#ef4444" } : {}}
-                >
-                  <option value="">Select Branch</option>
-                  {branches.length > 0 ? (
-                    branches.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name} {b.code ? `(${b.code})` : ""}
-                      </option>
-                    ))
-                  ) : (
-                    <option value="" disabled>
-                      No branches found - create branch first
-                    </option>
-                  )}
-                </select>
-                {errors.branchId && <span className={styles.errorText}>{errors.branchId}</span>}
-              </div>
-
-              {/* Role (FIXED TO MANAGER) */}
-              <div className={styles.formGroup}>
-                <label>
-                  Role <span>* (Fixed)</span>
-                </label>
-                <input
-                  type="text"
-                  name="role"
-                  value="Manager"
-                  readOnly
-                  disabled
-                  className={`${styles.input} ${styles.fixedInput}`}
-                />
-                <span className={styles.fieldHint}>🔒 Role is permanently fixed as Manager</span>
-              </div>
-
-              {/* Password */}
-              <div className={styles.formGroup}>
-                <label>
-                  Password <span>*</span>
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className={styles.input}
-                  style={errors.password ? { borderColor: "#ef4444" } : {}}
-                />
-                {errors.password && <span className={styles.errorText}>{errors.password}</span>}
-              </div>
-            </div>
-
-            <div className={styles.formActions}>
-              <button type="button" className={styles.cancelButton} onClick={handleCancel}>
-                Cancel
-              </button>
-              <button type="submit" className={styles.saveButton} disabled={submitting}>
-                <FiSave size={16} />
-                {submitting ? "Saving..." : "Save Manager Account"}
-              </button>
-            </div>
-          </form>
-        </section>
-      )}
 
       {/* MANAGERS TABLE */}
       <section className={styles.tableCard}>
@@ -460,7 +205,7 @@ export default function ManagersPage() {
                         </span>
                       </td>
 
-                      {/* Role (Fixed Admin) */}
+                      {/* Role */}
                       <td>
                         <span className={styles.roleBadge}>
                           <FiShield size={12} />
@@ -495,4 +240,3 @@ export default function ManagersPage() {
     </main>
   );
 }
-
