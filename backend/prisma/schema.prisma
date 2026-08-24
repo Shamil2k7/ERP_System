@@ -303,6 +303,9 @@ model Product {
 
   stockMovements StockMovement[]
 
+  medicine        Medicine?
+  medicineBatches MedicineBatch[]
+
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
@@ -359,6 +362,8 @@ model Supplier {
 
   purchases Purchase[]
 
+  medicineBatches MedicineBatch[]
+
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
@@ -397,6 +402,8 @@ model Warehouse {
   fromTransfers StockTransfer[] @relation("FromWarehouse")
 
   toTransfers StockTransfer[] @relation("ToWarehouse")
+
+  medicineBatches MedicineBatch[]
 
   createdAt DateTime @default(now())
 
@@ -990,6 +997,7 @@ model Branch {
 
   users User[]
   managers Manager[]
+  medicalShop MedicalShop?
 }
 
 
@@ -1054,4 +1062,289 @@ model Manager {
   @@index([fullName])
   @@index([email])
   @@map("managers")
+}
+
+// ==============================
+// LAUNDRY MANAGEMENT SYSTEM
+// ==============================
+
+model Laundry {
+  id        String   @id @default(uuid())
+  companyId String?  @map("company_id")
+  branchId  String?  @map("branch_id")
+  name      String   @db.VarChar(150)
+  phone     String?  @db.VarChar(50)
+  email     String?  @db.VarChar(150)
+  address   String?  @db.Text
+  status    Status   @default(ACTIVE)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  categories LaundryServiceCategory[]
+  services   LaundryService[]
+  orders     LaundryOrder[]
+
+  @@map("laundries")
+}
+
+model LaundryServiceCategory {
+  id          String   @id @default(uuid())
+  laundryId   String   @map("laundry_id")
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  status      Status   @default(ACTIVE)
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  laundry  Laundry          @relation(fields: [laundryId], references: [id], onDelete: Cascade)
+  services LaundryService[]
+
+  @@map("laundry_service_categories")
+}
+
+model LaundryService {
+  id            String   @id @default(uuid())
+  laundryId     String   @map("laundry_id")
+  categoryId    String   @map("category_id")
+  name          String   @db.VarChar(150)
+  description   String?  @db.Text
+  price         Decimal  @db.Decimal(18, 2)
+  estimatedTime String?  @map("estimated_time") @db.VarChar(100)
+  status        Status   @default(ACTIVE)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  laundry    Laundry                @relation(fields: [laundryId], references: [id], onDelete: Cascade)
+  category   LaundryServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  orderItems LaundryOrderItem[]
+
+  @@map("laundry_services")
+}
+
+model LaundryOrder {
+  id                  String               @id @default(uuid())
+  laundryId           String               @map("laundry_id")
+  branchId            String?              @map("branch_id")
+  customerId          String?              @map("customer_id") @db.Uuid
+  orderNumber         String               @unique @map("order_number") @db.VarChar(100)
+  status              LaundryOrderStatus   @default(RECEIVED)
+  subtotal            Decimal              @db.Decimal(18, 2)
+  discountAmount      Decimal              @default(0.00) @map("discount_amount") @db.Decimal(18, 2)
+  taxAmount           Decimal              @default(0.00) @map("tax_amount") @db.Decimal(18, 2)
+  totalAmount         Decimal              @map("total_amount") @db.Decimal(18, 2)
+  paidAmount          Decimal              @default(0.00) @map("paid_amount") @db.Decimal(18, 2)
+  balanceAmount       Decimal              @default(0.00) @map("balance_amount") @db.Decimal(18, 2)
+  specialInstructions String?              @map("special_instructions") @db.Text
+  receivedAt          DateTime             @default(now()) @map("received_at")
+  processingAt        DateTime?            @map("processing_at")
+  readyAt             DateTime?            @map("ready_at")
+  completedAt         DateTime?            @map("completed_at")
+  createdBy           String?              @map("created_by")
+  createdAt           DateTime             @default(now()) @map("created_at")
+  updatedAt           DateTime             @updatedAt @map("updated_at")
+
+  laundry        Laundry               @relation(fields: [laundryId], references: [id], onDelete: Cascade)
+  items          LaundryOrderItem[]
+  statusHistory  LaundryStatusHistory[]
+  deliveries     LaundryDelivery[]
+  garmentDetails LaundryGarment[]
+
+  @@map("laundry_orders")
+}
+
+enum LaundryOrderStatus {
+  RECEIVED
+  INSPECTING
+  PROCESSING
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+model LaundryOrderItem {
+  id             String   @id @default(uuid())
+  orderId        String   @map("order_id")
+  serviceId      String   @map("service_id")
+  garmentType    String   @map("garment_type") @db.VarChar(100)
+  quantity       Int      @default(1)
+  unitPrice      Decimal  @map("unit_price") @db.Decimal(18, 2)
+  discountAmount Decimal  @default(0.00) @map("discount_amount") @db.Decimal(18, 2)
+  taxAmount      Decimal  @default(0.00) @map("tax_amount") @db.Decimal(18, 2)
+  totalAmount    Decimal  @map("total_amount") @db.Decimal(18, 2)
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  order   LaundryOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  service LaundryService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("laundry_order_items")
+}
+
+model LaundryGarment {
+  id          String             @id @default(uuid())
+  orderId     String             @map("order_id")
+  garmentType String             @map("garment_type") @db.VarChar(100)
+  serviceName String             @map("service_name") @db.VarChar(150)
+  tagNumber   String             @unique @map("tag_number") @db.VarChar(100)
+  barcode     String?            @db.VarChar(100)
+  status      LaundryOrderStatus @default(RECEIVED)
+  notes       String?            @db.Text
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  order LaundryOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("laundry_garments")
+}
+
+model LaundryStatusHistory {
+  id        String             @id @default(uuid())
+  orderId   String             @map("order_id")
+  oldStatus LaundryOrderStatus? @map("old_status")
+  newStatus LaundryOrderStatus @map("new_status")
+  changedBy String?            @map("changed_by")
+  timestamp DateTime           @default(now()) @map("timestamp")
+  notes     String?            @db.Text
+
+  order LaundryOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("laundry_status_histories")
+}
+
+model LaundryDelivery {
+  id              String                @id @default(uuid())
+  orderId         String                @map("order_id")
+  deliveryAddress String                @map("delivery_address") @db.Text
+  phone           String?               @db.VarChar(50)
+  deliveryDate    DateTime?             @map("delivery_date")
+  deliveryStatus  LaundryDeliveryStatus @default(PENDING) @map("delivery_status")
+  deliveryNotes   String?               @map("delivery_notes") @db.Text
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+
+  order LaundryOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("laundry_deliveries")
+}
+
+enum LaundryDeliveryStatus {
+  PENDING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED
+  CANCELLED
+}
+
+// ==============================
+// MEDICAL SHOP SYSTEM
+// ==============================
+
+model MedicalShop {
+  id        String   @id @default(uuid())
+  branchId  String   @unique @map("branch_id")
+  name      String   @db.VarChar(150)
+  phone     String?  @db.VarChar(50)
+  email     String?  @db.VarChar(150)
+  address   String?  @db.Text
+  status    Status   @default(ACTIVE)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@map("medical_shops")
+}
+
+model Medicine {
+  id                   String     @id @default(uuid())
+  productId            String     @unique @map("product_id")
+  genericName          String     @map("generic_name") @db.VarChar(150)
+  strength             String     @db.VarChar(50)
+  dosageForm           DosageForm @map("dosage_form")
+  prescriptionRequired Boolean    @default(false) @map("prescription_required")
+  manufacturer         String?    @db.VarChar(150)
+  status               Status     @default(ACTIVE)
+  createdAt            DateTime   @default(now()) @map("created_at")
+  updatedAt            DateTime   @updatedAt @map("updated_at")
+
+  product           Product            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batches           MedicineBatch[]
+  prescriptionItems PrescriptionItem[]
+
+  @@map("medicines")
+}
+
+model MedicineBatch {
+  id                String    @id @default(uuid())
+  medicineId        String    @map("medicine_id")
+  productId         String    @map("product_id")
+  batchNumber       String    @map("batch_number") @db.VarChar(100)
+  manufacturingDate DateTime  @map("manufacturing_date")
+  expiryDate        DateTime  @map("expiry_date")
+  purchasePrice     Decimal   @map("purchase_price") @db.Decimal(18, 2)
+  sellingPrice      Decimal   @map("selling_price") @db.Decimal(18, 2)
+  quantity          Int       @default(0)
+  supplierId        String?   @map("supplier_id")
+  warehouseId       String?   @map("warehouse_id")
+  status            String    @default("SELLABLE")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  medicine  Medicine   @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supplier  Supplier?  @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  warehouse Warehouse? @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
+
+  @@index([batchNumber])
+  @@index([expiryDate])
+  @@map("medicine_batches")
+}
+
+model Prescription {
+  id                 String             @id @default(uuid())
+  customerId         String?            @map("customer_id") @db.Uuid
+  doctorName         String             @map("doctor_name") @db.VarChar(150)
+  prescriptionNumber String             @unique @map("prescription_number") @db.VarChar(100)
+  prescriptionDate   DateTime           @default(now()) @map("prescription_date")
+  notes              String?            @db.Text
+  status             String             @default("ACTIVE")
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
+
+  items PrescriptionItem[]
+
+  @@map("prescriptions")
+}
+
+model PrescriptionItem {
+  id             String   @id @default(uuid())
+  prescriptionId String   @map("prescription_id")
+  medicineId     String   @map("medicine_id")
+  dosage         String   @db.VarChar(100)
+  frequency      String   @db.VarChar(100)
+  duration       String   @db.VarChar(100)
+  quantity       Int      @default(1)
+  instructions   String?  @db.Text
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  medicine     Medicine     @relation(fields: [medicineId], references: [id], onDelete: Cascade)
+
+  @@map("prescription_items")
+}
+
+enum DosageForm {
+  TABLET
+  CAPSULE
+  SYRUP
+  INJECTION
+  CREAM
+  OINTMENT
+  DROPS
+  INHALER
+  POWDER
+  OTHER
 }
